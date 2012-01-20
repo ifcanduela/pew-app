@@ -1,0 +1,236 @@
+body {
+    background-color:#333;            
+    font:normal 14px/165% candara, 'trebuchet-ms', sans-serif;
+    margin:0;
+    padding:0;
+}
+div, h1, h2, p, blockquote, pre, ol, ul, li {
+    margin:0;
+    padding:0;
+}
+li li {
+    margin-left:3em;
+}
+a {
+    color:#39f;
+}
+a:hover {
+    color:#f93;
+}
+#header,
+#footer {
+    background-color:#333;
+    color:#b7d478;
+    padding:0.5em;
+}
+#header {
+    height:35px;
+}
+#header h1,
+#header h2 {
+    text-transform:uppercase;
+    margin:0;
+    padding:0;
+    text-shadow:0 0 3px rgba(183,212,120,0.7),
+                0 0 6px rgba(250,255,250, 0.4);
+}
+#header div {
+    float:right;
+}
+#header a {
+    color:#b7d478;
+}
+#footer{
+    position:absolute;
+    height:35px;
+    left:0;
+    right:0;
+    bottom:0;
+}
+#tabs {
+        position:absolute;
+        top:40px;
+        left:0;
+        right:0;
+        bottom:40px;
+    padding:2em;
+    /*background:#b7d478 url(../img/pew-bg.png) no-repeat bottom left;*/
+            background-color:#b7d478;
+    background-attachment:fixed;
+    /*background-position:-10%;*/
+    color:#575;
+    min-height:400px;
+    overflow-y:scroll;
+}
+#tabs > div {
+    border-radius:15px;
+    /* background-color:#cee2a3; */
+    background-color:rgba(206,226,163,0.9);
+    letter-spacing:0.1em;
+    margin: 1% 1% 1% 45%;
+    padding:1em;
+    padding-left:2em;
+    min-height:240px;
+    width:50%;
+}
+#tabs div p {
+    margin:0.8em 0 0.8em;
+    
+}
+#tabs div pre {
+    padding:0.3em;
+}
+#tabs div h2,
+#tabs div h3 {
+    margin-top:1em;
+}
+#tabs div ul,
+#tabs div ol {
+    margin-left:0px;
+    padding:0;
+}
+#tabs div ul li {
+    list-style-type:disc;
+}
+#tabs div ol li {
+    list-style-type:decimal;
+}
+.ui-tabs {
+    padding:0;
+}
+.ui-tabs li {
+}
+.ui-tabs-selected > a {
+    border-right:3px solid #f93;
+    background-color:rgba(200, 175, 60, 0.5);
+    border-radius:5px;
+}
+.ui-tabs-selected > a:hover {
+    border-right:3px solid #f93;
+}
+#nav {
+    position:fixed;
+    clear:both;
+    width:40%;
+    float:left;
+    margin:0;
+    margin-top:50px;
+}
+#nav * {
+    display:block;
+    float:none;
+    text-align:right;
+}
+#nav a {
+    color:#fff;
+    font-weight:bold;
+    border-radius:4px;
+    border-right:3px solid transparent;
+    padding:0.2em;
+    padding-right:1.2em;
+    text-shadow: 0px 0px 3px rgba(0,0,0,0.85),
+                 0px 1px 1px rgba(0,0,0,1);
+    letter-spacing:1px;
+    text-decoration:none;
+}
+#nav a:hover {
+    background-color:rgba(0,0,0,0.3);
+    border-right:3px solid #f93;
+}
+#footer {
+    background-color:#333;
+    clear:both;
+    text-align:center;
+    margin:0;
+    padding:0em;
+}
+
+.note {
+    background-color: rgba(200, 200, 0, 0.3);
+    border-radius: 3px;
+    padding: 1em;
+}
+
+.note ul, .note ol {
+    margin-left: 20px !important;
+}
+
+.tutorial_navigation {
+    min-height: 25px;
+    width: 100%;
+}
+
+.tutorial_navigation a {
+    display: block;
+    float: left;
+    width: 48%;
+}
+
+.tutorial_navigation .next {
+    float: right;
+    text-align: right;
+}
+
+code, pre {
+    font-family:consolas;
+    font-size:90%;
+}
+.source-file {
+    color:#357;
+}
+.filesystem {
+    font-weight:bold;
+    color:#222;
+}
+.class {
+    font-weight:bold;
+    color:#189;
+}
+.method {
+    font-weight:bold;
+    color:#e67;
+}
+.variable {
+    font-weight:bold;
+    color:#d93;
+}
+.string {
+    color:#39d;
+}
+.keyword {
+    color:#733;
+}
+.pewpewpew {
+    color:#596;
+    awesomesauce:activated!;
+}
+pre.php {
+    background-color:#333;
+    border-radius:4px;
+    color:#b7d478;
+    margin:0.8em auto;
+}
+pre.php c {
+    color:#666;
+}
+pre.php b {
+    color:#f93;
+}
+pre.php i {
+    color:#ff6;
+}
+pre.php u {
+    color:#39d;
+    text-decoration:none;
+}
+pre.php s {
+    color:#f3c;
+    text-decoration:none;
+}
+pre.php q {
+    color:#3df;
+}
+pre.php q:before,
+pre.php q:after {
+    content:'';
+}

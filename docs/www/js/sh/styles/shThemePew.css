@@ -1,0 +1,121 @@
+/**
+ * SyntaxHighlighter
+ * http://alexgorbatchev.com/SyntaxHighlighter
+ *
+ * Pew Theme by ifcanduela
+ *
+ * @version
+ * 0.0.1 (October 03 2011)
+ */
+.syntaxhighlighter {
+background-color: #333;
+border-radius: 3px;
+font: normal 13px/165% candara, 'lucida console', monospace;
+padding: 4px;
+}
+.syntaxhighlighter .line.alt1 {
+background-color: white;
+}
+.syntaxhighlighter .line.alt2 {
+background-color: white;
+}
+.syntaxhighlighter .line.highlighted.alt1,
+.syntaxhighlighter .line.highlighted.alt2 {
+background-color: #e0e0e0;
+}
+.syntaxhighlighter .line.highlighted.number {
+color: black;
+}
+.syntaxhighlighter table caption {
+color: black;
+}
+.syntaxhighlighter .gutter {
+color: #afafaf;
+display: none;
+}
+.syntaxhighlighter .gutter .line {
+border-right: 3px solid #6ce26c;
+}
+.syntaxhighlighter .gutter .line.highlighted {
+background-color: #6ce26c;
+color: white;
+}
+.syntaxhighlighter.printing .line .content {
+border: none;
+}
+.syntaxhighlighter.collapsed {
+overflow: visible;
+}
+.syntaxhighlighter.collapsed .toolbar {
+color: blue;
+background: white;
+border: 1px solid #6ce26c;
+}
+.syntaxhighlighter.collapsed .toolbar a {
+color: blue;
+}
+.syntaxhighlighter.collapsed .toolbar a:hover {
+color: red;
+}
+.syntaxhighlighter .toolbar {
+color: white;
+background: #6ce26c;
+border: none;
+display: none;
+}
+.syntaxhighlighter .toolbar a {
+color: white;
+}
+.syntaxhighlighter .toolbar a:hover {
+color: black;
+}
+.syntaxhighlighter .plain,
+.syntaxhighlighter .plain a {
+color: #b7d478;
+}
+.syntaxhighlighter .comments,
+.syntaxhighlighter .comments a {
+color: #666;
+}
+.syntaxhighlighter .string,
+.syntaxhighlighter .string a {
+color: #F3C;
+}
+.syntaxhighlighter .keyword {
+color: #3DF;
+}
+.syntaxhighlighter .preprocessor {
+color: #aaa;
+}
+.syntaxhighlighter .variable {
+color: #f93;
+}
+.syntaxhighlighter .value {
+color: #ff6;
+}
+.syntaxhighlighter .functions {
+color: #94ff43;
+}
+.syntaxhighlighter .constants {
+color: #06c;
+}
+.syntaxhighlighter .script {
+font-weight: bold;
+color: #006699;
+background-color: transparent;
+}
+.syntaxhighlighter .color1,
+.syntaxhighlighter .color1 a {
+color: gray;
+}
+.syntaxhighlighter .color2,
+.syntaxhighlighter .color2 a {
+color: #ff1493;
+}
+.syntaxhighlighter .color3,
+.syntaxhighlighter .color3 a {
+color: red;
+}
+.syntaxhighlighter .keyword {
+font-weight: bold;
+}

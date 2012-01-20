@@ -1,0 +1,26 @@
+/* 
+    Document   : print
+    Created on : 30-nov-2011, 15:01:22
+    Author     : ifernandez
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+body { 
+    background-color: white !important;
+    color: black !important;
+    font: normal 100% 'calibri', 'helvetica', sans-serif;
+}
+
+header, nav, #sidebar, .chapters, footer, .syntaxhighlighter .toolbar {
+    display: none;
+}
+
+.syntaxhighlighter {
+    font-size: 11pt !important;
+    font-family: consolas, monaco, courier !important;
+}
+
+.syntaxhighlighter .line {
+    margin-right: 10px;
+}

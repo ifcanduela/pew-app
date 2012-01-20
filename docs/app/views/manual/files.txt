@@ -1,0 +1,22 @@
+ El volumen de la unidad G es KINGSTON
+ El n£mero de serie del volumen es: 74B1-4315
+
+ Directorio de G:\xampp\htdocs\pew-pew-pew\docs\app\views\manual
+
+03/10/2011  08:38    <DIR>          .
+03/10/2011  08:38    <DIR>          ..
+03/10/2011  14:53             1.852 01_obligatory,_albeit_brief,_introduction.php
+07/08/2011  20:46             3.253 02_definitions_and_conventions.php
+07/08/2011  20:46             1.914 03_configure_a_site.php
+03/10/2011  16:05             4.559 04_a_simple_example.php
+07/08/2011  20:46             1.558 05_the_url_parameters.php
+03/10/2011  16:08             1.912 06_controllers_and_actions.php
+03/10/2011  16:10             2.680 07_views,_elements_and_layouts.php
+03/10/2011  16:19             1.572 08_models_and_database_access.php
+03/10/2011  16:17             2.610 09_sessions_and_authentication.php
+07/08/2011  20:46             2.545 10_some_introspection.php
+07/08/2011  20:46             2.355 11_about_pew_pew_pew.php
+07/08/2011  20:46               479 index.php
+04/10/2011  15:46                 0 files.txt
+              13 archivos         27.289 bytes
+               2 dirs   5.042.991.104 bytes libres

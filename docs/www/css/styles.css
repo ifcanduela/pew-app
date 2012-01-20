@@ -1,0 +1,377 @@
+/* ifcanduela 2011 */
+
+/* <?php
+    $dark_green = '#b7d478';
+    $light_green = '#cee2a3';
+?> */
+
+/* LAYOUT *********************************************************************/
+
+header, nav, #sidebar, #main, footer {
+    margin: 0;
+    padding: 0;
+    position: fixed;
+    overflow: auto;
+}
+
+header {
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 45px;
+    
+    min-width: 650px;
+    overflow: hidden;
+}
+
+nav {
+    top: 45px;
+    left: 0;
+    right: 0;
+    height: 40px;
+    
+    min-width: 650px;
+    overflow: hidden;
+}
+
+#sidebar {
+    overflow: auto;
+    
+    bottom: 40px;
+    left: 0;
+    top: 85px;
+    width: 280px;
+}
+
+#main {
+    bottom: 40px;
+    left: 280px;
+    right: 0;
+    top: 85px;
+    
+    min-width: 370px;
+    overflow: auto;
+}
+
+footer {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 39px;
+    
+    min-width: 650px;
+    overflow: hidden;
+}
+
+/* TYPOGRAPHY *****************************************************************/
+
+body {
+    font-family: helvetica, arial, sans-serif;
+    font-size: 75%;
+    line-height: 1.5;
+}
+
+.pewpewpew {
+    font-variant: small-caps;
+    font-weight: bold;
+}
+
+/* HEADER STYLES **************************************************************/
+
+header {
+    background-color: #333;
+    color: #b7d478;
+    font-size: 18px;
+    font-variant: small-caps;
+    font-weight: bold;
+    line-height: 45px;
+    text-align: center;
+    text-shadow: #b7d478 0 0 8px, #b7d478 0 0 1px;
+    text-transform: lowercase;
+    
+    /* design override */
+    height: 44px;
+    border-bottom: 1px solid #333;
+}
+
+/* NAV STYLES */
+
+nav {
+    background-color: #333;
+    color: #ab4;
+    
+    /* design override */
+    height: 39px;
+    border-bottom: 1px solid #333;
+}
+
+nav a, nav a:active, nav a:visited {
+    color: #ef9;
+    color: #fff;
+    display: block;
+    float: left;
+    font-weight: bold;
+    height: 29px;
+    line-height: 29px;
+    margin-right: 15px;
+    padding: 5px 15px 5px 5px;
+    position: relative;
+    text-decoration: none;
+    
+    -webkit-transition: all 0.3s linear;
+    -moz-transition: all 0.3s linear;
+    -ms-transition: all 0.3s linear;
+    -o-transition: all 0.3s linear;
+    transition: all 0.3s linear;
+}
+
+nav a:hover {
+    color: #cee2a3;
+    height: 25px;
+    border-bottom: 4px solid #cee2a3;
+}
+
+nav a.active {
+    color: #f93;
+    height: 25px;
+    border-bottom: 4px solid #f93;
+}
+
+nav a.book:before {
+    content: url('../img/icons/book.png');
+    display: block;
+    float: left;
+    margin-right: 5px;
+    margin-top: 3px;
+}
+
+nav a.tutorial:before {
+    content: url('../img/icons/tutorial.png');
+    display: block;
+    float: left;
+    margin-right: 5px;
+    margin-top: 3px;
+}
+
+nav a.reference:before {
+    content: url('../img/icons/reference.png');
+    display: block;
+    float: left;
+    margin-right: 5px;
+    margin-top: 3px;
+}
+
+/* SIDEBAR STYLES *************************************************************/
+
+#sidebar {
+    background-color: #b7d478;
+    /* layout override */
+    border-right: 1px solid #333;
+    width: 279px;
+}
+
+#sidebar > ul,  #sidebar > ul li {
+    margin: 0;
+    padding: 0;
+}
+
+#sidebar a {
+    color: #fff;
+    display: block;
+    font-weight: bold;
+    padding: 5px 5px 5px 20px;
+    text-decoration: none;
+    text-shadow: rgba(0, 0, 0, 0.3) 0 0 1px, rgba(0, 0, 0, 0.6) 0 1px 3px;
+    
+    -webkit-transition: all 0.5s ease-out;
+    -moz-transition: all 0.5s ease-out;
+    -ms-transition: all 0.5s ease-out;
+    -o-transition: all 0.5s ease-out;
+    transition: all 0.5s ease-out;
+}
+
+#sidebar a:hover {
+    background-color: rgba(0, 0, 0, 0.15);
+
+}
+
+#sidebar a.active {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-left: 4px solid #f93;
+    padding-left: 16px;
+}
+
+/* MAIN STYLES ****************************************************************/
+
+#main {
+    background-color: #cee2a3;
+    color: #453;
+    padding: 20px;
+}
+
+#main img {
+    border-radius: 4px;
+    box-shadow: rgba(0, 0, 0, 0.5) 1px 2px 2px;
+}
+
+#main > h2:first-child {
+    margin-top: 0;
+}
+
+#main > h2, #main > h3 {
+    position: relative;
+}
+
+.heading-block {
+    position: absolute;
+    left: -20px;
+    width: 10px;
+    background-color: #333;
+    height: 1px;
+    bottom: 10px;
+}
+
+#main > p {
+    line-height: 1.9;
+    text-align: justify;
+    text-shadow: rgba(0, 0, 0, 0.2) 0 1px 1px;
+}
+
+#main > p a, #main > ul a, #main > ol a, #main > dl a {
+    color: #39f;
+    font-weight: bold;
+    text-shadow: none;
+    text-shadow: rgba(255, 255, 255, 0.8) 0 1px 0px;
+}
+
+
+#main > p a:hover, #main > ul a:hover, #main > ol a:hover, #main > dl a:hover  {
+    color: #f93;
+    text-decoration: underline;
+}
+
+#main > p em {
+    font-family: georgia, serif;
+}
+
+#main code {
+    border: 1px dotted rgba(0, 0, 0, 0.3);
+    border-width: 1px 0;
+    background-color: rgba(255, 255, 255, 0.3);
+    padding: 0 2px;
+}
+
+#main > pre {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    padding: 5px;
+}
+
+#main code, #main > pre {
+    font: 100%/1.5 consolas, 'andale mono', monaco, courier;
+}
+
+#main > .chapters {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    height: 25px;
+    width: 100%;
+}
+
+#main > .chapters a {
+    color: #fff;
+    display: block;
+    font-weight: bold;
+    height: 25px;
+    line-height: 25px;
+    text-decoration: none;
+    width: 47%;
+}
+
+#main > .chapters a:hover {
+    color: #f93;
+}
+
+#main > .chapters .prev {
+    float: left;
+    padding-right: 1em;
+    text-align: right;
+}
+
+#main > .chapters .next {
+    float: right;
+    padding-left: 2%;
+    text-align: left;
+}
+
+aside  {
+    background-color: rgba(255, 200, 128, 0.3);
+    border: 1px dashed rgb(192, 150, 45);
+    font-family: georgia, serif;
+    margin-bottom: 12px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0.5em;
+    width: 75%;
+}
+
+/* FOOTER STYLES **************************************************************/
+
+footer {
+    background-color: #333;
+    color: #b7d478;
+    line-height: 20px;
+    text-align: center;
+    /* design override */
+    height: 39px;
+    border-top: 1px solid #333;
+}
+
+#debug-popup {
+    background-color: #433;
+    color: #888;
+    padding: 0;
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    overflow: hidden;
+    z-index: 10000;
+    height: 1%;
+    width: 1%;
+    min-width: 15px;
+    min-height: 15px;
+    text-indent: 2000px;
+    
+    transition: all 0.5s linear;
+    -webkit-transition: all 0.5s linear;
+    -moz-transition: all 0.5s linear;
+}
+
+#debug-popup:hover {
+    padding: 10px;
+    width: 50%;
+    height: 50%;
+    overflow: auto;
+    text-indent: inherit;
+}
+
+/* SYNTAXHIGHLIGHTER **********************************************************/
+
+div.syntaxhighlighter {
+    font-size: 13px !important;
+    font-family: consolas, 'andale mono', monaco, courier !important;
+}
+
+div.syntaxhighlighter .alt1 {
+}
+
+div.syntaxhighlighter .alt2 {
+    background-color: #f2ffe8 !important;
+}
+
+/* SYNTAXHIGHLIGHTER SCROLLBAR FIX ********************************************/
+
+div.syntaxhighlighter {
+    overflow-y: hidden !important;
+    padding-bottom: 3px;
+}
