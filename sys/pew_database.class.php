@@ -670,7 +670,7 @@ class PewDatabase /* extends DatabaseConfiguration */
             $this->from = $table;
         } else {
             if (!isset($this->from)) {
-                throw Exception("No table provided for method PewDatabase::cell()");
+                throw new Exception("No table provided for method PewDatabase::cell()");
             }
         }
         
@@ -704,7 +704,7 @@ class PewDatabase /* extends DatabaseConfiguration */
             $this->from = $table;
         } else {
             if (!isset($this->from)) {
-                throw Exception("No table provided for method PewDatabase::single()");
+                throw new Exception("No table provided for method PewDatabase::single()");
             }
         }
         
@@ -738,7 +738,7 @@ class PewDatabase /* extends DatabaseConfiguration */
             $this->from = $table;
         } else {
             if (!isset($this->from)) {
-                throw Exception("No table provided for method PewDatabase::select()");
+                throw new Exception("No table provided for method PewDatabase::select()");
             }
         }
         
@@ -769,7 +769,7 @@ class PewDatabase /* extends DatabaseConfiguration */
             $this->from = $table;
         } else {
             if (!isset($this->from)) {
-                throw Exception("No table provided for method PewDatabase::insert()");
+                throw new Exception("No table provided for method PewDatabase::insert()");
             }
         }
         
@@ -796,7 +796,7 @@ class PewDatabase /* extends DatabaseConfiguration */
             $this->from = $table;
         } else {
             if (!isset($this->from)) {
-                throw Exception("No table provided for method PewDatabase::update()");
+                throw new Exception("No table provided for method PewDatabase::update()");
             }
         }
         
@@ -823,7 +823,7 @@ class PewDatabase /* extends DatabaseConfiguration */
             $this->from = $table;
         } else {
             if (!isset($this->from)) {
-                throw Exception("No table provided for method PewDatabase::delete()");
+                throw new Exception("No table provided for method PewDatabase::delete()");
             }
         }
         
