@@ -161,20 +161,15 @@ class Auth
      */
     public function user()
     {
-        Log::in('inside Auth::user()');
         if (!is_object($this->db)) {
             $this->db = Pew::GetDatabase();
         }
-        Log::in('we has database!');
-        Log::in($this, 'The auth object');
-
+        
         if ($this->auth && $this->uuid) {
-            Log::in('we has userz!');
             # if the session has been authenticated, return user information
             $user = $this->db->where(array($this->fields['uuid'] => $this->uuid))->single($this->table);
             return $user;
         } else {
-            Log::in('for some reason, I feel alone');
             # if not, return false
             return false;
         }

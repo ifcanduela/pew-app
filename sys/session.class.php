@@ -43,10 +43,6 @@ class Session
         if ($open) {
             $this->open();
         }
-        
-        if (!isset($_SESSION[$this->_session_prefix])) {
-            $_SESSION[$this->_session_prefix] = array();
-        }
     }
     
     /**
@@ -60,6 +56,11 @@ class Session
         
         if ("" === $this->_session) {
             $this->_session = session_start();
+            
+            if (!is_array($_SESSION[$this->_session_prefix])) {
+                $_SESSION[$this->_session_prefix]= array();
+            }
+            
             return $this->_session !== "";
         }
         
