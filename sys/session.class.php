@@ -40,12 +40,12 @@ class Session
     {
         $this->_session_prefix = basename(getcwd());
         
-        if (!isset($_SESSION[$this->_session_prefix])) {
-            $_SESSION[$this->_session_prefix] = array();
-        }
-        
         if ($open) {
             $this->open();
+        }
+        
+        if (!isset($_SESSION[$this->_session_prefix])) {
+            $_SESSION[$this->_session_prefix] = array();
         }
     }
     
@@ -142,6 +142,8 @@ class Session
         if (!$this->is_open()) {
             return null;
         }
+        
+        if (!array_key_exists())
         
         return array_key_exists($key, $_SESSION[$this->_session_prefix]);
     }
