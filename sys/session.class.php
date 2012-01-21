@@ -143,8 +143,6 @@ class Session
             return null;
         }
         
-        if (!array_key_exists())
-        
         return array_key_exists($key, $_SESSION[$this->_session_prefix]);
     }
 
