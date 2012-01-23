@@ -86,19 +86,19 @@ class App
      */
     public function run($params = null)
     {
-	# compile the request information
+        # compile the request information
         if (!$params) {
             $url = isset($_GET['url']) ? $_GET['url'] : null;
         } else {
             $url = $params;
         }
 		
-	$this->url = $url or '';
+        $this->url = $url or '';
         $this->segments = $this->get_segments($url);
         
         # controller instantiation
         $controller_class = file_name_to_class_name($this->segments['controller']);
-	$this->controller = Pew::GetController($controller_class, $this->segments);
+        $this->controller = Pew::GetController($controller_class, $this->segments);
         
         # display an error page if the controller could not be instanced
         if (!is_object($this->controller)) {
