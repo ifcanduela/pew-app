@@ -26,21 +26,22 @@ class Session
     /**
      * A static variable to hold session status.
      *
-     * @var boolean
+     * @var string
      * @access protected
      */
     public $_session_prefix = null;
     
     /**
-     * The constructor initializes the server session.
+     * The constructor initializes the session prefix and opens the session.
      *
+     * @param bool $open If false, the sesion is not automatically started
      * @access public
      */
     public function __construct($open = true)
     {
         $this->_session_prefix = basename(getcwd());
         
-        if ($open) {
+        if ($open === false) {
             $this->open();
         }
     }
@@ -48,6 +49,7 @@ class Session
     /**
      * Starts a session if none is started.
      * 
+     * @return bool True if the session is started
      * @access public
      */
     public function open()
@@ -56,22 +58,20 @@ class Session
         
         if ("" === $this->_session) {
             $this->_session = session_start();
-            
-            if (!is_array($_SESSION[$this->_session_prefix])) {
-                $_SESSION[$this->_session_prefix]= array();
-            }
-            
-            return $this->_session !== "";
         }
         
-        return false;
+        if (!array_key_exists($this->_session_prefix, $_SESSION)) {
+            $_SESSION[$this->_session_prefix]= array();
+        }
+
+        return $this->_session !== "";
     }
     
     /**
      * Checks if there is a session open.
      * 
-     * @access public
      * @return boolean Returns true if there is a session, false otherwise
+     * @access public
      */
     public function is_open()
     {
@@ -82,7 +82,6 @@ class Session
      * Closes the current session if there is one.
      * 
      * @access public
-     * @static
      */
     public function close()
     {
