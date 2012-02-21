@@ -1,11 +1,8 @@
 <?php
 
-define('USEAUTH', false);
-define('USESESSION', false);
-define('USEDB', false);
-
-require_once dirname(__FILE__) . '/../functions.php';
-require_once dirname(__FILE__) . '/../app.class.php';
+require_once dirname(__FILE__) . '/../../config.php';
+require_once dirname(__FILE__) . '/../../functions.php';
+require_once dirname(__FILE__) . '/../../app.class.php';
 
 /**
  * Test class for App.
@@ -38,7 +35,7 @@ class AppTest extends PHPUnit_Framework_TestCase {
      * @todo Implement testRun().
      */
     public function testRun() {
-        $this->markTestIncomplete("The App::run() method is untestable for the moment.");
+        //$this->markTestIncomplete("The App::run() method is untestable for the moment.");
         
         $_GET['url'] = 'controller/action/page:1/2/3';
         
@@ -46,7 +43,7 @@ class AppTest extends PHPUnit_Framework_TestCase {
          * App::run() requires class Pew, which in turn requires sys/config, 
          * which in turn requires app/config, which in turn...
          */
-        $this->app->run();
+        //$this->app->run();
     }
 
     public function testGet_segments_GET() {
@@ -164,20 +161,72 @@ class AppTest extends PHPUnit_Framework_TestCase {
         $this->assertTrue(is_dir('testFunc_check_dir'));
     }
     
-    public function testFunc_clean_array_data()
+    public function testFunc_sanitize()
     {
-        $this->markTestIncomplete();
+        $str = '; DELETE FROM \"users\"';
+        $this->assertEquals('; DELETE FROM \\\\\"users\\\\\\"', sanitize($str));
+        
+        $str = '12';
+        $this->assertEquals('12', sanitize($str));
+        
+        $str = 12;
+        $this->assertEquals(12, sanitize($str));
+        
     }
     
-    public function testFunc_config()
+    public function testFunc_clean_array_data()
     {
-        $this->markTestIncomplete();
+        $array_data = array('', array('\\"; DELETE * from users'), '000234');
+        $result =array('', array('\"; DELETE * from users'), '000234');
+        
+        $this->assertEquals($result, $array_data);
+    }
+    
+    public function testFunc_cfg()
+    {
+        $this->assertEquals('config is set!', cfg('is_config_set?', 'config is set!'));
+        $this->assertEquals('config is set!', cfg('is_config_set?'));
+        $this->assertEquals(array('is_config_set?' => 'config is set!'), cfg(true));
+        $this->assertNull(cfg('this does not exist'));
+        $this->assertNull(cfg(false));
+        $this->assertNull(cfg(12.0));
     }
     
     public function testFunc_deref()
     {
-        $this->markTestIncomplete();
+        function deref_test_returns_array()
+        {
+            return array(1, 2, 3, 4, 5, 6);
+        }
+        
+        $this->assertEquals(3, deref(deref_test_returns_array(), 2));
+        $this->assertNull(deref(deref_test_returns_array(), 10));
+        // This test case must throw a E_USER_WARNING error
+        $this->assertNull(0, deref(deref_test_returns_array(), 'as', true));
     }
+    
+    public function testFunc_redirect()
+    {
+        $this->markTestSkipped();
+        // Test harness not suited for this test
+        // Pass up to funcional tests
+        //redirect('index.php');
+    }
+    
+    public function testFunc_pr()
+    {
+        $array = array(1, 2, 3);
+        $integer = '1234';
+        $string = 'output string';
+        
+        ob_start();
+        $this->assertEquals(
+                '',
+                pr($array, $title = null));
+        $result = ob_get_contents();
+        ob_end_clean();
+    }
+    
 }
 
 ?>

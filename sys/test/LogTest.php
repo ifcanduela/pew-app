@@ -1,6 +1,7 @@
 <?php
 
-require_once dirname(__FILE__) . '/../log.class.php';
+require_once dirname(__FILE__) . '/../../log.class.php';
+require_once dirname(__FILE__) . '/../../pew.class.php';
 
 /**
  * Test class for Log.
@@ -29,34 +30,31 @@ class LogTest extends PHPUnit_Framework_TestCase {
         
     }
 
-    /**
-     * @todo Implement testIn().
-     */
     public function testIn() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+        $this->assertNull($this->object->in('Logging test 1'));
+        $this->assertNull($this->object->in('Logging test 2', 'Title'));
+        $this->assertNull($this->object->in('Logging test 3', 123123));
     }
 
-    /**
-     * @todo Implement testOut().
-     */
     public function testOut() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+        ob_start();
+        $this->object->out();
+        $result = ob_get_contents();
+        ob_end_clean();
+        
+        $this->assertRegExp("/Logging test 1/", $result);
     }
 
-    /**
-     * @todo Implement testSession().
-     */
-    public function testSession() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+    public function testSession()
+    {        
+        defined('USESESSION') or define('USESESSION', true);
+        $_SESSION['test1'] = 'test_1_value';
+        ob_start();
+        $this->object->session();
+        $result = ob_get_contents();
+        ob_end_clean();
+        
+        $this->assertEquals("", $result);
     }
 
 }

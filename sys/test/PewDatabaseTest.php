@@ -1,6 +1,6 @@
 <?php
 
-require_once dirname(__FILE__) . '/../pew_database.class.php';
+require_once dirname(__FILE__) . '/../../pew_database.class.php';
 
 /**
  * Test class for PewDatabase.
@@ -18,7 +18,15 @@ class PewDatabaseTest extends PHPUnit_Framework_TestCase {
      * This method is called before a test is executed.
      */
     protected function setUp() {
-        $this->object = new PewDatabase;
+        $this->object = new PewDatabase(array
+        (
+            'engine' => 'sqlite',
+            'file' => 'C:\xampp\htdocs\pew-pew-pew\app\config\test.sqlite'
+        ));
+        
+        $this->object->values(array('username' => 'test_subj'))->insert('users');
+        $this->object->values(array('username' => 'test_subj'))->insert('users');
+        $this->object->values(array('username' => 'test_subj_1'))->insert('users');
     }
 
     /**
@@ -26,187 +34,212 @@ class PewDatabaseTest extends PHPUnit_Framework_TestCase {
      * This method is called after a test is executed.
      */
     protected function tearDown() {
-        
+        $this->object->where(array('username' => 'test_subj'))->delete('users');
     }
 
     /**
      * @todo Implement testInstance().
      */
     public function testInstance() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+        $db = PewDatabase::instance();
+        
+        $this->assertTrue(is_object($db));
+        $this->assertEquals('PewDatabase', get_class($db));
     }
 
     /**
      * @todo Implement testFrom().
      */
     public function testFrom() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+        $result1 = $this->object->from('test')->select(null, '*');
+        $this->assertTrue(is_array($result1));
+        
+        $result2 = $this->object->select('test', '*');
+        
+        $result3 = null;
+        
+        try {
+            $result3 = $this->object->select(null, '*');
+        } catch (Exception $e) {
+            $this->assertNull($result3);
+        }
+        
+        $this->assertEquals($result1, $result2);
     }
 
     /**
      * @todo Implement testInto().
      */
     public function testInto() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+        $this->object->into('users')->values(array('username' => 'test_subj_inserted'))->insert();
+        
+        $result = $this->object->where(array('username' => 'test_subj_inserted'))->from('users')->single(null, '*');
+        
+        $this->assertTrue(is_array($result));
+        $this->assertEquals('test_subj_inserted', $result['username']);
     }
 
     /**
      * @todo Implement testFields().
      */
     public function testFields() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+        $result = $this->object->fields('username')->select('users');
+        
+        $this->assertFalse(isset($result[0]['email']));
+        $this->assertTrue(isset($result[0]['username']));
     }
 
     /**
      * @todo Implement testWhere().
      */
-    public function testWhere() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+    public function testWhere()
+    {
+        $result = $this->object->where(array('username' => 'test_subj'))->select('users');
+        
+        $this->assertTrue(count($result) > 0);
     }
 
     /**
      * @todo Implement testGroup_by().
      */
-    public function testGroup_by() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+    public function testGroup_by()
+    {
+        $result = $this->object->group_by('username')->cell('users', 'count(*)');
+
+        $this->assertTrue(count($result) > 0);
     }
 
     /**
      * @todo Implement testHaving().
      */
-    public function testHaving() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+    public function testHaving()
+    {
+        $result = $this->object->group_by('username')->having(array('username' => 'test_subj'))->single('users', 'count(*) as cnt');
+
+        $this->assertTrue(is_array($result));
+        $this->assertTrue(is_numeric($result['cnt']));
     }
 
     /**
      * @todo Implement testOrder_by().
      */
-    public function testOrder_by() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+    public function testOrder_by()
+    {
+        $result = $this->object->order_by('username')->select('users');
+
+        $this->assertTrue(count($result) > 0);
     }
 
     /**
      * @todo Implement testLimit().
      */
-    public function testLimit() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+    public function testLimit()
+    {
+        $result = $this->object->order_by('username')->limit(1)->where(array('id>0'))->select('users');
+        $this->assertEquals(1, count($result));
+
+        $result = $this->object->order_by('username')->limit(1, 1)->select('users');
+        $this->assertEquals(1, count($result));
     }
 
     /**
      * @todo Implement testSet().
      */
     public function testSet() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+        $this->object->set(array('username' => 'test_subj_2'))->where(array('username' => array('=', 'test_subj_1')))->update('users');
     }
 
     /**
      * @todo Implement testValues().
      */
-    public function testValues() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+    public function testValues()
+    {
+        $this->object->values(array('username' => 'test_subj_values_from'))->from('users')->insert();
     }
 
     /**
      * @todo Implement testGet_pk().
      */
-    public function testGet_pk() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+    public function testGet_pk() 
+    {
+        $users_pk = $this->object->get_pk('users');
+        $this->assertEquals('id', $users_pk);
     }
 
     /**
      * @todo Implement testGet_cols().
      */
-    public function testGet_cols() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+    public function testGet_cols()
+    {
+        $users_cols = $this->object->get_cols('users');
+        $cols = array('id', 'username', 'password', 'email');
+        $this->assertEquals($cols, $users_cols);
     }
 
     /**
      * @todo Implement testCell().
      */
-    public function testCell() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+    public function testCell()
+    {
+        $result1 = $this->object->from('test')->select(null, '*');
+        $this->assertTrue(is_array($result1));
+        
+        $result2 = $this->object->select('test', '*');
+        
+        try {
+            $result3 = $this->object->select(null, '*');
+        } catch (Exception $e) {
+        
+        }
+        
+        $this->assertEquals($result1, $result2);
     }
 
-    /**
-     * @todo Implement testSingle().
-     */
-    public function testSingle() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+    public function testSingle()
+    {
+        $result1 = $this->object->from('test')->single(null, '*');
+        $this->assertTrue(is_array($result1));
+        
+        $result2 = $this->object->single('test', '*');
+        
+        $this->assertEquals($result1, $result2);
     }
 
     /**
      * @todo Implement testSelect().
      */
     public function testSelect() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+        $result1 = $this->object->from('users')->where(array('username' => array('IN', '"test_subject"')))->select(null, '*');
+        $this->assertTrue(is_array($result1));
+        
+        $result2 = $this->object->where(array('username' => array('BETWEEN', 1, 2000)))->select('users');
+        $this->assertTrue(is_array($result2));
+        
+        try {
+            $result_null = $this->object->select('no_table');
+        } catch (PDOException $e) {
+            
+        }
     }
 
     /**
      * @todo Implement testInsert().
      */
-    public function testInsert() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+    public function testInsert()
+    {
+        $this->object->values(array('username' => 'test_subj_test_insert'))->insert('users');
     }
 
     /**
      * @todo Implement testUpdate().
      */
-    public function testUpdate() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+    public function testUpdate()
+    {
+        $this->object->values(array('username' => 'test_subj_test_update'))->insert('users');
+        $this->object->set(array('username' => 'test_subj_test_update_updated'))->where(array('username' => 'test_subj_test_update'))->update('users');
+        $result = $this->object->where(array('username' => 'test_subj_test_update_updated'))->from('users')->fields('username')->cell();
+    
+        $this->assertEquals('test_subj_test_update_updated', $result);
     }
 
     /**

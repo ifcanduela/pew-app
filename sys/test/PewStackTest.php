@@ -1,6 +1,6 @@
 <?php
 
-require_once dirname(__FILE__) . '/../pew_stack.class.php';
+require_once dirname(__FILE__) . '/../../pew_stack.class.php';
 
 /**
  * Test class for PewStack.
@@ -28,77 +28,121 @@ class PewStackTest extends PHPUnit_Framework_TestCase {
     protected function tearDown() {
         
     }
-
-    /**
-     * @todo Implement testPut().
-     */
-    public function testPut() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+    
+    public function testCreate()
+    {
+        $stack = new PewStack(1, 2, 3, 4, 5);
+        $this->assertNotNull($stack);
+        
+        $stack = new PewStack();
+        $this->assertNotNull($stack);
+    }
+    
+    public function testPut()
+    {
+        $this->assertNull($this->object->put('first_item'));
     }
 
-    /**
-     * @todo Implement testCurrent().
-     */
     public function testCurrent() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+        $this->assertNull($this->object->current());
+        
+        $this->object->put(1);
+        $this->assertEquals(1, $this->object->current());
+        
+        $this->object->put(2);
+        $this->assertEquals(2, $this->object->current());
+        
+        $this->object->put('string value');
+        $this->assertEquals('string value', $this->object->current());
+        
+        $this->object->pop();
+        $this->assertEquals(2, $this->object->current());
     }
 
-    /**
-     * @todo Implement testPop().
-     */
-    public function testPop() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+    public function testPop()
+    {
+        $this->object->put(1);
+        $this->object->put(2);
+        $this->object->put(3);
+        $this->object->put(4);
+        
+        $this->assertEquals(4, $this->object->pop());
+        $this->assertEquals(3, $this->object->pop());
+        
+        $this->object->put(5);
+        
+        $this->assertEquals(5, $this->object->pop());
+        $this->assertEquals(2, $this->object->pop());
+        $this->assertEquals(1, $this->object->pop());
     }
 
     /**
      * @todo Implement testSkip().
      */
-    public function testSkip() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+    public function testSkip()
+    {
+        $this->object->put(1);
+        $this->object->put(2);
+        $this->object->put(3);
+        $this->object->put(4);
+        
+        $result = $this->object->skip(2);
+        $this->assertEquals(2, $result);
+        $this->assertEquals(1, $this->object->pop());
+        
+        $this->assertNull($this->object->pop());
     }
 
     /**
      * @todo Implement testSize().
      */
-    public function testSize() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+    public function testSize()
+    {
+        $this->object->put(1);
+        $this->object->put(2);
+        $this->object->put(3);
+        $this->object->put(4);
+        
+        $this->assertEquals(4, $this->object->size());
+        
+        $this->object->pop();
+        
+        $this->assertEquals(3, $this->object->size());
+        $this->object->pop();
+        $this->assertEquals(2, $this->object->size());
+        $this->object->pop();
+        $this->assertEquals(1, $this->object->size());
+        $this->object->pop();
+        $this->assertEquals(0, $this->object->size());
+        $this->object->pop();
+        $this->assertEquals(0, $this->object->size());
     }
 
     /**
      * @todo Implement testVoid().
      */
     public function testVoid() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+        $this->assertTrue($this->object->void());
+        $this->object->put(1);
+        $this->assertFalse($this->object->void());
+        $this->object->skip(1);
+        $this->assertTrue($this->object->void());
     }
 
     /**
      * @todo Implement testIs_current().
      */
     public function testIs_current() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+        $this->object->put(1);
+        $this->object->put(2);
+        $this->object->put(3);
+        $this->object->put(4);
+        
+        $this->assertTrue($this->object->is_current(4));
+        $this->object->pop();
+        $this->assertTrue($this->object->is_current(3));
+        $this->assertFalse($this->object->is_current(123));
     }
-
 }
 
 ?>
