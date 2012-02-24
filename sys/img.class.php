@@ -182,7 +182,7 @@ class Img
             # Get file info
             $path_info = pathinfo($file);
             
-            if (!in_array($path_info['extension'], array('jpeg', 'jpg', 'png', 'gif'))) {
+            if (!isset($path_info['extension']) || !in_array($path_info['extension'], array('jpeg', 'jpg', 'png', 'gif'))) {
                 $this->error = 'For the moment, only JPG and PNG image files are supported';
                 return false;
             }
@@ -268,7 +268,7 @@ class Img
         # Copy the source file to destination
         # Potential enhancement: allow the user to specify an output format,
         # and use the image_resource to save the copy.
-        if (copy($this->path . DS . $this->base_name, $folder . $this->dst_file_name . '.' . $this->extension)) {
+        if (copy($this->path . DIRECTORY_SEPARATOR . $this->base_name, $folder . $this->dst_file_name . '.' . $this->extension)) {
             return $folder . $this->dst_file_name . '.' . $this->extension;
         } else {
             $this->error = 'Image file could not be copied';
@@ -359,6 +359,17 @@ class Img
             
             return $this;
         }
+    }
+    
+    /**
+     * Retrieves the current thumbnail size.
+     *
+     * @return array An array with [width, height]
+     * @access public
+     */
+    public function getThumbSize()
+    {
+        return array($this->thumb_width, $this->thumb_height);
     }
     
     /**

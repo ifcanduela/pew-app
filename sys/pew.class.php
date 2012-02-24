@@ -63,6 +63,29 @@ class Pew
     }
 
     /**
+     * Stores an object in the registry.
+     * 
+     * This function does not overwrite storage indexes.
+     * 
+     * @param string $index The storage index
+     * @param object $obj The object to store
+     * @return boolean true if the object was stored, false on error
+     * @access protected
+     * @static
+     */
+    public static function Set($index, $obj)
+    {
+        if (is_string($index) && is_object($obj)) {
+            if (!isset(self::$_map[$index])) {
+                self::$_map[$index] = $obj;
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
      * Builds a fully-qualified pew-system file name.
      * 
      * @param string $theClassname Name of the class
@@ -144,7 +167,7 @@ class Pew
         
         if (file_exists(MODELS . $filename . MODEL_EXT)) {
             return MODELS . $filename . MODEL_EXT;
-        } elseif (file_exists(SYSTEM . 'default' . DS . 'controllers' . DS . $filename . '.class.php')) {
+        } elseif (file_exists(SYSTEM . 'default' . DS . 'models' . DS . $filename . '.class.php')) {
             return SYSTEM . 'default' . DS . 'models' . DS . $filename . '.class.php';
         }
         
@@ -185,7 +208,7 @@ class Pew
             }
             
             if ($filename) {
-                require $filename;
+                require_once $filename;
                 
                 if (class_exists($theClassName)) {
                     self::$_map[$map_index] = new $theClassName($argument);
@@ -266,7 +289,6 @@ class Pew
      * @access public
      * @static
      */
-    
     public static function GetDatabase($config = null)
     {
         $error = false;

@@ -43,10 +43,16 @@ class Log
     public static function in($value, $title = null)
     {
         if (is_string($title)) {
-            self::$log[$title] = $value;
+            if (!isset(self::$log[$title])) {
+                self::$log[$title] = $value;
+            } else {
+                return false;
+            }
         } else {
             self::$log[] = $value;
         }
+        
+        return true;
     }
     
     /**
@@ -78,15 +84,19 @@ class Log
                 echo '</dd>' . PHP_EOL;
             } // foreach $log
             echo '</dl> <!-- asterisc-log -->' . PHP_EOL;
-        } // if $log
+            
+            return true;
+        }  else { // if $log
+            return false;
+        }
     }
     
     static function session()
     {
-        if (defined('USESSESSION') and USESSESION) {
+        if (defined('USESESSION') and USESESSION) {
             
             echo '<dl id="asterisc-log">' . PHP_EOL;
-            foreach ($_SESSION[Pew::Get('Session')->_session_prefix] as $key => $value) {
+            foreach ($_SESSION as $key => $value) {
                 echo '<dt>Logged: <em>' . $key . '</em></dt>' . PHP_EOL;
                 echo '<dd>' . PHP_EOL;
                 if (is_array($value) || is_object($value)) {
@@ -104,6 +114,10 @@ class Log
                 echo '</dd>' . PHP_EOL;
             } // foreach $log
             echo '</dl> <!-- asterisc-log -->' . PHP_EOL;
-        } // if $log
+            
+            return true;
+        } else {  // if $log
+            return false;
+        }
     }
 }

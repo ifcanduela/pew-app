@@ -236,9 +236,13 @@ abstract class Controller
                 $this->get = false;
             }
         }
-            
-        # By default, the view name is the same as the action.
-        $this->view = $this->parameters['action'];
+        
+        if (isset($this->parameters['action'])) {
+            # By default, the view name is the same as the action.
+            $this->view = $this->parameters['action'];
+        } else {
+            $this->view = DEFAULT_ACTION;
+        }
     }
     
     /**

@@ -70,7 +70,7 @@ class PewStack
 }
 
 /* TESTS */
-
+/*
 $s = new PewStack(array('uno', 'dos', 'tres'));
 echo '#1 Must print "tres": ' . $s->pop() . PHP_EOL;
 $s->put('cuatro');
@@ -90,3 +90,4 @@ echo "#7 Must print NULL: ";
 var_dump($s->pop());
 echo "#8 Must print true: ";
 var_dump($s->void());
+*/

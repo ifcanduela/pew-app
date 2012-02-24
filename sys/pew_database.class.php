@@ -220,16 +220,18 @@ class PewDatabase /* extends DatabaseConfiguration */
      */
     public function __construct($config = null)
     {
-        //if (isset($config)) {
+        if (isset($config)) {
             $this->config['use'] = $config;
-        //} else {
-        //    $use = !is_string(USEDB) ? 'default' : USEDB;
-        //    $this->config['use'] = $this->config[$use];
-        //}
+        } elseif (defined('USEDB') && USEDB) {
+            $use = !is_string(USEDB) ? 'default' : USEDB;
+            $this->config['use'] = $this->config[$use];
+        }
         
         if (!isset($this->config['use']['engine'])) {
             throw new PDOException('Database engine was not selected');
         }
+        
+        self::$instance = $this;
     }
     
     /**
@@ -479,14 +481,14 @@ class PewDatabase /* extends DatabaseConfiguration */
         $pk = array();
         
         switch ($this->config['use']['engine']) {
-            case SQLITE:
+            case self::SQLITE:
                 $sql = "PRAGMA table_info({$table})";
                 $primary_key_index = 'pk';
                 $primary_key_value = 1;
                 $table_name_index = 'name';
             break; 
             
-            case MYSQL:
+            case self::MYSQL:
             default:
                 $sql = "SHOW COLUMNS FROM {$table}";
                 $primary_key_index = 'Key';
@@ -530,11 +532,11 @@ class PewDatabase /* extends DatabaseConfiguration */
         $cols = array();
         
         switch ($this->config['use']['engine']) {
-            case SQLITE:
+            case self::SQLITE:
                 $sql = "PRAGMA table_info({$table})";
                 $table_name_index = 'name';
             break;
-            case MYSQL:
+            case self::MYSQL:
             default:
                 $sql = "SHOW COLUMNS FROM {$table}";
                 $table_name_index = 'Field';
@@ -642,13 +644,11 @@ class PewDatabase /* extends DatabaseConfiguration */
         
         # Try to prepare the statement
         if (!$stm = $this->pdo->prepare($query)) {
-            pr($this->pdo->errorInfo());
             throw new PDOException("Query could not be prepared: $query");
         }
         
         # Execute the prepared statement
         if (!$stm->execute($this->tags) || $stm->errorCode() !== '00000') {
-            pr($this->pdo->errorInfo());
             throw new PDOException("Query could not be executed: $query");
         }
         

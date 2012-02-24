@@ -111,7 +111,7 @@ define('PEW_LOCAL', defined('STDIN') or 'localhost' == $_SERVER['REMOTE_ADDR'] |
  * Application configuration
  */
 if (file_exists(APP . 'config' . DS . 'config.php')) {
-    require APP . 'config' . DS . 'config.php';
+    require_once APP . 'config' . DS . 'config.php';
 }
 
 /**
@@ -171,12 +171,12 @@ defined('USETWIG')        or define('USETWIG', false);
 /**
  * Include the autoloading functions
  */
-require SYSTEM . 'pew_loaders.php';
+require_once SYSTEM . 'pew_loaders.php';
 
 /**
  * Include basic functions
  */
-require SYSTEM . 'functions.php';
+require_once SYSTEM . 'functions.php';
 
 /**
  * Application bootstrapping
