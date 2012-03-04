@@ -47,13 +47,24 @@ abstract class Controller
      * Data submitted by the browser agent via POST method.
      *
      * If no POST data is submitted for the current request, $post will be set
-     * false.
+     * to false.
      *
      * @var array
      * @access protected
      */
     protected $post = array();
 
+    /**
+     * Data submitted within the URL string in key:value pairs.
+     *
+     * If no GET data is submitted for the current request, $get will be set to
+     * false.
+     *
+     * @var array
+     * @access protected
+     */
+    protected $get = array();
+    
     /**
      * Additional function libraries made available to the controller.
      *
@@ -230,7 +241,7 @@ abstract class Controller
             }
             
             # Simplify access to named parameters as GET data 
-            if (isset($parameters['named']) && $parameters['named']) {
+            if (isset($parameters['named']) && count($parameters['named']) !== 0) {
                 $this->get = $parameters['named'];
             } else {
                 $this->get = false;
