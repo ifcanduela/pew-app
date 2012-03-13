@@ -7,7 +7,7 @@
 /**
  * The basic controller class, with some common methods and fields.
  * 
- * @version 0.21 2-dec-2011
+ * @version 0.30 13-mar-2012
  * @author ifcanduela <ifcanduela@gmail.com>
  * @abstract
  * @package sys
@@ -75,6 +75,14 @@ abstract class Controller
      * @access public
      */
     public $libs = array();
+    
+    /**
+     * Folder in which view files are stored.
+     *
+     * @var string
+     * @access public
+     */
+    public $view_folder = '';
 
     /**
      * The view file to use to render the action result.
@@ -191,17 +199,18 @@ abstract class Controller
      * The constructor instantiates the database and populates the instance
      * parameters.
      * 
-     * @param array $parameters The URL segments, prepared by the App
+     * @param PewRequest $request The request information
      * @return void
      * @access public
      */
-    public function __construct($parameters = array())
+    public function __construct($request)
     {
         # Make sure $model is read through the __get magic method the first time
         unset($this->model);
         
         # Controller file name in the CONTROLLERS folder.
         $this->file_name = class_name_to_file_name(get_class($this));
+        $this->view_folder = $request->controller;
         
         # Current Session object
         if (USESESSION) {
@@ -222,11 +231,13 @@ abstract class Controller
             foreach ($this->libs as $library_class_name) {
                 $this->libs[$library_class_name] = Pew::GetLibrary($library_class_name);
                 
-                if ($this->libs[$library_class_name] == false) {
+                if ($this->libs[$library_class_name] === false) {
                     Log::in($this->libs[$library_class_name], 'Missing library file');
                 }
             }
         }
+        
+        $parameters = $request->segments();
         
         # Manage the received URL parameters
         if (is_array($parameters)) {
@@ -414,7 +425,7 @@ abstract class Controller
     public function _get_view_file()
     {
         # Search in the app/views/{$controller} folder
-        if (!file_exists($view_file = VIEWS . $this->file_name . DS . $this->view . VIEW_EXT)) {
+        if (!file_exists($view_file = VIEWS . $this->view_folder . DS . $this->view . VIEW_EXT)) {
             # Search in the sys/default/views/{$controller} folder
             if (!file_exists($view_file = SYSTEM . '/default/views/' . $this->file_name . DS . $this->view . '.php')) {
                 $view_file = false;
@@ -433,7 +444,7 @@ abstract class Controller
     {
         Log::in('Using Twig');
         Twig_Autoloader::register();
-        $twig_loader = new Twig_Loader_Filesystem(VIEWS . $this->file_name);
+        $twig_loader = new Twig_Loader_Filesystem(VIEWS . $this->view_folder);
         $twig = new Twig_Environment($twig_loader);
         
         $view_file = $this->_get_view_file() or

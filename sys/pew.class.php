@@ -4,7 +4,7 @@
  * @package sys
  */
 
-define('DATABASE_CLASS_NAME', 'PewDatabase');
+defined('DATABASE_CLASS_NAME') or define('DATABASE_CLASS_NAME', 'PewDatabase');
 
 /**
  * An object registry.
@@ -12,11 +12,8 @@ define('DATABASE_CLASS_NAME', 'PewDatabase');
  * The Pew class is a bastard registry/factory that contains singleton-like
  * instances of classes in the framework. It's implemented as a collection
  * of static methods that return instances of Controllers and Models.
- *
- * It leverages the fact that constructors for the framework classes take at
- * most a single argument.
  * 
- * @version 0.1 20-jun-2011
+ * @version 0.5 13-mar-2012
  * @author ifcanduela <ifcanduela@gmail.com>
  * @package sys
  */
@@ -84,95 +81,6 @@ class Pew
         
         return false;
     }
-    
-    /**
-     * Builds a fully-qualified pew-system file name.
-     * 
-     * @param string $theClassname Name of the class
-     * @return string The absolute path and filename
-     * @access protected
-     * @static
-     */
-    protected static function GetPewFileName($theClassName)
-    {
-        $filename = preg_replace('/([A-Z])/', '_$1', $theClassName);
-        $filename = strtolower(trim($filename, '_'));
-        
-        if (file_exists(SYSTEM . $filename . '.class.php')) {
-            return SYSTEM . $filename . '.class.php';
-        }
-        
-        return false;
-    }
-
-    /**
-     * Builds a fully-qualified controller file name.
-     * 
-     * @param string $theClassName Name of the class
-     * @return string The absolute path and filename
-     * @access protected
-     * @static
-     */
-    protected static function GetControllerFileName($theClassName)
-    {
-        $filename = preg_replace('/([A-Z])/', '_$1', $theClassName);
-        $filename = strtolower(trim($filename, '_'));
-        
-        if (file_exists(CONTROLLERS . $filename . CONTROLLER_EXT)) {
-            return CONTROLLERS . $filename . CONTROLLER_EXT;
-        } elseif (file_exists(SYSTEM . 'default' . DS . 'controllers' . DS . $filename . '.class.php')) {
-            return SYSTEM . 'default' . DS . 'controllers' . DS . $filename . '.class.php';
-        } else {
-            new PewError(CONTROLLER_FILE_MISSING, $theClassName, CONTROLLERS . $filename . CONTROLLER_EXT);
-        }
-        
-        return false;
-    }
-
-    /**
-     * Builds a fully-qualified library file name.
-     * 
-     * @param string $theClassName Name of the class
-     * @return string The absolute path and filename
-     * @access protected
-     * @static
-     */
-    protected static function GetLibraryFileName($theClassName)
-    {
-        $filename = class_name_to_file_name($theClassName);
-        
-        if (file_exists($r = LIBRARIES . $filename . LIBRARY_EXT)) {
-            return LIBRARIES . $filename . LIBRARY_EXT;
-        } elseif (file_exists($r = SYSTEM . $filename . '.class.php')) {
-            return SYSTEM . $filename . '.class.php';
-        } else {
-            new PewError(LIBRARY_FILE_MISSING, $theClassName, LIBRARIES . $filename . LIBRARY_EXT);
-        }
-        
-        return false;
-    }
-
-    /**
-     * Builds a fully-qualified model filename.
-     *
-     * @param string $theClassName The class name
-     * @return string The absolute path and filename
-     * @access protected
-     * @static
-     */
-    protected static function GetModelFileName($theClassName)
-    {
-        $filename = preg_replace('/([A-Z])/', '_$1', $theClassName);
-        $filename = strtolower(trim($filename, '_'));
-        
-        if (file_exists(MODELS . $filename . MODEL_EXT)) {
-            return MODELS . $filename . MODEL_EXT;
-        } elseif (file_exists(SYSTEM . 'default' . DS . 'models' . DS . $filename . '.class.php')) {
-            return SYSTEM . 'default' . DS . 'models' . DS . $filename . '.class.php';
-        }
-        
-        return false;
-    }
 
     /**
      * Obtains an object of the specified class.
@@ -183,37 +91,22 @@ class Pew
      * @access public
      * @static
      */
-    public static function Get($theClassName, $argument = null, $type = self::SYSTEM)
+    public static function Get($theClassName, $arguments = null, $type = self::SYSTEM)
     {
         self::init();
         
         # Store the lower-case class name to use as index
         $map_index = strtolower($theClassName);
-        $filename = false;
         
         if (!isset(self::$_map[$map_index])) {
-            switch ($type) {
-                case self::MODEL:
-                    $filename = self::GetModelFileName($theClassName);
-                    break;
-                case self::CONTROLLER:
-                    $filename = self::GetControllerFileName($theClassName);
-                    break;
-                case self::LIBRARY:
-                    $filename = self::GetLibraryFileName($theClassName);
-                    break;
-                case self::SYSTEM:
-                    $filename = self::GetPewFilename($theClassName);
-                    break;
-            }
-            
-            if ($filename) {
-                require_once $filename;
-                
-                if (class_exists($theClassName)) {
-                    self::$_map[$map_index] = new $theClassName($argument);
+            if (class_exists($theClassName)) {
+                if (is_array($arguments)) {
+                    $reflection_class = new ReflectionClass($theClassName);
+                    self::$_map[$map_index] = $reflection_class->newInstanceArgs($arguments);
+                } elseif (is_null($arguments)) {
+                    self::$_map[$map_index] = new $theClassName;
                 } else {
-                    return false;
+                    self::$_map[$map_index] = new $theClassName($arguments);
                 }
             } else {
                 return false;

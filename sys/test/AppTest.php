@@ -222,7 +222,7 @@ class AppTest extends PHPUnit_Framework_TestCase {
         ob_start();
         $this->assertEquals(
                 '',
-                pr($array, $title = null));
+        pr($array, $title = null));
         $result = ob_get_contents();
         ob_end_clean();
     }
