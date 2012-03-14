@@ -8,7 +8,7 @@
  * The App class is a simple interface between the front controller and the
  * rest of the controllers.
  * 
- * @version 0.15 03-oct-2011
+ * @version 0.20 13-mar-2012
  * @author ifcanduela <ifcanduela@gmail.com>
  * @package sys
  */
@@ -70,39 +70,49 @@ class App
      *
      * The dispatcher accepts a path string, which should be formed according
      * to the .htaccess rules in the root of the app directory structure. It
-     * then builds a $segments array with all relevant parameters.
+     * then retrieves a PewRequest object with current request info.
      *
-     * This function is also responsible for initialising the Auth class when
-     * necessary, creating an instance of the appropriate Controller class and
-     * calling its action() methods, which will handle the data processing.
+     * This function is responsible of creating an instance of the appropriate
+     * Controller class and calling its action() methods, which will handle
+     * the data processing.
      *
      * When the action() method is done, the dispatcher checks if actions is
      * protected against non-authenticated access. If the check is passed, the
      * Controller::view() method is invoked.
      * 
-     * @param string $params a slash-separated string of url parameters
+     * @param string $params optional slash-separated string of url parameters
      * @access public
-     * @to-do Clear up what the $params parameter does
      */
-    public function run($params = null)
+    public function run($uri_string = '')
     {
-        # compile the request information
-        if (!$params) {
-            $url = isset($_GET['url']) ? $_GET['url'] : null;
-        } else {
-            $url = $params;
+        # get the URI segments, if they are available
+        if (!$uri_string && isset($_GET['url'])) {
+            $uri_string = $_GET['url'];
         }
-		
-        $this->url = $url or '';
-        $this->segments = $this->get_segments($url);
+        
+		# get the PewRequest object
+        $request = Pew::Get('PewRequest');
+		# configure fallback controller and action
+        $request->set_default(DEFAULT_CONTROLLER, DEFAULT_ACTION);
+		# process user-configured routes
+        $this->url = $request->remap($uri_string);
+		# parse the resulting URI string (throws exception on error)
+        $request->parse($this->url);
         
         # controller instantiation
-        $controller_class = file_name_to_class_name($this->segments['controller']);
-        $this->controller = Pew::GetController($controller_class, $this->segments);
+        $controller_class = file_name_to_class_name($request->controller);
+        $this->controller = Pew::GetController($controller_class, $request);
         
-        # display an error page if the controller could not be instanced
+		# check controller instantiation
         if (!is_object($this->controller)) {
-            new PewError(CONTROLLER_MISSING);
+            if (file_exists(VIEWS . $request->controller . DS . $request->action . VIEW_EXT)) {
+				# if the controller does not exist, but the view does, use Pages
+                $this->controller = Pew::GetController('Pages', $request);
+				$this->controller->view_folder = $request->controller;
+            } else {
+				# display an error page if the controller could not be instanced
+                new PewError(CONTROLLER_MISSING);
+            }
         }
         
         # call the before_action method if it's defined
@@ -160,9 +170,10 @@ class App
      * @todo: change $params to $uri and $return to $segments
      * @todo: add support for $_FILES
      */
+	/*
     public function get_segments($params)
     {
-		$params = pew_clean_string($params);
+	$params = pew_clean_string($params);
 		
         # $return will hold the segments and the original URI
         $return = array('uri' => $params);
@@ -258,4 +269,5 @@ class App
         # return the array
         return $return;
     }
+	*/
 }

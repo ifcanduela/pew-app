@@ -22,7 +22,7 @@ cfg('start_time', get_execution_time());
 
 try {
     # ...and the magic begins!
-    Pew::Get('App')->run('');
+    Pew::Get('App')->run();
 } catch (Exception $e) {
     echo $e->getMessage();
 }
