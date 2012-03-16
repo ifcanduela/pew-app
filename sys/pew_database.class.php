@@ -555,6 +555,27 @@ class PewDatabase /* extends DatabaseConfiguration */
     }
 
     /**
+     * Find out if the database contains a table.
+     *
+     * @param string $table Table name
+     * @return boolean True if the table exists, false otherwise
+     * @access public
+     */
+    public function table_exists($table)
+    {
+        $exists = false;
+        
+        try {
+            $this->pdo->prepare("SELECT 1 FROM $table");
+            $exists = true;
+        } catch (PDOException $e) {
+            $exists = false;
+        }
+        
+        return $exists;
+    }
+
+    /**
      * Builds lists for PDO prepared statements.
      *
      * This function returns a string for the WHERE and HAVING and SET clauses,
