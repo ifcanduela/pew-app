@@ -169,7 +169,7 @@ class Model
             # if this is an instance of the Model class, get the
             # table from the $table parameter
             if (!is_string($table)) {
-                trigger_error('Model constructor error: Models must be assigned to a table.');
+                throw new Exception('Model constructor error: Models must be assigned to a table.');
             }
             $this->table = $table;
         } elseif (!$this->table) {
@@ -184,7 +184,7 @@ class Model
         $this->_table_data['columns'] = $this->db->get_cols($this->table);
 
         if (!$this->primary_key) {
-            $this->primary_key = $this->db->get_pk($this->table);
+            $this->primary_key = $this->_table_data['primary_key'];
         }
     }
 
@@ -192,20 +192,28 @@ class Model
      * Instances related models.
      *
      * @param string $table_name Table of the related model
-     * @return void
+     * @return boolean false if the table does not exist, true otherwise
      * @access protected
+     * @todo Return false upon error? Throw exception?
      */
     protected function add_related_model($table_name)
     {
         if (!isset($this->_related_models[$table_name]) || !is_object($this->_related_models[$table_name])) {
-            $model_class_name = file_name_to_class_name($table_name . '_model');
-            $this->_related_models[$table_name] = Pew::GetModel($model_class_name);
+            if ($this->db->table_exists($table_name)) {
 
-            if (!$this->_related_models[$table_name]) {
-                Log::in("Using default model for $table_name", 'Model warning');
-                $this->_related_models[$table_name] = new Model($table_name);
+                $model_class_name = file_name_to_class_name($table_name . '_model');
+                $this->_related_models[$table_name] = Pew::GetModel($model_class_name);
+    
+                if (!$this->_related_models[$table_name]) {
+                    Log::in("Using default model for $table_name", 'Model warning');
+                    $this->_related_models[$table_name] = new Model($table_name);
+                }
+            } else {
+                return false;
             }
         }
+        
+        return true;
     }
 
     /**
@@ -277,8 +285,8 @@ class Model
     {
         if (in_array($field, $this->_table_data['columns']) && isset($this->_row_data[$field])) {
             return $this->_row_data[$field];
-        } elseif (array_key_exists($field, $this->has_many) || array_key_exists($field, $this->belongs_to)) {
-            $this->add_related_model($field);
+        } elseif ($this->add_related_model($field)) {
+            
             return $this->_related_models[$field];
         } else {
             return false;
@@ -387,29 +395,31 @@ class Model
 
             if ($this->_find_related) {
 
-
                 # search for child and parent tables
-                foreach ($this->has_many as $table => $foreign_key) {
-                    if (is_array($foreign_key)) {
-                        list($foreign_key, $alias) = $foreign_key;
+                foreach ($this->has_many as $alias => $value) {
+                    if (is_array($value)) {
+                        list($table, $foreign_key) = $value;
                     } else {
-                        $alias = $table;
+                        $table = $alias;
+                        $foreign_key = $value;
                     }
-                    $result[$alias] =
-                        $this
+                    $result[$alias] = $this
                         ->$table
                         ->find_all(array($foreign_key => $id));
                 }
 
-                foreach ($this->belongs_to as $table => $foreign_key) {
-                    if (is_array($foreign_key)) {
-                        list($foreign_key, $alias) = $foreign_key;
+                foreach ($this->belongs_to as $alias => $value) {
+                    if (is_array($value)) {
+                        list($table, $foreign_key) = $value;
                     } else {
-                        $alias = $table;
+                        $table = $alias;
+                        $foreign_key = $value;
                     }
-                    $result[$alias] = $this->$table->find($result[$foreign_key]);
+                    $result[$alias] = $this
+                        ->$table
+                        ->find($result[$foreign_key]);
                 }
-                # reset the fin_children behavior for later calls
+                # reset the find_children behavior for later calls
                 $this->_find_related = false;
             }
         } else {
