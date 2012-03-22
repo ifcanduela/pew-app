@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <title><?php echo $this->title; ?></title>
     <link rel="stylesheet" href="<?php www('/css/default.css'); ?>" />
-    <script type="text/javascript" src="<?php www('js/jquery.js'); ?>"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 </head>
 
 <body>
