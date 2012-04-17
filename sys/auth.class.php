@@ -7,7 +7,8 @@
 /**
  * User login data and procedures.
  * 
- * @uses Database Database access is required to retrieve user information
+ * @uses PewDatabase Database access is required to retrieve user information
+ * @uses Session Session management is made through the Session class
  * @version 0.1 15-mar-2011
  * @author ifcanduela <ifcanduela@gmail.com>
  * @package sys

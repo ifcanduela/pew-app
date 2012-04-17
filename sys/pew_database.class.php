@@ -228,7 +228,7 @@ class PewDatabase /* extends DatabaseConfiguration */
         }
         
         if (!isset($this->config['use']['engine'])) {
-            throw new PDOException('Database engine was not selected');
+            throw new Exception('Database engine was not selected');
         }
         
         self::$instance = $this;
@@ -266,8 +266,8 @@ class PewDatabase /* extends DatabaseConfiguration */
                 $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
                 $this->_is_connected = true;
             } catch (PDOException $e) {
-                echo 'PDO connection failed: ' . $e->getMessage();
                 $this->_is_connected = false;
+                throw new Exception('PDO connection failed: ' . $e->getMessage());
             }
          }
         
