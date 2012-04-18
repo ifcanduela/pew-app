@@ -90,27 +90,27 @@ class App
             $uri_string = $_GET['url'];
         }
         
-		# get the PewRequest object
+        # get the PewRequest object
         $request = Pew::Get('PewRequest');
-		# configure fallback controller and action
+        # configure fallback controller and action
         $request->set_default(DEFAULT_CONTROLLER, DEFAULT_ACTION);
-		# process user-configured routes
+        # process user-configured routes
         $this->url = $request->remap($uri_string);
-		# parse the resulting URI string (throws exception on error)
+        # parse the resulting URI string (throws exception on error)
         $request->parse($this->url);
         
         # controller instantiation
         $controller_class = file_name_to_class_name($request->controller);
         $this->controller = Pew::GetController($controller_class, $request);
         
-		# check controller instantiation
+        # check controller instantiation
         if (!is_object($this->controller)) {
             if (file_exists(VIEWS . $request->controller . DS . $request->action . VIEW_EXT)) {
-				# if the controller does not exist, but the view does, use Pages
+                # if the controller does not exist, but the view does, use Pages
                 $this->controller = Pew::GetController('Pages', $request);
-				$this->controller->view_folder = $request->controller;
+                $this->controller->view_folder = $request->controller;
             } else {
-				# display an error page if the controller could not be instanced
+                # display an error page if the controller could not be instanced
                 new PewError(CONTROLLER_MISSING);
             }
         }
