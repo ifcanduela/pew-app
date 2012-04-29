@@ -49,6 +49,14 @@ class PewRequest
     public $request_method = 'GET';
     
     /**
+     * The intended format of the view output
+     *
+     * @var string
+     * @ccess public
+    */
+    public $output_type = OUTPUT_TYPE_HTML;
+    
+    /**
      * The string with the segments.
      * 
      * @var string
@@ -68,6 +76,13 @@ class PewRequest
      * @var string
      */
     public $action = '';
+
+    /**
+     * View for the current request.
+     * 
+     * @var string
+     */
+    public $view = '';
     
     /**
      * First numeric value in the URL.
@@ -115,7 +130,7 @@ class PewRequest
     public $post = array();
     
     /**
-     * The uploaded files.
+     * Alias for the PHP $_FILES array
      * 
      * @var array
      */
@@ -123,6 +138,9 @@ class PewRequest
     
     function __construct()
     {
+        # The query string
+        $this->query_string = $_SERVER['QUERY_STRING'];
+        
         # GET or POST, mostly
         $this->request_method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'GET';
         
@@ -153,8 +171,8 @@ class PewRequest
             $this->files = false;
         }
     }
-    
-    function reset($reset_routes = false)
+        
+    public function reset($reset_routes = false)
     {
         $this->id = null;
         $this->query_string = '';
@@ -223,17 +241,22 @@ class PewRequest
             }
         }
         
-        # add the POST parameters if they exist
-        if (isset($_POST) && !empty($_POST)) {
-            $this->post = clean_array_data($_POST);
+        # setup the output type
+        switch ($this->action{0}) {
+            case '_':
+                # Actions prefixed with an underscore are private
+                new PewError(ACTION_FORBIDDEN, $this, $this->action);
+                break;
+            case '@':
+                # actions prefixed with an at-sign are XML
+                $this->output_type = OUTPUT_TYPE_XML;
+                break;
+            case ':':
+                # actions prefixed with a colon are JSON
+                $this->output_type = OUTPUT_TYPE_JSON;
         }
         
-        # and the GET parameters
-        if (isset($_GET) && !empty($_GET)) {
-            foreach ($_GET as $k => $v) {
-                $this->query_string[$k] = pew_clean_string($v);
-            }
-        }
+        $this->view = $this->action = trim($this->action, ':@ ');
     }
     
     public function segments()
@@ -241,11 +264,13 @@ class PewRequest
         $id = $this->id;
         $controller = $this->controller;
         $action = $this->action;
+        $view = $this->view;
         $named = $this->named;
         $form = $this->post;
         $files = $this->files;
         $passed = $this->values;
-        return compact('controller', 'action', 'id', 'named', 'form', 'files', 'passed');
+        
+        return compact('controller', 'action', 'view', 'id', 'named', 'form', 'files', 'passed');
     }
     
     /**
