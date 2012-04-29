@@ -67,6 +67,12 @@ define('LIBRARIES',    APP    . 'libs'        . DS);
 define('DEFAULT',      SYSTEM . 'default'     . DS);
 
 /**
+ * Framework class names  for use in the Pew factory
+ */
+defined('REQUEST_CLASS') or define('REQUEST_CLASS', 'PewRequest');
+defined('DATABASE_CLASS') or define('DATABASE_CLASS', 'PewDatabase');
+
+/**
  * Error type constants. Not many errors.
  */
 define('NO_ERROR', 0);

@@ -10,7 +10,7 @@
     <script type="text/javascript" src="<?php www('js/jquery.js'); ?>"></script>
 </head>
 
-<body id="<?php echo $this->parameters['controller']; ?>" class="<?php echo $this->parameters['action']; ?>">
+<body id="<?php echo $this->request->controller; ?>" class="<?php echo $this->request->action; ?>">
     
     <header>
         <h1>Pew-Pew-Pew</h1>
