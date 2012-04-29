@@ -45,6 +45,14 @@ class App
      * @access public
      */
     public $controller = null;
+
+    /**
+     * The view object.
+     *
+     * @var View
+     * @access public
+     */
+    public $view = null;
     
     /**
      * Initialization of components.
@@ -91,17 +99,12 @@ class App
         }
         
         # get the PewRequest object
-        $request = Pew::Get('PewRequest');
-        # configure fallback controller and action
-        $request->set_default(DEFAULT_CONTROLLER, DEFAULT_ACTION);
-        # process user-configured routes
-        $this->url = $request->remap($uri_string);
-        # parse the resulting URI string (throws exception on error)
-        $request->parse($this->url);
+        $request = Pew::GetRequest($uri_string);
         
         # controller instantiation
         $controller_class = file_name_to_class_name($request->controller);
         $this->controller = Pew::GetController($controller_class, $request);
+        $this->view = Pew::Get('View', $request);
         
         # check controller instantiation
         if (!is_object($this->controller)) {
@@ -142,7 +145,11 @@ class App
         
         # render the view, if not prevented
         if ($this->controller->render) {
-            $this->controller->_view();
+            $this->view->layout = $this->controller->layout;
+            $this->view->title = $this->controller->title;
+            
+            $this->view->render($this->controller->view, $this->controller->data);
+            //$this->controller->_view();
         }
     }
     
