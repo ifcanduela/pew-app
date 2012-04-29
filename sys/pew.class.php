@@ -221,6 +221,24 @@ class Pew
         return self::$_map[DATABASE_CLASS_NAME];
     }
     
+    public static function GetRequest($uri_string)
+    {
+        # instantiate the request object
+        $request = self::Get(REQUEST_CLASS);
+        
+        # configure fallback controller and action
+        $request->set_default(DEFAULT_CONTROLLER, DEFAULT_ACTION);
+        
+        # process user-configured routes
+        $url = $request->remap($uri_string);
+        
+        # parse the resulting URI string (throws exception on error)
+        $request->parse($url);
+        
+        return $request;
+    }
+
+
     /**
      * Resets the object store.
      *
