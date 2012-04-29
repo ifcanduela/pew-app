@@ -7,7 +7,7 @@
 /**
  * The basic controller class, with some common methods and fields.
  * 
- * @version 0.30 13-mar-2012
+ * @version 0.31 29-apr-2012
  * @author ifcanduela <ifcanduela@gmail.com>
  * @abstract
  * @package sys
@@ -18,9 +18,9 @@ abstract class Controller
      * Default window title to use in the view.
      *
      * @var string
-     * @access protected
+     * @access public
      */
-    protected $title = APPLICATION_TITLE;
+    public $title = APPLICATION_TITLE;
     
     /**
      * Default layout to use in the view.
@@ -28,9 +28,9 @@ abstract class Controller
      * The selected layout must be in app/views/layout/{$layout}.layout.php
      *
      * @var string
-     * @access protected
+     * @access public
      */
-    protected $layout = DEFAULT_LAYOUT;
+    public $layout = DEFAULT_LAYOUT;
     
     /**
      * Data created by the action and used by the view.
@@ -39,9 +39,9 @@ abstract class Controller
      * variables for easier access inside
      *
      * @var array
-     * @access protected
+     * @access public
      */
-    protected $data = array();
+    public $data = array();
 
     /**
      * Data submitted by the browser agent via POST method.
@@ -164,6 +164,14 @@ abstract class Controller
     public $model = null;
     
     /**
+     * The request information. 
+     * 
+     * @var PewRequest
+     * @access public
+     */
+    public $request = null;
+    
+    /**
      * Auth instance.
      *
      * @var Auth
@@ -205,6 +213,8 @@ abstract class Controller
      */
     public function __construct($request)
     {
+        $this->request = $request;
+        
         # Make sure $model is read through the __get magic method the first time
         unset($this->model);
         
@@ -380,173 +390,5 @@ abstract class Controller
         if ($property === 'model') {
             $this->model = $value;
         }
-    }
-    
-    /**
-     * Dispatches the view.
-     * 
-     * @return void
-     * @access protected
-     */
-    public function _view()
-    {
-        switch ($this->output_type) {
-            case OUTPUT_TYPE_HTML:
-                if ($this->use_twig === true) {
-                    # Use Twig library to render the view
-                    $this->_render_twig();
-                } else {
-                    $this->_render_html();
-                }
-                break;
-
-            case OUTPUT_TYPE_JSON:
-                $this->_render_json();
-                break;
-
-            case OUTPUT_TYPE_XML:
-                $this->_render_xml();
-                break;
-        }
-
-        if (method_exists($this, 'before_render')) {
-            $this->before_render();
-        }
-
-        $this->_render_layout();
-    }
-    
-    /**
-     * Searches for the view file.
-     * 
-     * @return string The filesystem location of the view.
-     * @access protected
-     */
-    public function _get_view_file()
-    {
-        # Search in the app/views/{$controller} folder
-        if (!file_exists($view_file = VIEWS . $this->view_folder . DS . $this->view . VIEW_EXT)) {
-            # Search in the sys/default/views/{$controller} folder
-            if (!file_exists($view_file = SYSTEM . '/default/views/' . $this->file_name . DS . $this->view . '.php')) {
-                $view_file = false;
-            }
-        }
-        
-        return $view_file;
-    }
-    
-    /**
-     * Renders a Twig template.
-     * 
-     * @access protected
-     */
-    public function _render_twig()
-    {
-        Log::in('Using Twig');
-        Twig_Autoloader::register();
-        $twig_loader = new Twig_Loader_Filesystem(VIEWS . $this->view_folder);
-        $twig = new Twig_Environment($twig_loader);
-        
-        $view_file = $this->_get_view_file() or
-                # Show an error page
-                new PewError(VIEW_MISSING, $this->parameters['controller'], $this->view);
-        $this->output = $twig->render(basename($view_file), $this->data);
-    }
-    
-    /**
-     * Renders a standard PHP template.
-     * 
-     * @access protected
-     */
-    public function _render_html()
-    {
-        # Get the view file
-        $view_file = $this->_get_view_file();
-        
-        # Show an error page if the file is not found
-        if (!$view_file) {
-            new PewError(VIEW_MISSING, $this->parameters['controller'], $this->view);
-        }
-        
-        # Make the variables directly accesible in the template.
-        extract($this->data);
-
-        # Load the view into a buffer called $this->output.
-        ob_start();
-        require $view_file;
-        $this->output = ob_get_contents();
-        ob_end_clean();
-    }
-    
-    /**
-     * Renders a JSON view.
-     * 
-     * @access protected
-     */
-    public function _render_json()
-    {
-        $this->layout = 'empty';
-        $this->output = json_encode($this->data);
-    }
-    
-    /**
-     * Renders an XML view.
-     * 
-     * @access protected
-     */
-    public function _render_xml()
-    {
-        $this->layout = 'empty';
-        $xml = $this->file_name;
-        array_to_xml($this->data, $xml, $this->file_name);
-        $this->output = $xml->asXml();
-    }
-    
-    /**
-     * Renders the layout.
-     * 
-     * @access protected
-     */
-    public function _render_layout()
-    {
-        if (!$this->layout /* || ($this->layout === 'default')*/) {
-            # Use the default layout file.
-            require SYSTEM . '/default/views/default.layout.php';
-        } elseif ($this->layout === 'empty') {
-            # output directly
-            echo $this->output;
-        } else {
-            # If the layout .php file cannot be found, show an error page.
-            if (!file_exists(VIEWS . $this->layout . '.layout.php')) {
-                new PewError(LAYOUT_MISSING, $this->layout);
-            }
-            # Render the layout file.
-            require VIEWS . $this->layout . '.layout.php';
-        }
-    }
-    
-    /**
-     * Load a snippet into the current view.
-     * 
-     * @param string $element The snippet to be loaded
-     * @param array $element_data Additional variables for use in the template
-     * @return void
-     * @access public
-     */
-    public function element($element, $element_data = null)
-    {
-        # If the element .php file cannot be found, show an error page.
-        if (!file_exists(ELEMENTS . $element . '.php')) {
-            new PewError(ELEMENT_MISSING, $element);
-        }
-        # If there are variables, make them easily available to the template.
-        if (is_array($element_data)) {
-            extract($element_data);
-        } elseif (count(func_get_args()) > 1) {
-            $args = array_slice(func_get_args(), 1);
-            extract($args, EXTR_PREFIX_ALL, 'param');
-        }
-        # Render the element.
-        require ELEMENTS . $element . '.php';
     }
 }

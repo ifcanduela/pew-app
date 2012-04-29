@@ -403,6 +403,21 @@ function file_name_to_class_name($file_name)
 }
 
 /**
+ * A quick way of converting file names to class names.
+ *
+ * Alias of file_name_to_class_name
+ * 
+ * @param string $file_name The file name, without extension
+ * @return string The properly-cased class name
+ * @author ifcanduela <ifcanduela@gmail.com>
+ * @version 0.1 28-apr-2012
+ */
+function f2c($file_name)
+{
+    return file_name_to_class_name($file_name);
+}
+
+/**
  * A quick way of converting class names to file names.
  * 
  * @param string $class_name The came-case class name
@@ -414,6 +429,21 @@ function class_name_to_file_name($class_name)
 {
     $file_name = preg_replace('/([A-Z])/', '_$1', $class_name);
     return strtolower(trim($file_name, '_'));
+}
+
+/**
+ * A quick way of converting class names to file names.
+ *
+ * Alias of class_name_to_file_name
+ * 
+ * @param string $class_name The came-case class name
+ * @return string The lower-case and underscore-separated file name
+ * @author ifcanduela <ifcanduela@gmail.com>
+ * @version 0.1 28-apr-2012
+ */
+function c2n($class_name)
+{
+    return class_name_to_file_name($class_name);
 }
 
 /**
