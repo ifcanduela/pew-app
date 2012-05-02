@@ -144,7 +144,11 @@ class View
         
         switch ($this->request->output_type) {
             case OUTPUT_TYPE_HTML: 
-                $output = $this->render_html($view_file, $this->data);
+                if (USETWIG) {
+                    $output = $this->render_twig($view_file, $this->data);
+                } else {
+                    $output = $this->render_html($view_file, $this->data);
+                }
                 break;
             case OUTPUT_TYPE_JSON: 
                 $output = $this->render_json($this->data);
@@ -155,7 +159,11 @@ class View
         }
         
         if (!is_null($layout_file)) {
-            $output = $this->render_html($layout_file, array('output' => $output));
+            if (USETWIG) {
+                $output = $this->render_twig($layout_file, array('output' => $output));
+            } else {
+                $output = $this->render_html($layout_file, array('output' => $output));
+            }
             echo $output;
         } else {
             echo $output;
@@ -187,19 +195,16 @@ class View
         return $_template_output;
     }
     
-    public function render_twig()
+    public function render_twig($view_file, $data)
     {
         Log::in('Using Twig');
         
         Twig_Autoloader::register();
         
-        $twig_loader = new Twig_Loader_Filesystem(VIEWS . $this->view_folder);
+        $twig_loader = new Twig_Loader_Filesystem(VIEWS . $this->request->controller);
         $twig = new Twig_Environment($twig_loader);
         
-        $view_file = $this->get_view_file() or
-            # Show an error page
-            new PewError(VIEW_MISSING, $this->parameters['controller'], $this->view);
-        $this->output = $twig->render(basename($view_file), $this->data);
+        return $twig->render(basename($view_file), $this->data);
     }
     
     public function render_json()
