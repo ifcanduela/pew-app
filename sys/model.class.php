@@ -396,24 +396,24 @@ class Model
             if ($this->_find_related) {
 
                 # search for child and parent tables
-                foreach ($this->has_many as $alias => $value) {
-                    if (is_array($value)) {
-                        list($table, $foreign_key) = $value;
+                foreach ($this->has_many as $alias => $r_value) {
+                    if (is_array($r_value)) {
+                        list($table, $foreign_key) = $r_value;
                     } else {
                         $table = $alias;
-                        $foreign_key = $value;
+                        $foreign_key = $r_value;
                     }
                     $result[$alias] = $this
                         ->$table
                         ->find_all(array($foreign_key => $id));
                 }
 
-                foreach ($this->belongs_to as $alias => $value) {
-                    if (is_array($value)) {
-                        list($table, $foreign_key) = $value;
+                foreach ($this->belongs_to as $alias => $r_value) {
+                    if (is_array($r_value)) {
+                        list($table, $foreign_key) = $r_value;
                     } else {
                         $table = $alias;
-                        $foreign_key = $value;
+                        $foreign_key = $r_value;
                     }
                     $result[$alias] = $this
                         ->$table
@@ -463,23 +463,25 @@ class Model
                 foreach ($result as $key => $value) {
                     $id = $value[$this->primary_key];
 
-                    foreach ($this->has_many as $table => $foreign_key) {
-                        if (is_array($foreign_key)) {
-                            list($foreign_key, $alias) = $foreign_key;
+                    foreach ($this->has_many as $alias => $r_value) {
+                        if (is_array($r_value)) {
+                            list($table, $foreign_key) = $r_value;
                         } else {
-                            $alias = $table;
+                            $table = $alias;
+                            $foreign_key = $r_value;
                         }
                         # prepare the find_all call
-                        $this->$table->where(array($foreign_key => $id));
+                        $this->$table->where();
                         # use the associated model to find related items
                         $result[$key][$alias] = $this->_related_models[$table]->find_all();
                     }
 
-                    foreach ($this->belongs_to as $table => $foreign_key) {
-                        if (is_array($foreign_key)) {
-                            list($foreign_key, $alias) = $foreign_key;
+                    foreach ($this->belongs_to as $alias => $r_value) {
+                        if (is_array($r_value)) {
+                            list($table, $foreign_key) = $r_value;
                         } else {
-                            $alias = $table;
+                            $table = $alias;
+                            $foreign_key = $r_value;
                         }
                         # use the associated model to find related items
                         $result[$key][$alias] = $this->$table->find($value[$foreign_key]);
