@@ -160,9 +160,9 @@ class View
         
         if (!is_null($layout_file)) {
             if (USETWIG) {
-                $output = $this->render_twig($layout_file, array('output' => $output));
+                $output = $this->render_twig($layout_file, array('output' => $output, 'title' => $this->title));
             } else {
-                $output = $this->render_html($layout_file, array('output' => $output));
+                $output = $this->render_html($layout_file, array('output' => $output, 'title' => $this->title));
             }
             echo $output;
         } else {
