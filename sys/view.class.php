@@ -77,7 +77,7 @@ class View
         # Search in the app/views/{$controller} folder
         if (!file_exists($view_file = VIEWS . $this->request->controller . DS . $this->view . VIEW_EXT)) {
             # Search in the sys/default/views/{$controller} folder
-            if (!file_exists($view_file = SYSTEM . '/default/views/' . $this->request->controller . DS . $this->action . '.php')) {
+            if (!file_exists($view_file = SYSTEM . '/default/views/' . $this->request->controller . DS . $this->view . '.php')) {
                 $view_file = false;
             }
         }
@@ -135,15 +135,13 @@ class View
         # Get the view file
         $view_file = $this->get_view_file();
         
-        $layout_file = $this->get_layout_file();
-        
-        # Show an error page if the file is not found
-        if (!$view_file) {
-            new PewError(VIEW_MISSING, $this->request->controller, $this->request->action);
-        }
-        
         switch ($this->request->output_type) {
             case OUTPUT_TYPE_HTML: 
+                # Show an error page if the file is not found
+                if (!$view_file) {
+                    new PewError(VIEW_MISSING, $this->request->controller, $this->request->action);
+                }
+                
                 if (USETWIG) {
                     $output = $this->render_twig($view_file, $this->data);
                 } else {
@@ -157,6 +155,9 @@ class View
                 $output = $this->render_xml($this->data);
                 break;
         }
+        
+        # find the layout file
+        $layout_file = $this->get_layout_file();
         
         if (!is_null($layout_file)) {
             if (USETWIG) {
