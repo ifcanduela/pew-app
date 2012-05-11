@@ -156,7 +156,7 @@ class PewRequest
         # POST values in request
         if (isset($_POST) && count($_POST) > 0) {
             foreach ($_POST as $k => $v) {
-                $this->post[$k] = pew_clean_string($v);
+                $this->post[$k] = $v;
             }
         } else {
             $this->post = false;
