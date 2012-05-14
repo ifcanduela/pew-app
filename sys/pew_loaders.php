@@ -16,11 +16,11 @@ function pear_autoload($ClassName)
     static $include_paths = '';
     
     if ($include_paths === '') {
-        $include_paths = explode(';', get_include_path());
+        $include_paths = explode(PATH_SEPARATOR, get_include_path());
     }
     
     $result = false;
-    $file_name = str_replace('_', '/', $ClassName) . '.php';
+    $file_name = str_replace('_', DIRECTORY_SEPARATOR, $ClassName) . '.php';
     
     foreach ($include_paths as $path) {
         if (file_exists($path . DIRECTORY_SEPARATOR . $file_name)) {
@@ -47,28 +47,28 @@ function pear_autoload($ClassName)
  */
 function pew_autoload($ClassName)
 {
-    # guess the standardised file name of the class
+    # Guess the standardised file name of the class
     $file_name = class_name_to_file_name($ClassName);
-
-    # a list of all possible locations
+    
+    # A list of all possible locations
     $locations = array(
-        # user-defined controller classes
+        # User-defined controller classes
         CONTROLLERS . $file_name . CONTROLLER_EXT,
-        # user-defined model classes
+        # User-defined model classes
         MODELS . $file_name . MODEL_EXT,
-        # user-defined library classes
+        # User-defined library classes
         LIBRARIES . $file_name . LIBRARY_EXT,
-        # pew_controller and pew_model
+        # Pew's controller and model
         APP . $file_name . 'class.php',
-        # framework files
+        # Other framework files
         SYSTEM . $file_name . '.class.php',
-        # default controllers
+        # Default controllers
         SYSTEM . 'default' . DS . 'controllers' . DS . $file_name . '.class.php',
-        # default models
+        # Default models
         SYSTEM . 'default' . DS . 'models' . DS . $file_name . '.class.php',
     );
     
-    # search locations in order
+    # Search locations in order
     foreach ($locations as $location) { 
         if (file_exists($location)) { 
             # load the file
