@@ -24,16 +24,13 @@
  *
  *      $pdb = new PewDatabase();
  *      $my_cat = $pdb->where(array('name' => 'Cuddles'))->single('cats');
- *
- * The official slogan is "Databases are Pewesome nao!"
  * 
- * @uses DatabaseConfiguration
- * @version 0.11 12-aug-2011
+ * @version 0.12 14-may-2012
  * @author ifcanduela <ifcanduela@gmail.com>
  * @package sys
  * @todo Decouple this class from DatabaseConfiguration
  */
-class PewDatabase /* extends DatabaseConfiguration */
+class PewDatabase
 {
     /**
      * Database singleton.
@@ -212,11 +209,11 @@ class PewDatabase /* extends DatabaseConfiguration */
      * Build the connection string and connect to the selected database engine.
      *
      * Connects to the specified database engine and sets PDO error mode to
-     * ERRMODE_SILENT.
+     * ERRMODE_EXCEPTION.
      * 
      * @param array $config Alternate configuration settings
      * @access public
-     * @throws PDOException If the DB engine is not selected
+     * @throws InvalidArgumentException If the DB engine is not selected
      */
     public function __construct($config = null)
     {
@@ -228,10 +225,14 @@ class PewDatabase /* extends DatabaseConfiguration */
         }
         
         if (!isset($this->config['use']['engine'])) {
-            throw new Exception('Database engine was not selected');
+            throw new InvalidArgumentException('Database engine was not selected');
         }
         
         self::$instance = $this;
+        
+        $this->connect();
+        
+        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
     
     /**
@@ -249,7 +250,7 @@ class PewDatabase /* extends DatabaseConfiguration */
                 switch ($engine) {
                     case self::SQLITE:
                         $this->pdo = new PDO($engine . ':' . $file);
-                        if (filesize($file) == 0 && function_exists('sqlite_init')) {
+                        if ($file !== ':memory:' && filesize($file) == 0 && function_exists('sqlite_init')) {
                             sqlite_init($this->pdo);
                         }
                     break;
@@ -436,7 +437,7 @@ class PewDatabase /* extends DatabaseConfiguration */
      */
     public function set($set)
     {
-        list($this->set_tags, $this->set) = $this->build_tags($set, 's_', ' SET ', ',');
+        list($this->set_tags, $this->set) = $this->build_tags($set, 's_', ' SET ', ', ');
         
         return $this;
     }
@@ -535,12 +536,12 @@ class PewDatabase /* extends DatabaseConfiguration */
             case self::SQLITE:
                 $sql = "PRAGMA table_info({$table})";
                 $table_name_index = 'name';
-            break;
+                break;
             case self::MYSQL:
             default:
                 $sql = "SHOW COLUMNS FROM {$table}";
                 $table_name_index = 'Field';
-            break;
+                break;
         }
         
         # Get all columns from a selected table
@@ -691,7 +692,7 @@ class PewDatabase /* extends DatabaseConfiguration */
             $this->from = $table;
         } else {
             if (!isset($this->from)) {
-                throw new Exception("No table provided for method PewDatabase::cell()");
+                throw new InvalidArgumentException("No table provided for method PewDatabase::cell()");
             }
         }
         
@@ -725,7 +726,7 @@ class PewDatabase /* extends DatabaseConfiguration */
             $this->from = $table;
         } else {
             if (!isset($this->from)) {
-                throw new Exception("No table provided for method PewDatabase::single()");
+                throw new InvalidArgumentException("No table provided for method PewDatabase::single()");
             }
         }
         
@@ -751,7 +752,7 @@ class PewDatabase /* extends DatabaseConfiguration */
      * @param string $table_name The table name
      * @param array $conditions Conditions
      * @return array Indexed array with the resulting rows
-     * @throws Exception Exception thrown if no table is set
+     * @throws InvalidArgumentException If no table is set
      */
     public function select($table = null, $fields = null)
     {
@@ -759,7 +760,7 @@ class PewDatabase /* extends DatabaseConfiguration */
             $this->from = $table;
         } else {
             if (!isset($this->from)) {
-                throw new Exception("No table provided for method PewDatabase::select()");
+                throw new InvalidArgumentException("No table provided for method PewDatabase::select()");
             }
         }
         
@@ -782,7 +783,7 @@ class PewDatabase /* extends DatabaseConfiguration */
      * @param array $data Values to modify
      * @param array $conditions Conditions
      * @return int Primary key value of the last inserted element
-     * @throws Exception Exception thrown if no table is set
+     * @throws InvalidArgumentException If no table is set
      */
     public function insert($table = null)
     {
@@ -790,7 +791,7 @@ class PewDatabase /* extends DatabaseConfiguration */
             $this->from = $table;
         } else {
             if (!isset($this->from)) {
-                throw new Exception("No table provided for method PewDatabase::insert()");
+                throw new InvalidArgumentException("No table provided for method PewDatabase::insert()");
             }
         }
         
@@ -809,7 +810,7 @@ class PewDatabase /* extends DatabaseConfiguration */
      * @param array $data Values to modify
      * @param array $conditions Conditions
      * @return int Number of rows affected
-     * @throws Exception Exception thrown if no table is set
+     * @throws InvalidArgumentException If no table is set
      */
     public function update($table = null)
     {
@@ -817,14 +818,12 @@ class PewDatabase /* extends DatabaseConfiguration */
             $this->from = $table;
         } else {
             if (!isset($this->from)) {
-                throw new Exception("No table provided for method PewDatabase::update()");
+                throw new InvalidArgumentException("No table provided for method PewDatabase::update()");
             }
         }
         
         $query = $this->get_query('UPDATE', $this->from);
-        
         $stm = $this->run_query($query);
-        
         $this->reset();
         
         return $stm->rowCount();
@@ -836,7 +835,7 @@ class PewDatabase /* extends DatabaseConfiguration */
      * @param string $table_name The table name
      * @param array $conditions
      * @return int Number of rows deleted
-     * @throws Exception Exception thrown if no table is set
+     * @throws InvalidArgumentException If no table is set
      */
     public function delete($table = null)
     {
@@ -844,14 +843,12 @@ class PewDatabase /* extends DatabaseConfiguration */
             $this->from = $table;
         } else {
             if (!isset($this->from)) {
-                throw new Exception("No table provided for method PewDatabase::delete()");
+                throw new InvalidArgumentException("No table provided for method PewDatabase::delete()");
             }
         }
         
         $query = $this->get_query('DELETE', $this->from);
-        
         $stm = $this->run_query($query);
-        
         $this->reset();
         
         return $stm->rowCount();

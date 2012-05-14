@@ -1,9 +1,9 @@
 <?php
 
-require_once dirname(__FILE__) . '/../../config.php';
-require_once dirname(__FILE__) . '/../../functions.php';
-require_once dirname(__FILE__) . '/../../app.class.php';
-require_once dirname(__FILE__) . '/../../controller.class.php';
+require_once'config.php';
+require_once 'functions.php';
+require_once 'app.class.php';
+require_once 'controller.class.php';
 
 defined('APPLICATION_TITLE') or define('APPLICATION_TITLE', 'Pew-Pew-Pew Testing');
 

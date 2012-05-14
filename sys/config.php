@@ -93,8 +93,8 @@ define('ACTION_FORBIDDEN', 12);
  * Framework version numbers.
  */
 define('MAJOR_VERSION', '0');
-define('MINOR_VERSION', '82');
-define('VERSION_DATE', '2011-11-29');
+define('MINOR_VERSION', '83');
+define('VERSION_DATE', '2012-05-11');
 define('VERSION', MAJOR_VERSION . '.' . MINOR_VERSION . '.' . VERSION_DATE);
 
 /**

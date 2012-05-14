@@ -14,11 +14,26 @@ require_once(__DIR__ . DIRECTORY_SEPARATOR . 'functions.php');
  * of the application.
  *
  * @package sys
- * @version 0.1 10-mar-2012
+ * @version 0.2 14-may-2012
  * @author ifernandez <ifcanduela@gmail.com>
  */
 class PewRequest
 {
+    /**
+     * Normal output type 
+     */
+    const OUTPUT_TYPE_HTML = '';
+    
+    /**
+     * Output type for ':' modifier 
+     */
+    const OUTPUT_TYPE_JSON = ':';
+    
+    /**
+     * Output type for '@' modifier 
+     */
+    const OUTPUT_TYPE_XML = '@';
+    
     /**
      * Default controller to use if no first segment provided.
      * 
@@ -38,7 +53,7 @@ class PewRequest
      * 
      * @var array
      */
-    static $routes = array();
+    protected static $_routes = array();
     
     /**
      * Stores the type of HTTP request (GET, POST, PUT, DELETE, HEAD, OPTIONS
@@ -54,7 +69,7 @@ class PewRequest
      * @var string
      * @ccess public
     */
-    public $output_type = OUTPUT_TYPE_HTML;
+    public $output_type = self::OUTPUT_TYPE_HTML;
     
     /**
      * The string with the segments.
@@ -136,10 +151,21 @@ class PewRequest
      */
     public $files = array();
     
-    function __construct()
+    /**
+     * Creates and initialises an HTTP request wrapper object.
+     *
+     * @param string $query_string An optional query string
+     */
+    function __construct($query_string = null)
     {
         # The query string
-        $this->query_string = $_SERVER['QUERY_STRING'];
+        if (isset($query_string)) {
+            $this->query_string = $query_string;
+        } elseif (isset($_SERVER['QUERY_STRING'])) {
+            $this->query_string = $_SERVER['QUERY_STRING'];
+        } else {
+            $this->query_string = '';
+        }
         
         # GET or POST, mostly
         $this->request_method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'GET';
@@ -155,7 +181,9 @@ class PewRequest
         
         # POST values in request
         if (isset($_POST) && count($_POST) > 0) {
+            $this->request_method = 'POST';
             foreach ($_POST as $k => $v) {
+                # Used to call pew_clean_string, but decided to drop it
                 $this->post[$k] = $v;
             }
         } else {
@@ -164,6 +192,7 @@ class PewRequest
         
         # FILES
         if (isset($_FILES) && count($_FILES) > 0) {
+            $this->request_method = 'POST';
             foreach ($_FILES as $file) {
                 $this->files[] = $file;
             }
@@ -171,7 +200,12 @@ class PewRequest
             $this->files = false;
         }
     }
-        
+    
+    /**
+     * Returns the request object to a default state.
+     * 
+     * @param bool $reset_routes If true, configured routes will be deleted
+     */
     public function reset($reset_routes = false)
     {
         $this->id = null;
@@ -181,48 +215,54 @@ class PewRequest
         $this->get = $this->post = $this->files = array();
         
         if ($reset_routes === true) {
-            self::$routes = array();
+            self::$_routes = array();
         }
     }
     
-    function parse($params = null)
+    /**
+     * Initialises the PewRequest.
+     * 
+     * @param string $uri_string The part the URL after the base locatio of the website
+     * @throws Exception When no controller can be found
+     */
+    public function parse($uri_string = null)
     {
-        $params = pew_clean_string($params);
+        $params = pew_clean_string($uri_string);
 		
-        # $return will hold the segments and the original URI
         $this->uri = $params;
                 
-        # separate the query string into chunk tags
+        # Separate the query string into chunks
         $tags = explode('/', trim($params, '/'));
         
-        # filter the tags to remove URL-encoded characters and whitespace
+        # Filter the tags to remove URL-encoded characters and whitespace
         array_walk($tags, function(&$item) { 
             $item = pew_clean_string($item); 
         });
         
-        # the first tag is the controller
+        # The first tag is the controller
         if (isset($tags[0]) && !empty($tags[0])) {
             $this->controller = str_replace('-', '_', $tags[0]);
         } else {
             if ($this->default_controller) {
                 $this->controller = $this->default_controller;
             } else {
-                throw new Exception("No controller segment found [$params]");
+                # No controller name could be found
+                throw new InvalidArgumentException("No controller segment found in [$params]");
             }
         }
         
-        # the second tag is the action
+        # The second tag is the action
         if (isset($tags[1])) {
             $this->action = str_replace('-', '_', $tags[1]);
         } else {
             if ($this->default_action) {
                 $this->action = $this->default_action;
             } else {
-                throw new Exception("No action segment found [$params]");
+                throw new InvalidArgumentException("No action segment found in [$params]");
             }
         }
         
-        # the rest of the tags are additional parameters
+        # The rest of the tags are additional parameters
         for ($i = 2; $i < count($tags); $i++) {
             # the first numeric tag is considered a primary key
             if (!isset($this->id) && is_numeric($tags[$i])) {
@@ -230,35 +270,51 @@ class PewRequest
             }
             
             if (strpos($tags[$i], ':')) {
-                # named tags (key:value) are special
+                # Named tags (key:value) are special
                 list($key, $val) = explode(':', $tags[$i]);
                 
                 $this->named[$key] = $val;
                 $this->values[] = $val;
             } else {
-                # the rest of the tags are just added to the array
+                # The rest of the tags are just added to the array
                 $this->values[] = $tags[$i];
             }
         }
         
-        # setup the output type
+        # Setup the output type
         switch ($this->action{0}) {
             case '_':
                 # Actions prefixed with an underscore are private
-                new PewError(ACTION_FORBIDDEN, $this, $this->action);
+                throw new InvalidArgumentException("Action is forbidden: {$this->action}");
                 break;
-            case '@':
+            case self::OUTPUT_TYPE_XML:
                 # actions prefixed with an at-sign are XML
-                $this->output_type = OUTPUT_TYPE_XML;
+                $this->output_type = self::OUTPUT_TYPE_XML;
                 break;
-            case ':':
+            case self::OUTPUT_TYPE_JSON:
                 # actions prefixed with a colon are JSON
-                $this->output_type = OUTPUT_TYPE_JSON;
+                $this->output_type = self::OUTPUT_TYPE_JSON;
         }
         
-        $this->view = $this->action = trim($this->action, ':@ ');
+        # Remove the extra characters and setup the view and action parameters
+        $this->view = $this->action = ltrim($this->action, ':@ _');
     }
     
+    /**
+     * Collects all information related to the current request.
+     * 
+     * The returned array has the following indexes:
+     *   - id:          first numeric segment in the URI string
+     *   - controller:  controller slug
+     *   - action:      action slug
+     *   - view:        same as the action slug
+     *   - passed       all segments after the first two
+     *   - named        key/value segments
+     *   - form         posted values
+     *   - get          server query_string
+     *   - files        uploaded files
+     * @return array
+     */
     public function segments()
     {
         $id = $this->id;
@@ -267,10 +323,11 @@ class PewRequest
         $view = $this->view;
         $named = $this->named;
         $form = $this->post;
+        $get = $this->query_string;
         $files = $this->files;
         $passed = $this->values;
         
-        return compact('controller', 'action', 'view', 'id', 'named', 'form', 'files', 'passed');
+        return compact('controller', 'action', 'view', 'id', 'named', 'form', 'get', 'files', 'passed');
     }
     
     /**
@@ -286,23 +343,42 @@ class PewRequest
     }
     
     /**
-     *
+     * Links a URL pattern and a destination.
+     * 
+     * A call with this form:
+     *     ::add_route('/^controller/fake_action(\/?)', 'controller/real_action$1')
+     * 
+     * Will substitute these requests (among others):
+     *     http://example.com/controller/fake_action
+     *     http://example.com/controller/fake_action/
+     *     http://example.com/controller/fake_action/param1
+     * 
+     * With these:
+     *     http://example.com/controller/real_action
+     *     http://example.com/controller/real_action/
+     *     http://example.com/controller/real_action/param1
+     * 
+     * Be careful when using $ in the substitution string! Better use single quotes.
+     * 
      * @param string $pattern A regular expression to match a URL
      * @param string $route The destination
+     * @return int Position in the routes list
      */
     static function add_route($pattern, $route)
     {
-        array_unshift(self::$routes, array('pattern' => $pattern, 'route' => $route));
+        array_unshift(self::$_routes, array('pattern' => $pattern, 'route' => $route));
+        return count(self::$_routes);
     }
     
     /**
+     * Translates a URI string into a configured route, if there is a match.
      * 
      * @return string The remapped URL string
      */
     function remap($url)
     {
-        if (count(self::$routes) > 0) {
-            foreach (self::$routes as $v) {
+        if (count(self::$_routes) > 0) {
+            foreach (self::$_routes as $v) {
                 if (preg_match($v['pattern'], $url)) {
                     return preg_replace($v['pattern'], $v['route'], $url);
                 }
@@ -312,93 +388,3 @@ class PewRequest
         return $url;
     }
 }
-
-/**
- * TESTS 
- 
-$url = 'my_controller/my_action/1/key1:value1/key2:value2/key1/value2';
-$_GET= array(
-    'url' => $url
-);
-
-$_POST = array(
-    'name' => 'Igor',
-    'place' => 'Barakaldo',
-    'age' => '31'
-);
-
-echo "<pre>";
-echo "Initialization\n===========================\n";
-
-$r = new PewRequest();
-
-var_dump($r->post['name'] === 'Igor');
-var_dump($r->get['url'] === 'my_controller/my_action/1/key1:value1/key2:value2/key1/value2');
-var_dump($r->post['name'] === 'Igor');
-
-echo "Parsing 1\n===========================\n";
-
-$r->parse($r->get['url']);
-
-var_dump($r->values[0] === '1');
-var_dump($r->id === 1);
-
-echo "Parsing 2\n===========================\n";
-
-$r->reset(true);
-
-$r->default_controller = 'the_default_controller';
-$r->default_action = 'the_default_action';
-
-$r->parse('');
-
-var_dump($r->controller === 'the_default_controller');
-var_dump($r->action === 'the_default_action');
-
-$r->parse('only_controller');
-
-var_dump($r->controller === 'only_controller');
-var_dump($r->action === 'the_default_action');
-
-echo "Parsing exception\n===========================\n";
-
-$r->reset();
-$r->default_action = null;
-
-try {
-    $r->parse('only_controller');
-} catch(Exception $e) {
-    var_dump('No action segment found [only_controller]' === $e->getMessage());
-}
-
-echo "Routing 1\n===========================\n";
-$r->reset();
-
-$url = 'only_action';
-
-try {
-    $r->add_route('/^(.*)$/', 'my_controller/${1}');
-    $url = $r->remap($url);
-    $r->parse($url);
-    var_dump($r->controller === 'my_controller');
-    var_dump($r->action === 'only_action');
-} catch(Exception $e) {
-    var_dump('No action segment found [only_controller]' === $e->getMessage());
-}
-
-echo "Routing 2\n===========================\n";
-$r->reset();
-
-$url = '18';
-$r->add_route('/^(\d+)$/', 'notes/index/${1}');
-$url = $r->remap($url);
-
-try {
-    $r->parse($url);
-    var_dump($r->controller === 'notes');
-    var_dump($r->action === 'index');
-    var_dump($r->id === 18);
-} catch(Exception $e) {
-    var_dump('No action segment found [only_controller]' === $e->getMessage());
-}
-*/

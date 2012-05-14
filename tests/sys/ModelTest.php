@@ -1,8 +1,8 @@
 <?php
 
-require_once dirname(__FILE__) . '/../../config.php';
-require_once dirname(__FILE__) . '/../../pew.class.php';
-require_once dirname(__FILE__) . '/../../model.class.php';
+require_once 'config.php';
+require_once 'pew.class.php';
+require_once 'model.class.php';
 
 /**
  * Test class for Model.

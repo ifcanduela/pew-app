@@ -1,7 +1,7 @@
 <?php
 
-require_once dirname(__FILE__) . '/../../log.class.php';
-require_once dirname(__FILE__) . '/../../pew.class.php';
+require_once 'log.class.php';
+require_once 'pew.class.php';
 
 if (!function_exists('pr')) {
     function pr() {}

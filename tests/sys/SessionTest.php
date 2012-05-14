@@ -1,6 +1,6 @@
 <?php
 
-require_once dirname(__FILE__) . '/../../session.class.php';
+require_once 'session.class.php';
 
 /**
  * Test class for Session.

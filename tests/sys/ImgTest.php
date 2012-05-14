@@ -1,6 +1,6 @@
 <?php
 
-require_once dirname(__FILE__) . '/../../img.class.php';
+require_once 'img.class.php';
 
 $cwd = getcwd();
 
