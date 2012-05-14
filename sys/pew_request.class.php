@@ -22,17 +22,26 @@ class PewRequest
     /**
      * Normal output type 
      */
-    const OUTPUT_TYPE_HTML = '';
+    const OUTPUT_TYPE_HTML = 'html';
     
     /**
      * Output type for ':' modifier 
      */
-    const OUTPUT_TYPE_JSON = ':';
+    const OUTPUT_TYPE_JSON = 'json';
     
     /**
      * Output type for '@' modifier 
      */
-    const OUTPUT_TYPE_XML = '@';
+    const OUTPUT_TYPE_XML = 'xml';
+
+    /**
+     * Output type prefixes
+     */
+    protected static $_output_type_prefixes = array(
+        self::OUTPUT_TYPE_HTML => '',
+        self::OUTPUT_TYPE_JSON => ':',
+        self::OUTPUT_TYPE_XML => '#'
+        );
     
     /**
      * Default controller to use if no first segment provided.
@@ -287,13 +296,17 @@ class PewRequest
                 # Actions prefixed with an underscore are private
                 throw new InvalidArgumentException("Action is forbidden: {$this->action}");
                 break;
-            case self::OUTPUT_TYPE_XML:
+            case self::$_output_type_prefixes[OUTPUT_TYPE_XML]:
                 # actions prefixed with an at-sign are XML
                 $this->output_type = self::OUTPUT_TYPE_XML;
                 break;
-            case self::OUTPUT_TYPE_JSON:
+            case self::$_output_type_prefixes[OUTPUT_TYPE_JSON]:
                 # actions prefixed with a colon are JSON
                 $this->output_type = self::OUTPUT_TYPE_JSON;
+                break;
+            default:
+                # normal actions are HTML
+                $this->output_type = self::OUTPUT_TYPE_HTML;
         }
         
         # Remove the extra characters and setup the view and action parameters
