@@ -93,7 +93,7 @@ class View
     public function get_layout_file()
     {
         # Check for special layouts in XML/JSON requests
-        if ($this->request->output_type !== OUTPUT_TYPE_HTML) {
+        if ($this->request->output_type !== PewRequest::OUTPUT_TYPE_HTML) {
             if (file_exists(VIEWS . $this->request->output_type . LAYOUT_EXT)) {
                 return VIEWS . $this->request->output_type . LAYOUT_EXT;
             } else {
@@ -136,7 +136,14 @@ class View
         $view_file = $this->get_view_file();
         
         switch ($this->request->output_type) {
-            case OUTPUT_TYPE_HTML: 
+            case PewRequest::OUTPUT_TYPE_JSON: 
+                $output = $this->render_json($this->data);
+                break;
+            case PewRequest::OUTPUT_TYPE_XML: 
+                $output = $this->render_xml($this->data);
+                break;
+            case PewRequest::OUTPUT_TYPE_HTML: 
+            default:
                 # Show an error page if the file is not found
                 if (!$view_file) {
                     new PewError(VIEW_MISSING, $this->request->controller, $this->request->action);
@@ -147,12 +154,6 @@ class View
                 } else {
                     $output = $this->render_html($view_file, $this->data);
                 }
-                break;
-            case OUTPUT_TYPE_JSON: 
-                $output = $this->render_json($this->data);
-                break;
-            case OUTPUT_TYPE_XML: 
-                $output = $this->render_xml($this->data);
                 break;
         }
         
