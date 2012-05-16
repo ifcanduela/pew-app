@@ -1,5 +1,8 @@
 <?php
 
+# Report all errors
+error_reporting(E_ALL | E_STRICT);
+
 # Add the PEAR directory to the global includes list for access to PHPUnit
 # Change the path here to point to the proper PEAR path
 # PHPUnit is usually installed to %PEAR_PATH%/PHPUnit

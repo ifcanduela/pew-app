@@ -17,6 +17,7 @@ class View
      * Current request object
      * 
      * @var PewRequest
+     * @access public
      */
     public $request = null;
 
@@ -24,6 +25,7 @@ class View
      * Current request object
      * 
      * @var PewRequest
+     * @access public
      */
     public $session = null;
     
@@ -31,6 +33,7 @@ class View
      * Auth object
      * 
      * @var Auth
+     * @access public
      */
     public $auth = null;
         
@@ -38,6 +41,7 @@ class View
      * View file name
      * 
      * @var string
+     * @access public
      */
     public $view = DEFAULT_ACTION;
     
@@ -45,6 +49,7 @@ class View
      * Layout name
      * 
      * @var string
+     * @access public
      */
     public $layout = DEFAULT_LAYOUT;
     
@@ -54,6 +59,14 @@ class View
      * @var array
      */
     public $data = null;
+    
+    /**
+     * Base templates directory
+     * 
+     * @var string
+     * @access public
+     */
+    public $template_dir = '';
     
     /**
      * @param PewRequest $request 
@@ -93,7 +106,7 @@ class View
     public function get_layout_file()
     {
         # Check for special layouts in XML/JSON requests
-        if ($this->request->output_type !== PewRequest::OUTPUT_TYPE_HTML) {
+        if ($this->request->output_type !== OUTPUT_TYPE_HTML) {
             if (file_exists(VIEWS . $this->request->output_type . LAYOUT_EXT)) {
                 return VIEWS . $this->request->output_type . LAYOUT_EXT;
             } else {
@@ -136,14 +149,7 @@ class View
         $view_file = $this->get_view_file();
         
         switch ($this->request->output_type) {
-            case PewRequest::OUTPUT_TYPE_JSON: 
-                $output = $this->render_json($this->data);
-                break;
-            case PewRequest::OUTPUT_TYPE_XML: 
-                $output = $this->render_xml($this->data);
-                break;
-            case PewRequest::OUTPUT_TYPE_HTML: 
-            default:
+            case OUTPUT_TYPE_HTML: 
                 # Show an error page if the file is not found
                 if (!$view_file) {
                     new PewError(VIEW_MISSING, $this->request->controller, $this->request->action);
@@ -154,6 +160,12 @@ class View
                 } else {
                     $output = $this->render_html($view_file, $this->data);
                 }
+                break;
+            case OUTPUT_TYPE_JSON: 
+                $output = $this->render_json($this->data);
+                break;
+            case OUTPUT_TYPE_XML: 
+                $output = $this->render_xml($this->data);
                 break;
         }
         

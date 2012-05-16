@@ -82,7 +82,7 @@ class Model
      * Whether to query the related tables or not.
      *
      * @var boolean
-     * @access public
+     * @access protected
      */
     protected $_find_related = false;
 
