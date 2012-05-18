@@ -121,7 +121,7 @@ class Auth
         $user = $this->db->where(array($this->fields['username'] => $userdata[$this->fields['username']]))->single($this->table);
         $pass = $this->password($userdata);
         
-        if (is_array($user) && ($user['password'] == $pass)) {
+        if (is_array($user) && ($user['password'] === $pass)) {
             # if the credentials are correct, set the auth and user_id properties
             $this->auth = true;
             $this->uuid = $user[$this->fields['uuid']];
