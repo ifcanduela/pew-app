@@ -4,8 +4,6 @@
  * @package sys
  */
 
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'functions.php');
-
 /**
  * The PewRequest class handles data coming from the server.
  * 
@@ -38,24 +36,26 @@ class PewRequest
      * Output type prefixes
      */
     protected static $_output_type_prefixes = array(
-        self::OUTPUT_TYPE_HTML => '',
-        self::OUTPUT_TYPE_JSON => ':',
-        self::OUTPUT_TYPE_XML => '#'
+            self::OUTPUT_TYPE_HTML => '',
+            self::OUTPUT_TYPE_JSON => ':',
+            self::OUTPUT_TYPE_XML => '@'
         );
     
     /**
      * Default controller to use if no first segment provided.
      * 
      * @var string
+     * @access protected
      */
-    public $default_controller;
+    protected $_default_controller;
     
     /**
      * Default action to use if no second segment provided.
      * 
      * @var string
+     * @access protected
      */
-    public $default_action;
+    protected $_default_action;
     
     /**
      * The user-created routing rules.
@@ -252,8 +252,8 @@ class PewRequest
         if (isset($tags[0]) && !empty($tags[0])) {
             $this->controller = str_replace('-', '_', $tags[0]);
         } else {
-            if ($this->default_controller) {
-                $this->controller = $this->default_controller;
+            if ($this->_default_controller) {
+                $this->controller = $this->_default_controller;
             } else {
                 # No controller name could be found
                 throw new InvalidArgumentException("No controller segment found in [$params]");
@@ -264,8 +264,8 @@ class PewRequest
         if (isset($tags[1])) {
             $this->action = str_replace('-', '_', $tags[1]);
         } else {
-            if ($this->default_action) {
-                $this->action = $this->default_action;
+            if ($this->_default_action) {
+                $this->action = $this->_default_action;
             } else {
                 throw new InvalidArgumentException("No action segment found in [$params]");
             }
@@ -296,11 +296,11 @@ class PewRequest
                 # Actions prefixed with an underscore are private
                 throw new InvalidArgumentException("Action is forbidden: {$this->action}");
                 break;
-            case self::$_output_type_prefixes[OUTPUT_TYPE_XML]:
+            case self::$_output_type_prefixes[self::OUTPUT_TYPE_XML]:
                 # actions prefixed with an at-sign are XML
                 $this->output_type = self::OUTPUT_TYPE_XML;
                 break;
-            case self::$_output_type_prefixes[OUTPUT_TYPE_JSON]:
+            case self::$_output_type_prefixes[self::OUTPUT_TYPE_JSON]:
                 # actions prefixed with a colon are JSON
                 $this->output_type = self::OUTPUT_TYPE_JSON;
                 break;
@@ -351,8 +351,8 @@ class PewRequest
      */
     public function set_default($default_controller, $default_action)
     {
-        $this->default_controller = $default_controller;
-        $this->default_action = $default_action;
+        $this->_default_controller = $default_controller;
+        $this->_default_action = $default_action;
     }
     
     /**
