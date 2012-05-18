@@ -163,7 +163,7 @@ class Model
     public function __construct($table = null)
     {
         # get the Database class instance
-        $this->db = Pew::GetDatabase();
+        $this->db = Pew::get_database();
 
         if (get_class($this) === 'Model') {
             # if this is an instance of the Model class, get the
@@ -202,7 +202,7 @@ class Model
             if ($this->db->table_exists($table_name)) {
 
                 $model_class_name = file_name_to_class_name($table_name . '_model');
-                $this->_related_models[$table_name] = Pew::GetModel($model_class_name);
+                $this->_related_models[$table_name] = Pew::get_model($model_class_name);
     
                 if (!$this->_related_models[$table_name]) {
                     Log::in("Using default model for $table_name", 'Model warning');

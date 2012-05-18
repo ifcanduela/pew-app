@@ -62,13 +62,13 @@ class App
     function __construct()
     {
         # initialise Authentication if required
-        if (USEAUTH) {
-            $this->auth = Pew::Get('Auth');
+        if (defined('USEAUTH') && USEAUTH) {
+            $this->auth = Pew::get_auth();
         }
         
         # starts a session if required
-        if (USESESSION) {
-            $this->session = Pew::Get('Session');
+        if (defined('USESESSION') && USESESSION) {
+            $this->session = Pew::get_session();
             $this->session->open();
         }
     }
@@ -99,18 +99,18 @@ class App
         }
         
         # get the PewRequest object
-        $request = Pew::GetRequest($uri_string);
+        $request = Pew::get_request($uri_string);
         
         # controller instantiation
         $controller_class = file_name_to_class_name($request->controller);
-        $this->controller = Pew::GetController($controller_class, $request);
-        $this->view = Pew::Get('View', $request);
+        $this->controller = Pew::get_controller($controller_class, $request);
+        $this->view = Pew::get('View', $request);
         
         # check controller instantiation
         if (!is_object($this->controller)) {
             if (file_exists(VIEWS . $request->controller . DS . $request->action . VIEW_EXT)) {
                 # if the controller does not exist, but the view does, use Pages
-                $this->controller = Pew::GetController('Pages', $request);
+                $this->controller = Pew::get('Pages', $request);
                 $this->controller->view_folder = $request->controller;
             } else {
                 # display an error page if the controller could not be instanced

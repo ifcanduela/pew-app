@@ -224,12 +224,12 @@ abstract class Controller
         
         # Current Session object
         if (USESESSION) {
-            $this->session = Pew::Get('Session');
+            $this->session = Pew::get_session();
         }
         
         # Current Auth object
         if (USEAUTH) {
-            $this->auth = Pew::Get('Auth');
+            $this->auth = Pew::get_auth();
         }
         
         # Function libraries
@@ -239,7 +239,7 @@ abstract class Controller
                 $this->libs = array($this->libs);
             }
             foreach ($this->libs as $library_class_name) {
-                $this->libs[$library_class_name] = Pew::GetLibrary($library_class_name);
+                $this->libs[$library_class_name] = Pew::get_library($library_class_name);
                 
                 if ($this->libs[$library_class_name] === false) {
                     Log::in($this->libs[$library_class_name], 'Missing library file');
@@ -347,7 +347,7 @@ abstract class Controller
         if ($property === 'model') {
             # Initialize the model
             if (USEDB && $this->use_db) {
-                $this->model = Pew::GetModel(get_class($this), true);
+                $this->model = Pew::get_model(get_class($this), true);
 
                 if ($this->model === false) {
                     Log::in(get_class($this), 'Model not found for this controller, using default');
