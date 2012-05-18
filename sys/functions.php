@@ -213,19 +213,20 @@ function pew_clean_string($evil_string)
  * 
  * @param array $array The array data
  * @param mixed $index The integer or string index to retrieve
- * @param bool $strict Whether or not to trigger a warning if the index does
- *                     not exist
+ * @param bool $strict Whether or not to throw an InvalidArgumenException
+ *                     if the index does not exist
+ * @throws InvalidArgumentException When $index is not found and $strict is true
  * @author ifcanduela <ifcanduela@gmail.com>
  * @version 0.1 24-oct-2011
  */
 function deref(array $array, $index, $strict = false)
 {
-    if ($strict && !isset($array[$index])) {
-        trigger_error("Array key does not exist: [$index]", E_USER_WARNING);
-    }
-    
-    if (!isset($array[$index])) {
-        return null;
+    if (!array_key_exists($index, $array)) {
+        if ($strict) {
+            throw new InvalidArgumentException("Array key does not exist: [$index]");
+        } else {
+            return null;
+        }
     }
     
     return $array[$index];
