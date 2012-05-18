@@ -87,7 +87,7 @@ class Asset
      * 
      * @param string $base_path Base path for css, less and js folders
      */
-    public function __construct($base_path = '');
+    public function __construct($base_path = '')
     {
         if ($base_path == '') {
             $base_path = __DIR__;
@@ -95,7 +95,7 @@ class Asset
 
         $base_path = rtrim($base_path, '/\\') . DIRECTORY_SEPARATOR;
 
-        foreach (self::_asset_types as $type) {
+        foreach (self::$_asset_types as $type) {
             $type_folder_name = "_{$type}_folder";
             $this->$type_folder_name = $base_path . $type;
         }
