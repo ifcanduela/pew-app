@@ -32,10 +32,11 @@ class AppTest extends PHPUnit_Framework_TestCase {
     }
 
     /**
-     * @todo Implement testRun().
+     * @todo Implement test_app_run().
      */
-    public function testRun() {
-        //$this->markTestIncomplete("The App::run() method is untestable for the moment.");
+    public function test_app_run()
+    {
+        $this->markTestIncomplete("The App::run() method is untestable for the moment.");
         
         $_GET['url'] = 'controller/action/page:1/2/3';
         
@@ -46,48 +47,7 @@ class AppTest extends PHPUnit_Framework_TestCase {
         //$this->app->run();
     }
 
-    public function testGet_segments_GET()
-    {
-        $_SERVER['REQUEST_METHOD'] = 'get';
-        
-        $_GET = $data = array(
-            'dog_name' => 'Truffles',
-            'street_address' => 'Main st.',
-            'owner_id' => '1'
-        );
-        
-        $segments = $this->app->get_segments('');
-        $this->assertEquals(DEFAULT_CONTROLLER, $segments['controller']);
-        $this->assertEquals(DEFAULT_ACTION, $segments['action']);
-        
-        
-        $segments = $this->app->get_segments('kittens/feed/page:1/2/catnip');
-        $this->assertEquals('kittens/feed/page:1/2/catnip', $segments['uri']);
-        $this->assertEquals('kittens', $segments['controller']);
-        $this->assertEquals('feed', $segments['action']);
-        $this->assertEquals('1', $segments['named']['page']);
-        $this->assertEquals('page:1', $segments['segments'][2]);
-        $this->assertEquals('2', $segments['passed'][1]);
-        $this->assertEquals('catnip', $segments['passed'][2]);
-        $this->assertEquals(2, $segments['id']);
-    }
-    
-    public function testGet_segments_POST()
-    {
-        $_SERVER['REQUEST_METHOD'] = 'post';
-        
-        $_POST = $data = array(
-            'dog_name' => 'Truffles',
-            'street_address' => 'Main st.',
-            'owner_id' => '1'
-        );
-        
-        $segments = $this->app->get_segments('goggies/walk/1');
-        $this->assertEquals($data, $segments['form']);
-        $this->assertEquals($data['street_address'], $segments['form']['street_address']);
-    }
-    
-    public function testCfg()
+    public function test_cfg()
     {
         $this->assertEquals('config is set!', cfg('is_config_set?', 'config is set!'));
         $this->assertEquals('config is set!', cfg('is_config_set?'));
@@ -97,7 +57,7 @@ class AppTest extends PHPUnit_Framework_TestCase {
         $this->assertNull(cfg(12.0));
     }
 
-    public function testPr()
+    public function test_pr()
     {
         $array = array(1, 2, 3);
         $integer = '1234';
@@ -118,7 +78,7 @@ class AppTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("Twelve: 12", $result);
     }
 
-    public function testPew_exit()
+    public function test_pew_exit()
     {
         // Remove the following lines when you implement this test.
         $this->markTestIncomplete(
@@ -126,14 +86,14 @@ class AppTest extends PHPUnit_Framework_TestCase {
         );
     }
 
-    public function testGet_execution_time()
+    public function test_get_execution_time()
     {
         $this->assertEquals(0, get_execution_time());
         $this->assertNotEquals(0, get_execution_time());
         $this->assertNotEquals(0, get_execution_time(true));
     }
 
-    public function testSanitize()
+    public function test_sanitize()
     {
         $str = '; DELETE FROM \"users\"';
         $this->assertEquals('; DELETE FROM \\\\\"users\\\\\\"', sanitize($str));
@@ -145,7 +105,7 @@ class AppTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals(12, sanitize($str));
     }
 
-    public function testClean_array_data()
+    public function test_clean_array_data()
     {
         $array_data = array('', array('\\"; DELETE * from users'), '000234');
         $result = array('', array('"; DELETE * from users'), '000234');
@@ -160,7 +120,7 @@ class AppTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals('\&quot;; DELETE * FROM \&#039;users\&#039;', pew_clean_string($str));
     }
 
-    public function testDeref()
+    public function test_deref()
     {
         function returns_array()
         {
@@ -169,19 +129,17 @@ class AppTest extends PHPUnit_Framework_TestCase {
         
         $this->assertEquals(3, deref(returns_array(), 2));
         $this->assertNull(deref(returns_array(), 10));
-        
-        // The following test case must throw a E_USER_WARNING error
-        ////////////////////////////////////////////////////////////
-        ob_start();
-        $return = deref(returns_array(), 'as', true);
-        $result = ob_get_contents();
-        ob_end_clean();
-        
-        $this->assertNull($return);
-        $this->assertEquals("", $result);
     }
 
-    public function testArray_reap()
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function test_deref_throws_exception()
+    {
+        $return = deref(returns_array(), 'as', true);
+    }
+
+    public function test_array_reap()
     {
         $array = array(
             array(1, 2, 3, 4, 5),
@@ -214,13 +172,13 @@ class AppTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals($result6, array_reap($array2, '$'), "Objects as array values are not converted");
     }
 
-    public function testArray_flatten()
+    public function test_array_flatten()
     {
         $array = array(array(1, 2, 3), 4, array ('five' => 5, 'six' => 6));
         $this->assertEquals(array(1, 2, 3, 4, 5, 6), array_flatten($array));
     }
 
-    public function testArray_to_xml()
+    public function test_array_to_xml()
     {
         $array = array(
             'one' => array('test'),
@@ -231,7 +189,7 @@ class AppTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals('', array_to_xml($array, $xml));
     }
 
-    public function testFile_name_to_class_name()
+    public function test_file_name_to_class_name()
     {
         $this->assertEquals('PewClassName', file_name_to_class_name('pew_class_name'));
         $this->assertEquals('PewclassName', file_name_to_class_name('pewclass_name'));
@@ -241,7 +199,7 @@ class AppTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals('Pewclassname', file_name_to_class_name('pewclassname'));
     }
 
-    public function testClass_name_to_file_name()
+    public function test_class_name_to_file_name()
     {
         $this->assertEquals('pew_class_name', class_name_to_file_name('PewClassName'));
         $this->assertEquals('pewclass_name', class_name_to_file_name('PewclassName'));
@@ -256,19 +214,21 @@ class AppTest extends PHPUnit_Framework_TestCase {
         $this->markTestSkipped('The http redirecion is tested at functional stage.');
     }
 
-    public function testCheck_dirs()
+    public function test_check_dirs()
     {
-        if (is_dir('testFunc_check_dir')) {
-            rmdir('testFunc_check_dir');
+        if (is_dir(TESTS_PATH . '/testFunc_check_dir')) {
+            rmdir(TESTS_PATH . '/testFunc_check_dir');
         }
-        $this->assertFalse(is_dir('testFunc_check_dir'));
-        $this->assertTrue(check_dirs('testFunc_check_dir'));
-        $this->assertTrue(is_dir('testFunc_check_dir'));
+        $this->assertFalse(is_dir(TESTS_PATH . '/testFunc_check_dir'));
+        $this->assertTrue(check_dirs(TESTS_PATH . '/testFunc_check_dir'));
+        $this->assertTrue(is_dir(TESTS_PATH . '/testFunc_check_dir'));
         
         $this->assertFalse(check_dirs(''));
+
+        rmdir(TESTS_PATH . '/testFunc_check_dir');
     }
 
-    public function testSlugify()
+    public function test_slugify()
     {
         $str = 'This is a slug';
         $this->assertEquals('this-is-a-slug', slugify($str));
@@ -283,7 +243,7 @@ class AppTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals('this-is-a-slug', slugify($str));
     }
 
-    public function testTo_underscores()
+    public function test_to_underscores()
     {
         $this->assertEquals('______', to_underscores('- _-- '));
         $this->assertEquals('My_Class_Name', to_underscores('My Class Name'));
@@ -291,13 +251,13 @@ class AppTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals('My_Class\Name', to_underscores('My-Class\\Name'));
     }
 
-    public function testRoot()
+    public function test_root()
     {
         $this->assertEquals(getcwd() . DIRECTORY_SEPARATOR, root('', false));
         $this->assertEquals(getcwd() . DIRECTORY_SEPARATOR . 'subdir', root('subdir', false));
     }
 
-    public function testUrl()
+    public function test_url()
     {
         if (defined('STDIN')) {
             $this->markTestSkipped();
@@ -307,7 +267,7 @@ class AppTest extends PHPUnit_Framework_TestCase {
         }
     }
 
-    public function testWww()
+    public function test_www()
     {
         if (defined('STDIN')) {
             $this->markTestSkipped();
@@ -317,7 +277,7 @@ class AppTest extends PHPUnit_Framework_TestCase {
         }
     }
 
-    public function testPrint_config()
+    public function test_print_config()
     {
         ob_start();
         print_config();
@@ -330,7 +290,7 @@ class AppTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals(4, count($lines));
     }
     
-    public function testUser()
+    public function test_user()
     {
         if (!USESESSION || !USEAUTH or defined(STDIN)) {
             $this->markTestIncomplete();
