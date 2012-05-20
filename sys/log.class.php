@@ -132,7 +132,7 @@ class Log
                 $log_contents .= "- - - - -" . PHP_EOL;
             }
             
-            file_put_contents($location . $filename, $log_contents);
+            file_put_contents($location . DIRECTORY_SEPARATOR . $filename, $log_contents);
         }
     }
     

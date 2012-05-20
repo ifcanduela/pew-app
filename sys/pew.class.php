@@ -32,7 +32,7 @@ class Pew
     protected static $_map = null;
 
     /**
-     * Map of class domains and class names.
+     * Map of class domains and class names for "services".
      * 
      * @var array
      */

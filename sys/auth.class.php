@@ -68,7 +68,7 @@ class Auth
     {
         if (USEAUTH) {
             if (USESESSION) {
-                $this->session = Pew::Get('Session');
+                $this->session = Pew::get_session();
             } else {
                 throw new Exception("Auth requires sessions enabled");
             }
@@ -114,7 +114,7 @@ class Auth
     public function authenticate($userdata)
     {
         if (!is_object($this->db)) {
-            $this->db = Pew::GetDatabase();
+            $this->db = Pew::get_database();
         }
 
         # find information about the user in the database
@@ -163,7 +163,7 @@ class Auth
     public function user()
     {
         if (!is_object($this->db)) {
-            $this->db = Pew::GetDatabase();
+            $this->db = Pew::get_database();
         }
         
         if ($this->auth && $this->uuid) {

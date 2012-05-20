@@ -31,7 +31,7 @@ function cfg($key, $value = null)
     if (!is_string($key) && !is_int($key)) {
         return null;
     }
-    
+
     if (is_null($value)) {
         if (array_key_exists($key, $_config_values)) {
             return $_config_values[$key];
@@ -643,24 +643,16 @@ function user()
 {
     static $return = null;
     
-    Log::in('calling user()');
-    
     if (!isset($return)) {
-        Log::in('calling user() for the first time');
         $return = false;
         
         if (class_exists('Pew') && USEAUTH) {
-            Log::in('USEAUTH is enabled');
             $user = Pew::Get('Auth')->user();
-            Log::in($user, 'The user');
             if (is_array($user)) {
-                Log::in('$user is array');
                 $return = (object) $user;
             }
         }
     }
-    
-    Log::in($return, 'returning');
     
     return $return;
 }
