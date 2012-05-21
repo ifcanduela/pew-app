@@ -141,6 +141,7 @@ class Log
      * 
      * @param  boolean $print If false, the log is not printed
      * @return string|bool The contents of the log, or false if there is no session
+     * @deprecated 2012.5.21
      */
     function session($print = true)
     {

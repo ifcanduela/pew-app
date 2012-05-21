@@ -96,10 +96,11 @@ function pr($data, $title = null)
  */
 function pew_exit($message, $level = E_USER_ERROR)
 {
+    $debug_backtrace = debug_backtrace();
     # get the caller of the function that called pew_exit()
-    $callee = next(debug_backtrace());
+    $callee = $debug_backtrace[0];
     # trigger the appropriate error
-    trigger_error("$message in {$callee['file']} on line {$callee['line']}", $level);
+    trigger_error("ERROR: $message in {$callee['file']} on line {$callee['line']}", $level);
     # print the complete backtrace
     debug_print_backtrace();
 }
@@ -460,7 +461,6 @@ function c2n($class_name)
  */
 function redirect($url)
 {
-    //$url = preg_replace('/^' . trim(URL, PS) . '/', '', $url);
     $url = ltrim($url, '/');
     header('Location: ' . URL . $url);
     exit(302);
@@ -567,8 +567,8 @@ function to_underscores($str)
  */
 function root($path = '', $print = true)
 {
-    if ($print) echo ROOT . str_replace(PS, DS, $path);
-    return ROOT . str_replace(PS, DS, $path);
+    if ($print) echo ROOT . str_replace('/', DIRECTORY_SEPARATOR, $path);
+    return ROOT . str_replace('/', DIRECTORY_SEPARATOR, $path);
 }
 
 /**

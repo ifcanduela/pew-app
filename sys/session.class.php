@@ -4,8 +4,6 @@
  * @package sys
  */
 
-define ('FLASHDATA', 'flash');
-
 /**
  * A simple session management class.
  *
@@ -16,12 +14,20 @@ define ('FLASHDATA', 'flash');
 class Session
 {
     /**
+     * Array index for the flash messages.
+     * 
+     * @var string
+     * @const
+     */
+    const FLASHDATA = '_flash_';
+
+    /**
      * A static variable to hold session status.
      *
      * @var boolean
      * @access protected
      */
-    public $_session = false;
+    protected $_session = false;
     
     /**
      * A static variable to hold session status.
@@ -29,7 +35,7 @@ class Session
      * @var string
      * @access protected
      */
-    public $_session_prefix = null;
+    protected $_session_prefix = null;
     
     /**
      * The constructor initializes the session prefix and opens the session.
@@ -41,7 +47,7 @@ class Session
     {
         $this->_session_prefix = basename(getcwd());
         
-        if ($open === false) {
+        if ($open === true) {
             $this->open();
         }
     }
@@ -65,6 +71,17 @@ class Session
         }
 
         return $this->_session !== "";
+    }
+
+    /**
+     * Get the session prefix, if any.
+     * 
+     * @return string
+     * @access public
+     */
+    public function get_session_prefix()
+    {
+        return $this->_session_prefix;
     }
     
     /**
@@ -171,7 +188,7 @@ class Session
      */
     public function set_flash($message)
     {
-        $this->write(FLASHDATA, $message);
+        $this->write(self::FLASHDATA, $message);
     }
     
     /**
@@ -182,7 +199,7 @@ class Session
      */
     public function is_flash()
     {
-        return $this->exists(FLASHDATA);
+        return $this->exists(self::FLASHDATA);
     }
     
     /**
@@ -193,45 +210,45 @@ class Session
      */
     public function get_flash($prefix = '', $suffix = '')
     {
-        if ($this->exists(FLASHDATA)) {
-            $message = $this->read(FLASHDATA);
-            $this->delete(FLASHDATA);
+        if ($this->exists(self::FLASHDATA)) {
+            $message = $this->read(self::FLASHDATA);
+            $this->delete(self::FLASHDATA);
             return $prefix . $message . $suffix;
         } else {
             return false;
         }
     }
     
-    function __set($key, $value)
+    public function __set($key, $value)
     {
-        if ($key === FLASHDATA) {
+        if ($key === self::FLASHDATA) {
             $this->set_flash($value);
         } else {
             $this->write($key, $value);
         }
     }
     
-    function __get($key)
+    public function __get($key)
     {
-        if ($key === FLASHDATA) {
+        if ($key === self::FLASHDATA) {
             return $this->get_flash();
         } else {
             return $this->read($key);
         }
     }
     
-    function __isset($key)
+    public function __isset($key)
     {
-        if ($key === FLASHDATA) {
+        if ($key === self::FLASHDATA) {
             return $this->is_flash();
         } else {
             return $this->exists($key);
         }
     }
     
-    function __unset($key)
+    public function __unset($key)
     {
-        if ($key !== FLASHDATA) {
+        if ($key !== self::FLASHDATA) {
             return $this->delete($key);
         } else {
             return false;
