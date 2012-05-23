@@ -205,7 +205,6 @@ class Model
                 $this->_related_models[$table_name] = Pew::get_model($model_class_name);
     
                 if (!$this->_related_models[$table_name]) {
-                    Log::in("Using default model for $table_name", 'Model warning');
                     $this->_related_models[$table_name] = new Model($table_name);
                 }
             } else {
@@ -458,7 +457,6 @@ class Model
 
         if ($result) {
             if ($this->_find_related) {
-                Log::in('find_all children');
                 # search child and parent tables
                 foreach ($result as $key => $value) {
                     $id = $value[$this->primary_key];
@@ -471,7 +469,7 @@ class Model
                             $foreign_key = $r_value;
                         }
                         # prepare the find_all call
-                        $this->$table->where();
+                        $this->$table->where(array($foreign_key => $value[$this->_table_data['primary_key']]));
                         # use the associated model to find related items
                         $result[$key][$alias] = $this->_related_models[$table]->find_all();
                     }
