@@ -181,7 +181,6 @@ class ImgTest extends PHPUnit_Framework_TestCase
         
         $this->assertFileExists(TESTS_PATH . '/temp/thumb_1.jpg');
         $imgsize = getimagesize(TESTS_PATH . '/temp/thumb_1.jpg');
-        file_put_contents(TESTS_PATH . '/log.txt', print_r($imgsize, true));
         $this->assertEquals(90, $imgsize[0]);
         $this->assertEquals(150, $imgsize[1]);
 

@@ -274,19 +274,21 @@ class Model
     }
 
     /**
-     * Getter for table fields and related tables.
+     * Getter for related tables.
      *
      * @param string $field Field name to retrieve
      * @return mixed Field value if field exists, false otherwise
      * @access public
      */
-    public function __get($field)
+    public function __get($related_model)
     {
-        if ($this->add_related_model($field)) {
-            return $this->_related_models[$field];
-        } else {
-            return false;
+        if (array_key_exists($related_model, $this->has_many) || array_key_exists($related_model, $this->belongs_to)) {
+            if ($this->add_related_model($related_model)) {
+                return $this->_related_models[$related_model];
+            }
         }
+
+        return null;
     }
 
     /**
@@ -297,6 +299,7 @@ class Model
      * @return mixed Field value if field exists, false otherwise
      * @access public
      */
+    /*
     public function __set($field, $value)
     {
         if (array_key_exists($field, $this->has_many) || array_key_exists($field, $this->belongs_to)) {
@@ -306,6 +309,7 @@ class Model
             return false;
         }
     }
+    */
 
     /**
      * Find by field name.

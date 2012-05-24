@@ -20,13 +20,13 @@ class ModelTest extends PHPUnit_Framework_TestCase
                 'file'   => ':memory:'
             ));
 
-        $db->pdo->query('CREATE TABLE users (id INTEGER PRIMARY KEY, username TEXT)');
+        $db->pdo->query('CREATE TABLE users (id INTEGER PRIMARY KEY, username TEXT, email TEXT)');
         $db->pdo->query('CREATE TABLE projects (id INTEGER PRIMARY KEY, title TEXT, user_id INTEGER)');
         $db->pdo->query('CREATE TABLE tasks (id INTEGER PRIMARY KEY, title TEXT, priority INTEGER, project_id INTEGER, assigned_to INTEGER)');
 
-        $db->values(array('username' => 'admin'))->insert('users');
-        $db->values(array('username' => 'projman'))->insert('users');
-        $db->values(array('username' => 'developer'))->insert('users');
+        $db->values(array('username' => 'admin',     'email' => 'admin@email.com'))->insert('users');
+        $db->values(array('username' => 'projman',   'email' => 'projman@email.com'))->insert('users');
+        $db->values(array('username' => 'developer', 'email' => 'developer@email.com'))->insert('users');
 
         $db->values(array('title' => 'project1', 'user_id' => 1))->insert('projects');
         $db->values(array('title' => 'project2', 'user_id' => 1))->insert('projects');
@@ -80,20 +80,20 @@ class ModelTest extends PHPUnit_Framework_TestCase
 
     public function test_remove_child()
     {
-        $model = new Model('users');
-        $model->add_child('users', 'user_id');
-        $model->remove_child('users');
+        $users = new Model('users');
+        $users->add_child('projects', 'user_id');
+        $users->remove_child('projects');
         
-        //$this->markTestIncomplete('This test has not been implemented yet.');
+        $this->assertNull($users->projects);
     }
 
     public function test_remove_parent()
     {
-        $model = new Model('users');
-        $model->add_parent('users', 'user_id');
-        $model->remove_parent('users');
+        $tasks = new Model('tasks');
+        $tasks->add_parent('projects', 'project_id');
+        $tasks->remove_parent('projects');
         
-        //$this->markTestIncomplete('This test has not been implemented yet.');
+        $this->assertNull($tasks->projects);
     }
 
     public function test_magic_get()
@@ -103,15 +103,6 @@ class ModelTest extends PHPUnit_Framework_TestCase
         $projects->add_child('tasks', 'project_id');
         $this->assertEquals('Model', get_class($projects->users));
         $this->assertEquals('Model', get_class($projects->tasks));
-    }
-
-    public function test_magic_set()
-    {
-        $users = new Model('users');
-        $projects = new Model('projects');
-        $users->projects = $projects;
-        $this->assertEquals($projects, $users->projects);
-        $this->assertEquals('Model', get_class($users->projects));
     }
 
     public function test_magic_call()
@@ -161,18 +152,30 @@ class ModelTest extends PHPUnit_Framework_TestCase
 
     public function test_save()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+        $users = new Model('users');
+        $user1 = $user2 = $users->find(1);
+        $user2['email'] = 'another_email@email.org';
+        $users->save($user2);
+        $user3 = $users->find(1);
+
+        $this->assertEquals($user2, $user3);
+        $this->assertEquals('another_email@email.org', $user3['email']);
+
+        $count = $users->count();
+        $user4 = $users->save(array('username' => 'user4', 'email' => 'user4@email.com'));
+
+        $this->assertEquals('4', $user4['id']);
+        $this->assertEquals($count + 1, $users->count());
     }
 
     public function test_delete()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+        $users = new Model('users');
+        $user4 = $users->save(array('username' => 'user4', 'email' => 'user4@email.com'));
+        $count = $users->count();
+
+        $users->delete($user4['id']);
+        $this->assertEquals($count - 1, $users->count());
     }
 
     public function test_find_related()
@@ -191,7 +194,7 @@ class ModelTest extends PHPUnit_Framework_TestCase
         );
     }
 
-    public function test_select()
+    public function test_find_by()
     {
         // Remove the following lines when you implement this test.
         $this->markTestIncomplete(
@@ -199,39 +202,7 @@ class ModelTest extends PHPUnit_Framework_TestCase
         );
     }
 
-    public function test_where()
-    {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
-    }
-
-    public function test_limit()
-    {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
-    }
-
-    public function test_order_by()
-    {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
-    }
-
-    public function test_group_by()
-    {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
-    }
-
-    public function test_having()
+    public function test_find_functions()
     {
         // Remove the following lines when you implement this test.
         $this->markTestIncomplete(
