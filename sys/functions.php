@@ -20,26 +20,35 @@
  * @version 0.1 04-jan-2012
  * @author ifcanduela <ifcanduela@gmail.com>
  */
-function cfg($key, $value = null)
+function cfg($key, $value = null, $default = null)
 {
+    # static storage
     static $_config_values = array();
     
+    # return all values in special case
     if ($key === true) {
         return $_config_values;
     }
     
+    # return null if key is invalid
     if (!is_string($key) && !is_int($key)) {
         return null;
     }
 
+    # if there is no value argument...
     if (is_null($value)) {
+        # and the key was created
         if (array_key_exists($key, $_config_values)) {
+            # return the value
             return $_config_values[$key];
         } else {
-            return null;
+            # if the key does not exist, create it and assign $default/null
+            return $_config_values[$key] = $default;
         }
     } else {
+        # assign the value to the key
         $_config_values[$key] = $value;
+        # and return it
         return $value;
     }
 }
