@@ -192,7 +192,6 @@ class Pew
                 if (!self::exists(self::CURRENT_REQUEST_CONTROLLER)) {
                     self::set(self::CURRENT_REQUEST_CONTROLLER, $controller);
                 }
-                
             }
         }
 
@@ -218,12 +217,11 @@ class Pew
             $class_name .= 'Model';
         }
         
-        
-        $obj = self::get($class_name, $arguments);
-        
-        if (!$obj) {
-            $controller_name =  substr($class_name, 0, -5);
-            $obj = new Model(strtolower($controller_name));
+        if (class_exists($class_name)) {
+            $obj = self::get($class_name, $arguments);
+        } else {
+            $table_name = class_name_to_file_name(substr($class_name, 0, -5));
+            $obj = new Model($table_name);
         }
         
         return $obj;

@@ -282,10 +282,7 @@ class Model
      */
     public function __get($field)
     {
-        if (in_array($field, $this->_table_data['columns']) && isset($this->_row_data[$field])) {
-            return $this->_row_data[$field];
-        } elseif ($this->add_related_model($field)) {
-            
+        if ($this->add_related_model($field)) {
             return $this->_related_models[$field];
         } else {
             return false;
@@ -302,11 +299,7 @@ class Model
      */
     public function __set($field, $value)
     {
-        if (array_key_exists($field, $this->_table_data['columns'])) {
-            $this->_row_data[$field] = $value;
-            return true;
-        } elseif (array_key_exists($field, $this->has_many)
-               || array_key_exists($field, $this->belongs_to)) {
+        if (array_key_exists($field, $this->has_many) || array_key_exists($field, $this->belongs_to)) {
             $this->_related_models[$field] = $value;
             return true;
         } else {
