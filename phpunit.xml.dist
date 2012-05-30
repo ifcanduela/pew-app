@@ -16,4 +16,10 @@
             <directory>./tests/sys/</directory>
         </testsuite>
     </testsuites>
+
+    <filter>
+        <whitelist>
+            <directory suffix=".php">./sys/</directory>
+        </whitelist>
+    </filter>
 </phpunit>
