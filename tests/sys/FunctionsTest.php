@@ -1,6 +1,6 @@
 <?php
 
-require 'functions.php';
+require_once 'functions.php';
 
 class FunctionsTest extends PHPUnit_Framework_TestCase
 {
