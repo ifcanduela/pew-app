@@ -1,7 +1,7 @@
 <h1>Login</h1>
-<?php
-    echo Pew::Get('Session')->get_flash();
-?>
+
+<?= $this->session->get_flash(); ?>
+
 <form action="" method="post">
     <div>
         <label for="username">Username:</label>

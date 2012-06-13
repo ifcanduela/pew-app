@@ -25,14 +25,14 @@ class Users extends Controller
     public function login()
     {
         # check if a login form was submitted
-        if (isset($this->parameters['form'])) {
+        if ($this->post) {
             # request authentication
-            if (Pew::Get('Auth')->authenticate($this->parameters['form'])) {
+            if ($this->auth->authenticate($this->post)) {
                 # if the referrer was set, redirect there, if not load the default controller and action
-                redirect(Pew::Get('Session')->read('referrer', ''));
+                redirect($this->session->read('referrer', ''));
             } else {
                 # login failed, so try again
-                Pew::Get('Session')->set_flash('Login failed, please try again');
+                $this->session->set_flash('Login failed, please try again');
             }
         }
         
@@ -47,7 +47,7 @@ class Users extends Controller
     public function logout()
     {
         # clear authentication status
-        Pew::Get('Auth')->revoke();
+        $this->auth->revoke();
         # and display the default controller/action
         redirect('');
     }
