@@ -60,23 +60,24 @@ class Model
     protected $_row_data = array();
 
     /**
-     * Related models.
+     * Related child models.
      *
-     * Holds an index for each related models.
+     * Holds an index for each related child model (has-many relationship).
      *
      * @var array
      * @access protected
      */
-    protected $_related_models = array();
+    protected $_related_children = array();
 
     /**
-     * Name of the main field of the model (usually 'name', 'label' or 'title').
+     * Related parent models.
      *
-     * @var string
+     * Holds an index for each related parent model (belongs-to relationship).
+     *
+     * @var array
      * @access protected
-     * @deprecated since 0.7
      */
-    protected $title = 'name';
+    protected $_related_parents = array();
 
     /**
      * Whether to query the related tables or not.
@@ -87,8 +88,15 @@ class Model
     protected $_find_related = false;
 
     /**
-     * Child tables, an associative array of 'table_name' =>
-     * 'foreign_key' elements.
+     * An associative array of child tables.
+     *
+     * The simplest way of defining a relationship is as follows:
+     *
+     *     <code>public $has_many = array('comments' => 'user_id');</code>
+     * 
+     * This field can also be used with aliases using the following format:
+     *
+     *     <code>public $has_many = array('user_comments' => array('comments' => 'user_id'));</code>
      *
      * @var array
      * @access protected
@@ -96,13 +104,25 @@ class Model
     protected $has_many = array();
 
     /**
-     * Parent tables, an associative array of 'table_name' =>
-     * 'foreign_key' elements.
+     * An associative array of parent tables.
+     *
+     * The simplest way of defining a relationship is as follows:
+     *
+     *     <code>public $belongs_to = array('users' => 'user_id');</code>
+     * 
+     * This field can also be used with aliases using the following format:
+     *
+     *     <code>public $belongs_to = array('owner' => array('users' => 'user_id'));</code>
      *
      * @var array
      * @access protected
      */
     protected $belongs_to = array();
+
+    /**
+     * Whether or not the related models have been initialised.
+     */
+    protected $_initialised = false;
 
     /**
      * Fields to retrieve in SELECT statements.
@@ -186,45 +206,67 @@ class Model
         if (!$this->primary_key) {
             $this->primary_key = $this->_table_data['primary_key'];
         }
+
+        foreach ($this->belongs_to as $alias => $fk) {
+            $this->_add_related_model('parent', $alias, $fk);
+        }
+
+        foreach ($this->has_many as $alias => $fk) {
+            $this->_add_related_model('child', $alias, $fk);
+        }
     }
 
     /**
-     * Instances related models.
+     * Configures related models.
      *
+     * @param string $relationship_type Either 'child' or 'parent'
+     * @param string $alias Name of the relationship
+     * @param string|array $fk The name of the FK or a array with [table_name, FK_name]
      * @param string $table_name Table of the related model
      * @return boolean false if the table does not exist, true otherwise
      * @access protected
-     * @todo Return false upon error? Throw exception?
      */
-    protected function add_related_model($table_name)
+    protected function _add_related_model($relationship_type, $alias, $fk)
     {
-        if (!isset($this->_related_models[$table_name]) || !is_object($this->_related_models[$table_name])) {
-            if ($this->db->table_exists($table_name)) {
+        $table = $alias;
 
-                $model_class_name = file_name_to_class_name($table_name . '_model');
-                $this->_related_models[$table_name] = Pew::get_model($model_class_name);
-    
-                if (!$this->_related_models[$table_name]) {
-                    $this->_related_models[$table_name] = new Model($table_name);
-                }
-            } else {
-                return false;
-            }
+        if (is_array($fk)) {
+            list($table, $foreign_key) = $fk;
+        } else {
+            $foreign_key = $fk;
         }
-        
-        return true;
+
+        $model = null;
+
+        if ($this->db->table_exists($table)) {
+            switch ($relationship_type) {
+                case 'child':
+                        $this->_related_children[$alias] = compact('table', 'foreign_key', 'alias', 'model');
+                    break;
+                case 'parent':
+                        $this->_related_parents[$alias] = compact('table', 'foreign_key', 'alias', 'model');
+                    break;
+                default:
+                    throw new InvalidArgumentException();
+            }
+
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
      * Adds a has-many relationship to the model.
      *
-     * @param string $table The related table
-     * @param string $foreign_key The foreign key in the related table
-     * @return Model The model object
+     * @param type $alias The related table name or an alias if $foreign_key is an array
+     * @param string|array $foreign_key The foreign key in this model's table,  or an 
+     *     array with [table_name, FK_name]
+     * @return Model The model object ($this)
      */
     public function add_child($table, $foreign_key)
     {
-        $this->has_many += array($table => $foreign_key);
+        $this->_add_related_model('child', $table, $foreign_key);
 
         return $this;
     }
@@ -232,27 +274,28 @@ class Model
     /**
      * Adds a belongs-to relationship to the model.
      *
-     * @param type $table The related table
-     * @param type $foreign_key The foreign key in this model's table
-     * @return Model The model object
+     * @param type $alias The related table name or an alias if $foreign_key is an array
+     * @param string|array $foreign_key The foreign key in this model's table,  or an 
+     *     array with [table_name, FK_name]
+     * @return Model The model object ($this)
      */
     public function add_parent($table, $foreign_key)
     {
-        $this->belongs_to += array($table => $foreign_key);
+        $this->_add_related_model('parent', $table, $foreign_key);
 
         return $this;
     }
 
     /**
-     * removes a has-many relationship from the model.
+     * Removes a has-many relationship from the model.
      *
      * @param string $table The related table
      * @return Model The model object
      */
     public function remove_child($table)
     {
-        if (array_key_exists($table, $this->has_many)) {
-            unset($this->has_many[$table]);
+        if (array_key_exists($table, $this->_related_children)) {
+            unset($this->_related_children[$table]);
         }
 
         return $this;
@@ -266,8 +309,8 @@ class Model
      */
     public function remove_parent($table)
     {
-        if (array_key_exists($table,  $this->belongs_to)) {
-            unset( $this->belongs_to[$table]);
+        if (array_key_exists($table,  $this->_related_parents)) {
+            unset($this->_related_parents[$table]);
         }
 
         return $this;
@@ -280,36 +323,29 @@ class Model
      * @return mixed Field value if field exists, false otherwise
      * @access public
      */
-    public function __get($related_model)
+    public function __get($related_model_alias)
     {
-        if (array_key_exists($related_model, $this->has_many) || array_key_exists($related_model, $this->belongs_to)) {
-            if ($this->add_related_model($related_model)) {
-                return $this->_related_models[$related_model];
+        $model_info = null;
+
+        if (array_key_exists($related_model_alias, $this->_related_parents)) {
+            $model_info =& $this->_related_parents[$related_model_alias];
+        }
+
+        if (array_key_exists($related_model_alias, $this->_related_children)) {
+            $model_info =& $this->_related_children[$related_model_alias];
+        }
+
+        if ($model_info) {
+            if (is_null($model_info['model'])) {
+                $model_name = file_name_to_class_name($model_info['table']);
+                $model_info['model'] = Pew::get_model($model_name);
             }
-        }
-
-        return null;
-    }
-
-    /**
-     * Setter for table fields and related tables.
-     *
-     * @param string $field Field name to set
-     * @param mixed $value Field value to set
-     * @return mixed Field value if field exists, false otherwise
-     * @access public
-     */
-    /*
-    public function __set($field, $value)
-    {
-        if (array_key_exists($field, $this->has_many) || array_key_exists($field, $this->belongs_to)) {
-            $this->_related_models[$field] = $value;
-            return true;
+            
+            return $model_info['model'];
         } else {
-            return false;
+            return null;
         }
     }
-    */
 
     /**
      * Find by field name.
@@ -390,33 +426,20 @@ class Model
             }
 
             if ($this->_find_related) {
-
-                # search for child and parent tables
-                foreach ($this->has_many as $alias => $r_value) {
-                    if (is_array($r_value)) {
-                        list($table, $foreign_key) = $r_value;
-                    } else {
-                        $table = $alias;
-                        $foreign_key = $r_value;
-                    }
-                    $result[$alias] = $this
-                        ->$table
-                        ->find_all(array($foreign_key => $id));
-                }
-
-                foreach ($this->belongs_to as $alias => $r_value) {
-                    if (is_array($r_value)) {
-                        list($table, $foreign_key) = $r_value;
-                    } else {
-                        $table = $alias;
-                        $foreign_key = $r_value;
-                    }
-                    $result[$alias] = $this
-                        ->$table
-                        ->find($result[$foreign_key]);
-                }
-                # reset the find_children behavior for later calls
+                # disable the find_related behavior for later calls
                 $this->_find_related = false;
+
+                # search for child tables
+                foreach ($this->_related_children as $alias => $child) {
+                    # use the associated model to find related items
+                    $result[$alias] = $this->$alias->find_all(array($child['foreign_key'] => $id));
+                }
+
+                # search for parent tables
+                foreach ($this->_related_parents as $alias => $parent) {
+                    # use the associated model to find related items
+                    $result[$alias] = $this->$alias->find($result[$parent['foreign_key']]);
+                }
             }
         } else {
             # if there was no result, return false
@@ -454,36 +477,25 @@ class Model
 
         if ($result) {
             if ($this->_find_related) {
+                # disable the find_related behavior for later calls
+                $this->_find_related = false;
+
                 # search child and parent tables
                 foreach ($result as $key => $value) {
                     $id = $value[$this->primary_key];
 
-                    foreach ($this->has_many as $alias => $r_value) {
-                        if (is_array($r_value)) {
-                            list($table, $foreign_key) = $r_value;
-                        } else {
-                            $table = $alias;
-                            $foreign_key = $r_value;
-                        }
+                    foreach ($this->_related_children as $alias => $child) {
                         # prepare the find_all call
-                        $this->$table->where(array($foreign_key => $value[$this->_table_data['primary_key']]));
+                        $this->$alias->where(array($child['foreign_key'] => $value[$this->_table_data['primary_key']]));
                         # use the associated model to find related items
-                        $result[$key][$alias] = $this->_related_models[$table]->find_all();
+                        $result[$key][$alias] = $this->$alias->find_all();
                     }
 
-                    foreach ($this->belongs_to as $alias => $r_value) {
-                        if (is_array($r_value)) {
-                            list($table, $foreign_key) = $r_value;
-                        } else {
-                            $table = $alias;
-                            $foreign_key = $r_value;
-                        }
+                    foreach ($this->_related_parents as $alias => $parent) {
                         # use the associated model to find related items
-                        $result[$key][$alias] = $this->$table->find($value[$foreign_key]);
+                        $result[$key][$parent['alias']] = $this->$alias->find($value[$parent['foreign_key']]);
                     }
                 }
-                # reset the fin_children behavior for later calls
-                $this->_find_related = false;
             }
         } else {
             # return null if there was no result

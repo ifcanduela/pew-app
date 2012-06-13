@@ -138,7 +138,7 @@ class Pew
     public static function get($index, $arguments = null, $as_array = false)
     {
         self::init();
-        
+
         if (self::exists($index)) {
             return self::$_map[$index];
         } else {
@@ -147,7 +147,7 @@ class Pew
                     $reflection_class = new ReflectionClass($index);
                     self::$_map[$index] = $reflection_class->newInstanceArgs($arguments);
                 } elseif (is_null($arguments)) {
-                    self::$_map[$index] = new $index;
+                    self::$_map[$index] = new $index();
                 } else {
                     self::$_map[$index] = new $index($arguments);
                 }
@@ -216,9 +216,9 @@ class Pew
         if (substr($class_name, -5) !== 'Model') {
             $class_name .= 'Model';
         }
-        
+
         if (class_exists($class_name)) {
-            $obj = self::get($class_name, $arguments);
+            $obj = self::get($class_name);
         } else {
             $table_name = class_name_to_file_name(substr($class_name, 0, -5));
             $obj = new Model($table_name);

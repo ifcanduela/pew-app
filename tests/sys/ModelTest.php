@@ -140,6 +140,36 @@ class ModelTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('projman', $user['username']);
     }
 
+    public function test_find_related()
+    {
+        $model = new Model('projects');
+        $model->add_parent('users', 'user_id');
+        $model->add_child('tasks', 'project_id');
+
+        $model->find_related(true);
+        $project_1 = $model->find(1);
+
+        $this->assertEquals(1, $project_1['id']);
+        $this->assertEquals(1, $project_1['users']['id']);
+        $this->assertEquals(1, $project_1['tasks'][0]['id']);
+    }
+
+    public function test_find_all_related()
+    {
+        $model = new Model('projects');
+        $model->add_parent('users', 'user_id');
+        $model->add_child('tasks', 'project_id');
+
+        $model->find_related(true);
+        $projects = $model->find_all();
+
+        $project_1 = $projects[0];
+
+        $this->assertEquals(1, $project_1['id']);
+        $this->assertEquals(1, $project_1['users']['id']);
+        $this->assertEquals(1, $project_1['tasks'][0]['id']);
+    }
+
     public function test_count()
     {
         $model = new Model('users');
@@ -176,14 +206,6 @@ class ModelTest extends PHPUnit_Framework_TestCase
 
         $users->delete($user4['id']);
         $this->assertEquals($count - 1, $users->count());
-    }
-
-    public function test_find_related()
-    {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
     }
 
     public function test_last_insert_id()
