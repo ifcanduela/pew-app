@@ -3,10 +3,10 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title><?php echo $this->title; ?></title>
-    <link rel="stylesheet" href="<?php url('www/css/simple-reset.css'); ?>" />
-    <link rel="stylesheet" href="<?php url('www/css/default.css'); ?>" />
-    <script type="text/javascript" src="<?php url('www/js/jquery.js'); ?>"></script>
+    <title><?= $this->title; ?></title>
+    <link rel="stylesheet" href="<?php www('css/simple-reset.css'); ?>" />
+    <link rel="stylesheet" href="<?php www('css/default.css'); ?>" />
+    <script type="text/javascript" src="<?php www('js/jquery.js'); ?>"></script>
 </head>
 
 <body>

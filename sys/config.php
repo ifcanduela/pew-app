@@ -25,6 +25,14 @@ define('DS', DIRECTORY_SEPARATOR);
 define('PS', '/');
 
 /**
+ * Server string. This goes before URL to assemble a full server URL.
+ *
+ * @var string
+ * @name APP_SERVER
+ */
+define('APP_SERVER', (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['SERVER_NAME']);
+
+/**
  * Root path (url), '/' in case of root installation.
  *
  * @var string
