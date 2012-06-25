@@ -120,14 +120,27 @@ class Auth
         # find information about the user in the database
         $user = $this->db->where(array($this->fields['username'] => $userdata[$this->fields['username']]))->single($this->table);
         $pass = $this->password($userdata);
-        
+
+        # register the number of login attempts
+        $login_attempts = $this->session->read('login_attempts', 0);
+
         if (is_array($user) && ($user['password'] === $pass)) {
             # if the credentials are correct, set the auth and user_id properties
             $this->auth = true;
             $this->uuid = $user[$this->fields['uuid']];
+            $this->session->write('login_attempts', 0);
         } else {
             # if not, return false
             $this->auth = $this->uuid = false;
+
+            # check if the retries should be delayed
+            if (defined('LOGIN_DELAY')) {
+                if (LOGIN_DELAY > 0) {
+                    sleep(LOGIN_DELAY);
+                }
+            }
+
+            $this->session->write('login_attempts', $login_attempts + 1);
         }
         
         $this->session->write('uuid', $this->uuid);
