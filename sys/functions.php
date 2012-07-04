@@ -54,6 +54,37 @@ function cfg($key, $value = null, $default = null)
 }
 
 /**
+ * Generates a floating-point pseudo-random number.
+ *
+ * If only one parameter is provided, it's used as upper boundary. If no parameters are 
+ * provided, 0.0 and 1.0 are used as boundaries.
+ * 
+ * @param number $from Lower boundary
+ * @param number $to Upper boundary
+ * @return float A floating point number between 0.0 and 1.0
+ * @version 0.1 04-jul-2012
+ * @author ifcanduela <ifcanduela@gmail.com>
+ */
+function frand($from = null, $to = null)
+{
+    $multiplier = 1000000;
+
+    if (!isset($to)) {
+        if (isset($from)) {
+            $to = $from;
+            $from = 0;
+        } else {
+            $from = 0;
+            $to = 1;
+        }
+    } 
+
+    $result = rand($from * $multiplier, $to * $multiplier) / $multiplier;
+
+    return $result;
+}
+
+/**
  * A handy wrapper for print_r.
  *
  * The pr() function calls print_r with the $data parameter, wrapping the call
