@@ -260,11 +260,20 @@ abstract class Controller
             } else {
                 $this->post = false;
             }
-            
+
+            $this->get = array();
+
             # Simplify access to named parameters as GET data 
             if (isset($parameters['named']) && count($parameters['named']) !== 0) {
-                $this->get = $parameters['named'];
-            } else {
+                $this->get += $parameters['named'];
+            }
+
+            # Add proper GET data from the URL
+            if ($request->get) {
+                $this->get += $request->get;
+            }
+
+            if (empty($this->get)) {
                 $this->get = false;
             }
         }

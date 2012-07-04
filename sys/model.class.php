@@ -412,10 +412,20 @@ class Model
     {
         # if $id is not numeric, use it as a conditions array
         if (is_array($id)) {
-            $result = $this->db->where($id)->single($this->table, $this->_fields);
+            $where = $id;
         } else {
-            $result = $this->db->where(array($this->primary_key => $id))->single($this->table, $this->_fields);
+            $where = array($this->primary_key => $id);
         }
+
+        #quert the database
+        $result = $this->db->where($where)
+                        ->group_by($this->_group_by)
+                        ->having($this->_having)
+                        ->limit($this->_limit)
+                        ->order_by($this->_order_by)
+                        ->single($this->table, $this->_fields);
+
+        $this->_reset();
 
         if ($result) {
             $id = $result[$this->_table_data['primary_key']];
@@ -461,6 +471,10 @@ class Model
      */
     public function find_all($where = null)
     {
+        if ($this->order_by) {
+            $this->db->order_by($this->order_by);
+        }
+
         # if conditions are provided, overwrite the previous model conditions
         if (is_array($where)) {
             $this->_where = $where;
@@ -474,6 +488,8 @@ class Model
                     ->limit($this->_limit)
                     ->order_by($this->_order_by)
                     ->select($this->table, $this->_fields);
+
+        $this->_reset();
 
         if ($result) {
             if ($this->_find_related) {
@@ -546,7 +562,7 @@ class Model
     public function save($data)
     {
         $record = array();
-        
+
         foreach ($data as $key => $value) {
             if (in_array($key, $this->_table_data['columns'])) {
                 $record[$key] = $value;
@@ -686,10 +702,16 @@ class Model
      * @return Model a reference to the same object, for method chaining
      * @access public
      */
-    public function order_by()
+    public function order_by($order_by)
     {
         $clauses = func_get_args();
-        $this->_order_by= join(', ', $clauses);
+
+        if (!$clauses && isset($this->order_by)) {
+            $this->_order_by = $this->order_by;
+        } else {
+            $this->_order_by= join(', ', $clauses);
+        }
+        
         $this->db->order_by($this->_order_by);
 
         return $this;
@@ -727,5 +749,15 @@ class Model
         $this->db->having($this->_having);
 
         return $this;
+    }
+
+    protected function _reset()
+    {
+        $this->_order_by = '';
+        $this->_group_by = '';
+        $this->_having = array();
+        $this->_where = array();
+        $this->_limit = '';
+        $this->_fields = '*';
     }
 }
