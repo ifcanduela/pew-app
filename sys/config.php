@@ -116,6 +116,10 @@ define('OUTPUT_TYPE_HTML', 'html');
 define('OUTPUT_TYPE_XML', 'xml');
 define('OUTPUT_TYPE_JSON', 'json');
 
+defined('OUTPUT_TYPE_HTML_PREFIX') or define('OUTPUT_TYPE_HTML_PREFIX', '');
+defined('OUTPUT_TYPE_JSON_PREFIX') or define('OUTPUT_TYPE_JSON_PREFIX', ':');
+defined('OUTPUT_TYPE_XML_PREFIX')  or define('OUTPUT_TYPE_XML_PREFIX', '#');
+
 /**
  * Whether the App is running on the localhost space.
  */
@@ -157,11 +161,16 @@ if ((DEBUG && PEW_LOCAL) || DEBUG > 1) {
 }
 
 /**
- * Define constants if user didn't.
+ * Define main component constants if user didn't.
  */
 defined('DEFAULT_CONTROLLER') or define('DEFAULT_CONTROLLER', 'pages');
 defined('DEFAULT_ACTION')     or define('DEFAULT_ACTION', 'index');
 defined('DEFAULT_LAYOUT')     or define('DEFAULT_LAYOUT', '');
+
+/**
+ * Option to use a prefix for action method names in controllers.
+ */
+defined('ACTION_PREFIX') or define('ACTION_PREFIX', '');
 
 /**
  * This one is somewhat hidden from the user.
@@ -180,7 +189,10 @@ defined('ELEMENT_EXT')    or define('ELEMENT_EXT', '.php');
 defined('LAYOUT_EXT')     or define('LAYOUT_EXT', '.layout.php');
 defined('LIBRARY_EXT')    or define('LIBRARY_EXT', '.php');
 
-defined('USETWIG')        or define('USETWIG', false);
+/**
+ * Set to true to use the Twig templating library for views.
+ */
+defined('USETWIG') or define('USETWIG', false);
 
 /**
  * Include the autoloading functions

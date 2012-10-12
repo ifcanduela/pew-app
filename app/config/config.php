@@ -50,6 +50,11 @@ define('DEFAULT_ACTION', 'index');
 define('DEFAULT_LAYOUT', 'default');
 
 /**
+ * Configure global action prefixes. Default is ''
+ */
+//define('ACTION_PREFIX', 'action_');
+
+/**
  * Additional configuration for app file extensions.
  **/
 //define('MODEL_EXT', '.class.php');

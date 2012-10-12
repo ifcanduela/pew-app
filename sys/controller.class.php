@@ -170,6 +170,13 @@ abstract class Controller
      * @access public
      */
     public $request = null;
+
+    /**
+     * String prefixed to action names in this controller.
+     * 
+     * @var string
+     */
+    protected $action_prefix = '';
     
     /**
      * Auth instance.
@@ -230,6 +237,11 @@ abstract class Controller
         # Current Auth object
         if (USEAUTH) {
             $this->auth = Pew::get_auth();
+        }
+
+        # Global action prefix override
+        if (!$this->action_prefix && ACTION_PREFIX) {
+            $this->action_prefix = ACTION_PREFIX;
         }
         
         # Function libraries
@@ -332,13 +344,13 @@ abstract class Controller
                 $this->view = $action = substr($action, 1);
             }
             
-            if (!method_exists($this, $action)) {
+            if (!method_exists($this, $this->action_prefix . $action)) {
                 # If the $action method does not exist, show an error page
-                new PewError(ACTION_MISSING, $this, $action);
+                new PewError(ACTION_MISSING, $this, $this->action_prefix . $action);
             }
             
             # Everything's clear pink
-            call_user_func_array(array($this, $action), $this->parameters['passed']);
+            call_user_func_array(array($this, $this->action_prefix . $action), $this->parameters['passed']);
         } else {
             new PewError(404);
         }

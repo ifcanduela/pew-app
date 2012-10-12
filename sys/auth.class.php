@@ -119,7 +119,7 @@ class Auth
 
         # find information about the user in the database
         $user = $this->db->where(array($this->fields['username'] => $userdata[$this->fields['username']]))->single($this->table);
-        $pass = $this->password($userdata);
+        $pass = $this->password($userdata, $user);
 
         # register the number of login attempts
         $login_attempts = $this->session->read('login_attempts', 0);
@@ -214,11 +214,11 @@ class Auth
      * @param Array $user_info the user properties, like username or password
      * @access public
      */
-    public function password($userdata)
+    public function password($userdata, $user = null)
     {
         if (function_exists('custom_hash')) {
             # if the custom_hash function has been defined, use it
-            return custom_hash($userdata);
+            return custom_hash($userdata, $user);
         } else {
             # if not, use a standard SHA1 hash function
             return sha1($userdata[$this->fields['password']]);
