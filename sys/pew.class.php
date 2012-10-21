@@ -39,7 +39,7 @@ class Pew
     protected static $_classes = array(
             'auth' => 'Auth',
             'database' => 'PewDatabase',
-            'log' => 'Log',
+            'log' => 'PewLog',
             'model' => 'Model',
             'request' => 'PewRequest',
             'session' => 'Session',

@@ -41,6 +41,14 @@ define('APP_SERVER', (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SER
 define('URL', str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']));
 
 /**
+ * Full path (url) to the app, including server name and folder path.
+ *
+ * @var string
+ * @name APP_SERVER_URL
+*/
+define('APP_SERVER_URL', APP_SERVER . URL);
+
+/**
  * Full path to the base folder (filesystem).
  *
  * @var string
