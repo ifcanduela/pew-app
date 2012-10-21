@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 
 <html>
-<head>
+<head lang="en">
     <meta charset="utf-8">
-    <title><?= $this->title; ?></title>
-    <link rel="stylesheet" href="<?php www('/css/default.css'); ?>" />
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <base href="<?= APP_SERVER_URL ?>">
+    <title><?= $title; ?></title>
+    <link rel="stylesheet" href="www/css/default.css">
 </head>
 
 <body>
@@ -20,9 +20,11 @@
     
     </div>
     
-    <div id="footer"><p>&copy; 2011 ifcanduela | Powered by Pew-Pew-Pew <?php echo VERSION; ?></p>
+    <div id="footer"><p>&copy; 2012 ifcanduela | Powered by Pew-Pew-Pew <?php echo VERSION; ?></p>
     <?php $this->element('debug'); ?></div>
 
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="www/js/app.js"></script>
 </body>
 
 </html>

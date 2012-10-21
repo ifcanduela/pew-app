@@ -9,11 +9,15 @@
 */
 class PewLog
 {
+    /**
+     * Error level constants.
+     */
     const DEBUG = 0;
     const INFO  = 2;
     const ALERT = 4;
     const ERROR = 6;
     const FATAL = 8;
+    const OFF   = 10;
 
     /**
      * String labels for the error level constants
@@ -27,6 +31,7 @@ class PewLog
             self::ALERT => 'ALERT',
             self::ERROR => 'ERROR',
             self::FATAL => 'FATAL',
+            self::OFF   => '',
         );
 
     /**
@@ -69,11 +74,21 @@ class PewLog
      */
     protected $_log_filename = null;
 
+    /**
+     * Class constructor.
+     *
+     * @param string $filename    Name of the log file
+     * @param string $date_format Date format
+     * @param string $time_format Time format
+     */
     function __construct($filename = null, $date_format = null, $time_format = null)
     {
-        $this->_log_filename = date('Y-m-d') . '.txt';
+        if (!is_string($filename)) {
+            $filename = date('Y-m-d') . 'log.txt';
+        }
 
         $this->log_file($filename);
+        $this->level(self::OFF);
         $this->date_format($date_format);
         $this->time_format($time_format);
     }
@@ -129,25 +144,6 @@ class PewLog
         }
     }
 
-    public function log_file($filename = null)
-    {
-        if (is_string($filename)) {
-            $this->_log_folder = dirname($filename);
-            $this->_log_filename = basename($filename);
-        }
-        
-        return $this->_log_folder . DIRECTORY_SEPARATOR . $this->_log_filename;
-    }
-
-    public function time_format($format = null)
-    {
-        if (is_string($format)) {
-            $this->_time_format = $format;
-        }
-
-        return $this->_time_format;
-    }
-
     public function date_format($format = null)
     {
         if (is_string($format)) {
@@ -167,15 +163,47 @@ class PewLog
             $entries = array();
 
             foreach ($this->_log as $entry) {
-                extract($entry);
-                $entries[] = "[{$date} {$time}] --{$level}-- {$message}" . PHP_EOL;
+                if ($entry['level'] > $this->level()) {
+                    extract($entry);
+                    $entries[] = "[{$date} {$time}] --{$level}-- {$message}" . PHP_EOL;
+                }
             }
 
-            file_put_contents($this->log_file(), join('', $entries), FILE_APPEND);
+            if (!empty($entries)) {
+                file_put_contents($this->log_file(), join('', $entries), FILE_APPEND);
+            }
 
             if ($clear) {
                 $this->_log = array();
             }
         }
+    }
+
+    public function level($level = null)
+    {
+        if (is_numeric($level)) {
+            $this->_log_level = $level;
+        }
+
+        return $this->_log_level;
+    }
+
+    public function log_file($filename = null)
+    {
+        if (is_string($filename)) {
+            $this->_log_folder = dirname($filename);
+            $this->_log_filename = basename($filename);
+        }
+        
+        return $this->_log_folder . DIRECTORY_SEPARATOR . $this->_log_filename;
+    }
+
+    public function time_format($format = null)
+    {
+        if (is_string($format)) {
+            $this->_time_format = $format;
+        }
+
+        return $this->_time_format;
     }
 }

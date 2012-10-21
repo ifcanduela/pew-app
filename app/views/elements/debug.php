@@ -1,5 +1,5 @@
 <?php if (DEBUG): ?>
     <div id="debug">
-        <?php Pew::Get('Log')->out(); ?>
+        <?php Pew::get_log()->dump(); ?>
     </div>
 <?php endif; ?>

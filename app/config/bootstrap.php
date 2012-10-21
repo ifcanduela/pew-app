@@ -1,4 +1,4 @@
-<?php //if (!defined('PEWPEWPEW')) exit('Forbidden');
+<?php if (!defined('PEWPEWPEW')) exit('Forbidden');
 
 /**
  * Use the custom_hash function to encrypt your passwords however you like
@@ -6,12 +6,13 @@
  * Don't use transitory data to hash a password, i.e. the time of the day or
  * a random value.
  *
- * @param array $data Array with username and password fields used for login
- * @return string The hased data
- * @version 0.1 16-apr-2011
+ * @param array $input Array with credential used for login
+ * @param array $data Array with credentials to compare
+ * @return string The hashed data
+ * @version 0.2 21-oct-2012
  * @author ifcanduela <ifcanduela@gmail.com>
  */
-//function custom_hash($data)
+//function custom_hash($input, $data)
 //{
 //    return md5($data['username'] . md5($data['password']));
 //}
