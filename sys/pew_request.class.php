@@ -342,6 +342,22 @@ class PewRequest
         
         return compact('controller', 'action', 'view', 'id', 'named', 'form', 'get', 'files', 'passed');
     }
+
+    /**
+     * Retrieves the segment in the specified position.
+     * 
+     * Segments are numbered starting with 1, after controller and action.
+     * 
+     * @return string The value of the segment, or null if undefined
+     */
+    public function segment($position)
+    {
+        if (isset($this->values[$position - 1])) {
+            return $this->values[$position - 1];
+        }
+
+        return null;
+    }
     
     /**
      * Configures default controller and default action.
