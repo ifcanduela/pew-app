@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
-<html>
-<head lang="en">
+<html lang="en">
+<head>
     <meta charset="utf-8">
     <base href="<?= APP_SERVER_URL ?>">
     <title><?= $title; ?></title>
