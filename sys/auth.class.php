@@ -211,7 +211,8 @@ class Auth
      * Hashes a password using a default algorithm, or a custom_hash function
      * defined elsewhere by the user.
      * 
-     * @param Array $user_info the user properties, like username or password
+     * @param array $user_info the user-provided fields from the form
+     * @param array $user      the existing user information from the database
      * @access public
      */
     public function password($userdata, $user = null)
@@ -220,8 +221,12 @@ class Auth
             # if the custom_hash function has been defined, use it
             return custom_hash($userdata, $user);
         } else {
-            # if not, use a standard SHA1 hash function
-            return sha1($userdata[$this->fields['password']]);
+            # if not, use PHP's crypt function
+            if (isset($user)) {
+                return crypt($userdata[$this->fields['password']], $user[$this->fields['password']]);
+            } else {
+                return crypt($userdata[$this->fields['password']]);
+            }
         }
     }
 }
