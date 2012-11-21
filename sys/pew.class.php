@@ -29,7 +29,7 @@ class Pew
      * @access protected
      * @static
      */
-    protected static $_map = null;
+    protected static $_map = array();
 
     /**
      * Map of class domains and class names for "services".
@@ -37,6 +37,7 @@ class Pew
      * @var array
      */
     protected static $_classes = array(
+            'app' => 'App',
             'auth' => 'Auth',
             'database' => 'PewDatabase',
             'log' => 'PewLog',
@@ -46,7 +47,7 @@ class Pew
         );
     
     /**
-     * Special storage for the main controller in the current request.
+     * Special storage index for the main controller in the current request.
      */
     const CURRENT_REQUEST_CONTROLLER = '_current_request_controller_';
 
@@ -59,22 +60,7 @@ class Pew
     protected function __construct() { throw new BadMethodCallException("Pew cannot be instanced."); }
 
     /**
-     * Initializes the object store.
-     * 
-     * @param bool $forced Set to true to unconditionally reset the store
-     * @return void
-     * @access protected
-     * @static
-     */
-    protected static function init($forced = false)
-    {
-        if ($forced === true || !isset(self::$_map) && !is_array(self::$_map)) {
-            self::$_map = array();
-        }
-    }
-
-    /**
-     * Checks if an object is sotred in the registry.
+     * Checks if an object is stored in the registry.
      * 
      * @param string $index Index to check
      * @return bool True if the index is occupied, false if it's available
@@ -137,8 +123,6 @@ class Pew
      */
     public static function get($index, $arguments = null, $as_array = false)
     {
-        self::init();
-
         if (self::exists($index)) {
             return self::$_map[$index];
         } else {
@@ -159,6 +143,23 @@ class Pew
         return self::$_map[$index];
     }
 
+    /**
+     * Obtains the current instance of the Pew-Pew-Pew application.
+     *
+     * @return App Instance of the application
+     * @access public
+     * @static
+     */
+    public static function app()
+    {
+        $app_class_name = self::$_classes['app'];
+
+        if (!self::exists($app_class_name)) {
+            self::set($app_class_name, $app_class_name);
+        }
+
+        return self::get($app_class_name);
+    }
     /**
      * Obtains a controller instance of the specified class.
      * 
@@ -185,7 +186,8 @@ class Pew
                 $controller = self::get($class_name);
             } else  {
                 # instance the controller
-                $controller = self::get($class_name, $argument_list);
+                $controller = new $class_name(self::request());
+                self::set($class_name, $controller);
                 # maybe some dependency injection here (session, auth, log...)
 
                 # set the first controller that reaches this point as the current controller
@@ -290,13 +292,17 @@ class Pew
      * @return PewRequest The initialised request object
      * @throws Exception When the class does not exist.
      */
-    public static function get_request($uri_string)
+    public static function request($uri_string = null)
     {
         $class_name = self::$_classes['request'];
 
         if (self::exists($class_name)) {
             $request = self::get($class_name);
         } else {
+            if (!is_string($uri_string)) {
+                throw new InvalidArgumentException('PewRequest must be initialized with a URI');
+            }
+
             # instantiate the request object
             $request = self::get($class_name);
         
@@ -326,7 +332,7 @@ class Pew
      */
     public static function clean()
     {
-        self::init(true);
+        self::$_map = array();
     }
 
     /**

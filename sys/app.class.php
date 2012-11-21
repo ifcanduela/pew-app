@@ -99,7 +99,7 @@ class App
         }
         
         # get the PewRequest object
-        $request = Pew::get_request($uri_string);
+        $request = Pew::request($uri_string);
         
         # controller instantiation
         $controller_class = file_name_to_class_name($request->controller);
