@@ -412,17 +412,18 @@ class Model
     {
         # if $id is not numeric, use it as a conditions array
         if (is_array($id)) {
-            $where = $id;
+            $this->where($id);
         } else {
-            $where = array($this->primary_key => $id);
+            $this->where(array($this->primary_key => $id));
         }
 
-        #quert the database
-        $result = $this->db->where($where)
-                        ->group_by($this->_group_by)
-                        ->having($this->_having)
-                        ->limit($this->_limit)
-                        ->order_by($this->_order_by)
+        #query the database
+        $result = $this->db
+                        ->where($this->where())
+                        ->group_by($this->group_by())
+                        ->having($this->having())
+                        ->limit($this->limit())
+                        ->order_by($this->order_by())
                         ->single($this->table, $this->_fields);
 
         $this->_reset();
@@ -471,22 +472,18 @@ class Model
      */
     public function find_all($where = null)
     {
-        if ($this->order_by) {
-            $this->db->order_by($this->order_by);
-        }
-
         # if conditions are provided, overwrite the previous model conditions
         if (is_array($where)) {
-            $this->_where = $where;
+            $this->where($where);
         }
 
         # query the database
         $result = $this->db
-                    ->where($this->_where)
-                    ->group_by($this->_group_by)
-                    ->having($this->_having)
-                    ->limit($this->_limit)
-                    ->order_by($this->_order_by)
+                    ->where($this->where())
+                    ->group_by($this->group_by())
+                    ->having($this->having())
+                    ->limit($this->limit())
+                    ->order_by($this->order_by())
                     ->select($this->table, $this->_fields);
 
         $this->_reset();
@@ -664,12 +661,20 @@ class Model
      * @return Model a reference to the same object, for method chaining
      * @access public
      */
-    public function where($conditions)
+    public function where($conditions = null)
     {
-        $this->_where = $conditions;
-        $this->db->where($conditions);
+        if (!is_null($conditions)) {
+            $this->_where = $conditions;
+            $this->db->where($conditions);
 
-        return $this;
+            return $this;
+        } else {
+            if (isset($this->_where)) {
+                return $this->_where;
+            } else {
+                return $this->where;
+            }
+        }
     }
 
     /**
@@ -681,7 +686,7 @@ class Model
      * @return Model a reference to the same object, for method chaining
      * @access public
      */
-    public function limit($count, $start = 0)
+    public function limit($count = null, $start = 0)
     {
         if (is_numeric($count)) {
             if (isset($start) && is_numeric($start)) {
@@ -689,10 +694,16 @@ class Model
             } else {
                 $this->_limit = $count;
             }
-        }
-        $this->db->limit($this->_limit);
 
-        return $this;
+            return $this;
+        } else {
+            if (isset($this->_limit)) {
+                return $this->_limit;
+            } else {
+                return $this->limit;
+            }
+        }
+
     }
 
     /**
@@ -702,19 +713,18 @@ class Model
      * @return Model a reference to the same object, for method chaining
      * @access public
      */
-    public function order_by($order_by)
+    public function order_by($order_by = null)
     {
-        $clauses = func_get_args();
-
-        if (!$clauses && isset($this->order_by)) {
-            $this->_order_by = $this->order_by;
+        if (!is_null($order_by)) {
+            $this->_order_by = $order_by;
+            return $this;
         } else {
-            $this->_order_by= join(', ', $clauses);
+            if (isset($this->_order_by)) {
+                return $this->_order_by;
+            } else {
+                return $this->order_by;
+            }
         }
-        
-        $this->db->order_by($this->_order_by);
-
-        return $this;
     }
 
     /**
@@ -726,12 +736,18 @@ class Model
      * @access public
      * @todo: Make this work
      */
-    public function group_by($groups)
+    public function group_by($group_by = null)
     {
-        $this->_group_by= $groups;
-        $this->db->group_by($this->_group_by);
-
-        return $this;
+        if (!is_null($group_by)) {
+            $this->_group_by= $group_by;
+            return $this;
+        } else {
+            if (isset($this->_group_by)) {
+                return $this->_group_by;
+            } else {
+                $this->group_by;
+            }
+        }
     }
 
     /**
@@ -743,21 +759,27 @@ class Model
      * @access public
      * @todo: Make this work
      */
-    public function having($conditions)
+    public function having($having = null)
     {
-        $this->_having= $conditions;
-        $this->db->having($this->_having);
-
-        return $this;
+        if (!is_null($having)) {
+            $this->_having= $having;
+            return $this;
+        } else {
+            if (isset($this->_having)) {
+                return $this->_having;
+            } else {
+                $this->having;
+            }
+        }
     }
 
     protected function _reset()
     {
-        $this->_order_by = '';
-        $this->_group_by = '';
-        $this->_having = array();
-        $this->_where = array();
-        $this->_limit = '';
+        $this->_order_by = null;
+        $this->_group_by = null;
+        $this->_having = null;
+        $this->_where = null;
+        $this->_limit = null;
         $this->_fields = '*';
     }
 }
