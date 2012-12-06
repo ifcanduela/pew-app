@@ -1,4 +1,4 @@
-<?php if (!defined('PEWPEWPEW')) exit('Forbidden');
+<?php
 
 /**
  * @package sys
@@ -180,10 +180,10 @@ class Model
      * @access public
      * @todo Test trigger_error and pew_exit
      */
-    public function __construct($table = null)
+    public function __construct($db, $table = null)
     {
         # get the Database class instance
-        $this->db = Pew::get_database();
+        $this->db = $db;
 
         if (get_class($this) === 'Model') {
             # if this is an instance of the Model class, get the

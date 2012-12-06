@@ -1,10 +1,8 @@
-<?php if (!defined('PEWPEWPEW')) exit('Forbidden');
+<?php
 
 /**
  * @package sys
  */
-
-defined('DATABASE_CLASS_NAME') or define('DATABASE_CLASS_NAME', 'PewDatabase');
 
 /**
  * An object registry.
@@ -25,27 +23,21 @@ class Pew
     /**
      * The object store.
      *
-     * @var array $_map
+     * @var array
      * @access protected
      * @static
      */
-    protected static $_map = array();
+    protected static $map = array();
 
     /**
-     * Map of class domains and class names for "services".
+     * Framework and application configuration settings.
      * 
      * @var array
+     * @access protected
+     * @static
      */
-    protected static $_classes = array(
-            'app' => 'App',
-            'auth' => 'Auth',
-            'database' => 'PewDatabase',
-            'log' => 'PewLog',
-            'model' => 'Model',
-            'request' => 'PewRequest',
-            'session' => 'Session',
-        );
-    
+    protected static $config = array();
+
     /**
      * Special storage index for the main controller in the current request.
      */
@@ -57,7 +49,7 @@ class Pew
      * @access protected
      * @throws Exception
      */
-    protected function __construct() { throw new BadMethodCallException("Pew cannot be instanced."); }
+    protected function __construct() { }
 
     /**
      * Checks if an object is stored in the registry.
@@ -68,7 +60,7 @@ class Pew
      */
     public static function exists($index)
     {
-        return array_key_exists($index, self::$_map);
+        return array_key_exists($index, self::$map);
     }
 
     /**
@@ -93,16 +85,16 @@ class Pew
      * This function does not overwrite storage indexes.
      * 
      * @param string $index The index to use for storage
-     * @param object $obj The object to store
+     * @param mixed $obj The item to store
      * @return boolean true if the object was stored, false on error
      * @access public
      * @static
      */
     public static function set($index, $obj)
     {
-        if (is_string($index) && is_object($obj)) {
-            if (!isset(self::$_map[$index])) {
-                self::$_map[$index] = $obj;
+        if (is_string($index)) {
+            if (!isset(self::$map[$index])) {
+                self::$map[$index] = $obj;
                 return $obj;
             }
         }
@@ -121,45 +113,61 @@ class Pew
      * @access public
      * @static
      */
-    public static function get($index, $arguments = null, $as_array = false)
+    public static function get($index, $arguments = array())
     {
-        if (self::exists($index)) {
-            return self::$_map[$index];
-        } else {
+        if (!self::exists($index)) {
             if (class_exists($index)) {
-                if (is_array($arguments) && !$as_array) {
-                    $reflection_class = new ReflectionClass($index);
-                    self::$_map[$index] = $reflection_class->newInstanceArgs($arguments);
-                } elseif (is_null($arguments)) {
-                    self::$_map[$index] = new $index();
-                } else {
-                    self::$_map[$index] = new $index($arguments);
-                }
+                $reflection_class = new ReflectionClass($index);
+                self::$map[$index] = $reflection_class->newInstanceArgs($arguments);
             } else {
                 throw new Exception("Class $index could not be found.");
             }
         }
         
-        return self::$_map[$index];
+        return self::$map[$index];
     }
 
     /**
      * Obtains the current instance of the Pew-Pew-Pew application.
      *
+     * @param $app_folder Folder name that holds the application folders and files
      * @return App Instance of the application
      * @access public
      * @static
      */
-    public static function app()
+    public static function app($app_folder)
     {
-        $app_class_name = self::$_classes['app'];
+        Pew::log()->debug("Starting app in $app_folder");
 
-        if (!self::exists($app_class_name)) {
-            self::set($app_class_name, $app_class_name);
+        // 1. load app/config/config.php
+        // 2. merge user config with Pew config
+        // 3. add config values for www folder
+        // 4. load app/config/bootstrap.php
+        // 5. load app/config/database.php
+        // 6. load app/config/routes.php
+
+        if (!self::exists('app')) {
+            self::set('app', new App($app_folder));
         }
 
-        return self::get($app_class_name);
+        return self::get('app');
     }
+
+    /**
+     * Merges configuration arrays an return the resulting configuration.
+     * 
+     * @param array $config An array with configuration keys
+     * @return object Object with configuration properties
+     */
+    public static function config(array $config = null)
+    {
+        if ($config) {
+            self::$config = array_merge(self::$config, $config);
+        }
+
+        return (object) $config;
+    }
+
     /**
      * Obtains a controller instance of the specified class.
      * 
@@ -169,8 +177,10 @@ class Pew
      * @static
      * @throws InvalidArgumentException When no current controller exists and no class name is provided
      */
-    public static function get_controller($class_name = null, $argument_list = null)
+    public static function controller($class_name = null, $argument_list = null)
     {
+        Pew::log()->debug("Loading controller $class_name");
+
         # check if the class name is omitted
         if (!isset($class_name)) {
             if (self::exists(CURRENT_REQUEST_CONTROLLER)) {
@@ -212,18 +222,21 @@ class Pew
      * @access public
      * @static
      */
-    public static function get_model($class_name, $arguments = null)
+    public static function model($class_name, $arguments = null)
     {
+        Pew::log()->debug("Loading model $class_name");
+        
         # Make sure the suffix "Model" is added to the class name
         if (substr($class_name, -5) !== 'Model') {
             $class_name .= 'Model';
         }
 
         if (class_exists($class_name)) {
-            $obj = self::get($class_name);
+            $obj = self::get($class_name, array(self::get_database()));
         } else {
             $table_name = class_name_to_file_name(substr($class_name, 0, -5));
-            $obj = new Model($table_name);
+            $obj = new Model(self::get_database(), $table_name);
+            self::set($class_name, $obj);
         }
         
         return $obj;
@@ -238,7 +251,7 @@ class Pew
      * @access public
      * @static
      */
-    public static function get_library($class_name, $arguments = null)
+    public static function library($class_name, $arguments = null)
     {
         return self::get($class_name, $arguments);
     }
@@ -256,33 +269,23 @@ class Pew
      * @access public
      * @static
      */
-    public static function get_database($config = null)
+    public static function database($config = null)
     {
-        $database_class_name = self::$_classes['database'];
-
-        if (self::exists($database_class_name)) {
-            return self::get($database_class_name);
-        } else {
+        if (!self::exists('PewDatabase')) {
             if (USEDB !== false) {
-                if (defined('DATABASE_CONFIGURATION')) {
-                    require DATABASE_CONFIGURATION;
-                } else {
-                    require APP . 'config/database_configuration.php';
-                }
-                
                 $dbc = new DatabaseConfiguration();
-
                 $use = is_string($config) ? $config : (!is_string(USEDB) ? 'default' : USEDB);
                 
                 if (isset($dbc->config[$use])) {
-                    return self::get($database_class_name, $dbc->config[$use], true);
+                    self::set('PewDatabase', new PewDatabase($dbc->config[$use]));
                 } else {
-                    throw new Exception("Database is not properly configured");
+                    throw new Exception("Database is disabled.");
                 }                
-            }    
+            }
+
         }
-        
-        return self::$_map[DATABASE_CLASS_NAME];
+
+        return self::get('PewDatabase');        
     }
     
     /**
@@ -319,6 +322,15 @@ class Pew
         return $request;
     }
 
+    public static function log()
+    {
+        if (!self::exists('log')) {
+            self::set('log', new PewLog(self::$config['debug_level']));
+        }
+
+        return Pew::get('log');
+    }
+
     /**
      * Resets the object store.
      *
@@ -332,7 +344,7 @@ class Pew
      */
     public static function clean()
     {
-        self::$_map = array();
+        self::$map = array();
     }
 
     /**
@@ -353,18 +365,12 @@ class Pew
      * @return object
      * @throw BadMethodCallException
      */
-    public static function __callStatic($method, $arguments)
+    public static function __callStatic($key, $arguments)
     {
-        if (strpos($method, '_') === false) {
-            throw new BadMethodCallException("No such method in class Pew [$method]");
-        }
-
-        list($prefix, $prop) = explode('_', $method, 2);
-
-        if (array_key_exists($prop, self::$_classes)) {
-            return self::get(self::$_classes[$prop], $arguments);
+        if (self::exists($key, self::$map)) {
+            return self::get($key);
         } else {
-            throw new BadMethodCallException("No service configured for [$prop]");
+            throw new BadMethodCallException("No service configured for [$key]");
         }
     }
 }

@@ -1,4 +1,4 @@
-<?php if (!defined('PEWPEWPEW')) exit('Forbidden');
+<?php
 
 /**
  * @package sys
@@ -16,53 +16,35 @@
  */
 define('DS', DIRECTORY_SEPARATOR);
 
-/**
- * Url path separator, just because.
- *
- * @var string
- * @name PS
- */
-define('PS', '/');
+$cfg = array();
 
 /**
  * Server string. This goes before URL to assemble a full server URL.
  *
  * @var string
- * @name APP_SERVER
  */
-define('APP_SERVER', (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['SERVER_NAME']);
+$cfg['host'] = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['SERVER_NAME'];
 
 /**
  * Root path (url), '/' in case of root installation.
  *
  * @var string
- * @name URL
  */
-define('URL', str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']));
+$cfg['path'] = str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']);
 
 /**
  * Full path (url) to the app, including server name and folder path.
  *
  * @var string
- * @name APP_SERVER_URL
 */
-define('APP_SERVER_URL', APP_SERVER . URL);
+$cfg['app_url'] = $cfg['host'] . $cfg['path'];
 
 /**
  * Full path to the base folder (filesystem).
  *
  * @var string
- * @name ROOT
  */
-defined ('ROOT') or define('ROOT', getcwd() . DS);
-
-/**
- * Full path to the application folder (filesystem).
- *
- * @var string
- * @name APP
- */
-defined('APP') or define('APP', ROOT  . 'app' . DS);
+$cfg['root_folder'] = getcwd() . DS;
 
 /**
  * Full path to the framework folder (filesystem).
@@ -70,68 +52,57 @@ defined('APP') or define('APP', ROOT  . 'app' . DS);
  * @var string
  * @name SYSTEM
  */
-defined('SYSTEM') or define('SYSTEM', dirname(__FILE__) . DS);
-
-/**
- * Framework source file folders (filesystem).
- */
-define('CONTROLLERS',  APP    . 'controllers' . DS);
-define('MODELS',       APP    . 'models'      . DS);
-define('VIEWS',        APP    . 'views'       . DS);
-define('ELEMENTS',     VIEWS  . 'elements'    . DS);
-define('LIBRARIES',    APP    . 'libs'        . DS);
-define('DEFAULT',      SYSTEM . 'default'     . DS);
-
-/**
- * Framework class names  for use in the Pew factory
- */
-defined('REQUEST_CLASS') or define('REQUEST_CLASS', 'PewRequest');
-defined('DATABASE_CLASS') or define('DATABASE_CLASS', 'PewDatabase');
-
-/**
- * Error type constants. Not many errors.
- */
-define('NO_ERROR', 0);
-define('VIEW_MISSING', 1);
-define('LAYOUT_MISSING', 2);
-define('CONTROLLER_MISSING', 3);
-define('ACTION_MISSING', 4);
-define('ELEMENT_MISSING', 5);
-define('CONTROLLER_FILE_MISSING', 6);
-define('CONTROLLER_CLASS_MISSING', 7);
-define('MODEL_FILE_MISSING', 8);
-define('MODEL_CLASS_MISSING', 9);
-define('LIBRARY_FILE_MISSING', 10);
-define('LIBRARY_CLASS_MISSING', 11);
-define('ACTION_FORBIDDEN', 12);
+$cfg['system_folder'] = dirname(__FILE__) . DS;
 
 /**
  * Framework version numbers.
  */
-define('MAJOR_VERSION', '0');
-define('MINOR_VERSION', '83');
-define('VERSION_DATE', '2012-05-11');
-define('VERSION', MAJOR_VERSION . '.' . MINOR_VERSION . '.' . VERSION_DATE);
-
-/**
- * Output formats for actions
- */
-define('RESPONSE_FORMAT_HTML', 'html');
-define('RESPONSE_FORMAT_XML', 'xml');
-define('RESPONSE_FORMAT_JSON', 'json');
-
-define('OUTPUT_TYPE_HTML', 'html');
-define('OUTPUT_TYPE_XML', 'xml');
-define('OUTPUT_TYPE_JSON', 'json');
-
-defined('OUTPUT_TYPE_HTML_PREFIX') or define('OUTPUT_TYPE_HTML_PREFIX', '');
-defined('OUTPUT_TYPE_JSON_PREFIX') or define('OUTPUT_TYPE_JSON_PREFIX', ':');
-defined('OUTPUT_TYPE_XML_PREFIX')  or define('OUTPUT_TYPE_XML_PREFIX', '#');
+$cfg['version_major'] = '0';
+$cfg['version_minor'] = '83';
+$cfg['version_date'] = '2012-12-06';
 
 /**
  * Whether the App is running on the localhost space.
  */
-define('PEW_LOCAL', defined('STDIN') or 'localhost' == $_SERVER['REMOTE_ADDR'] || '127.0.0.1' == $_SERVER['REMOTE_ADDR']);
+$cfg['localhost'] = in_array($_SERVER['REMOTE_ADDR'], array('localhost', '127.0.0.1', '::1'));
+
+/**
+ * Option to use a prefix for action method names in controllers.
+ */
+$cfg['action_prefix'] = '';
+
+/**
+ * Define DEBUG if it's not defined in app/config 
+ */
+$cfg['debug'] = false;
+
+/**
+ * Define DEBUG if it's not defined in app/config 
+ */
+$cfg['log_level'] = 0;
+
+
+/**
+ * Define extensions if user didn't.
+ *
+ * The values must include the first period (i.e., '.php')
+ */
+$cfg['model_ext'] = '.class.php';
+$cfg['controller_ext'] = '.class.php';
+$cfg['view_ext'] = '.php';
+$cfg['element_ext'] = '.php';
+$cfg['layout_ext'] = '.layout.php';
+$cfg['library_ext'] = '.class.php';
+
+/**
+ * Set to true to use the Twig templating library for views.
+ */
+$cfg['use_twig'] = false;
+
+require __DIR__ . DS .'functions.php';
+require __DIR__ . DS .'pew.class.php';
+
+Pew::config($cfg);
 
 /**
  * Application configuration
@@ -157,11 +128,6 @@ defined('USEDB')      or define('USEDB', false);
 defined('USEAUTH')    or define('USEAUTH', false);
 
 /**
- * Define DEBUG if it's not defined in app/config 
- */
-defined ('DEBUG')     or define('DEBUG', 0);
-
-/**
  * Enable strict error reporting according to config.
  */
 if ((DEBUG && PEW_LOCAL) || DEBUG > 1) {
@@ -176,31 +142,9 @@ defined('DEFAULT_ACTION')     or define('DEFAULT_ACTION', 'index');
 defined('DEFAULT_LAYOUT')     or define('DEFAULT_LAYOUT', '');
 
 /**
- * Option to use a prefix for action method names in controllers.
- */
-defined('ACTION_PREFIX') or define('ACTION_PREFIX', '');
-
-/**
  * This one is somewhat hidden from the user.
  */
 defined('DEFAULT_RESPONSE_FORMAT') or define('DEFAULT_RESPONSE_FORMAT', RESPONSE_FORMAT_HTML);
-
-/**
- * Define extensions if user didn't.
- *
- * The values must include the first period (i.e., '.php')
- */
-defined('MODEL_EXT')      or define('MODEL_EXT', '.class.php');
-defined('CONTROLLER_EXT') or define('CONTROLLER_EXT', '.class.php');
-defined('VIEW_EXT')       or define('VIEW_EXT', '.php');
-defined('ELEMENT_EXT')    or define('ELEMENT_EXT', '.php');
-defined('LAYOUT_EXT')     or define('LAYOUT_EXT', '.layout.php');
-defined('LIBRARY_EXT')    or define('LIBRARY_EXT', '.php');
-
-/**
- * Set to true to use the Twig templating library for views.
- */
-defined('USETWIG') or define('USETWIG', false);
 
 /**
  * Include the autoloading functions

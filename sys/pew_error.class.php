@@ -1,4 +1,4 @@
-<?php if (!defined('PEWPEWPEW')) exit('Forbidden');
+<?php
 
 /**
  * @package sys
@@ -16,6 +16,20 @@
  */
 class PewError extends Pages
 {
+    const NO_ERROR = 0;
+    const VIEW_MISSING = 1;
+    const LAYOUT_MISSING = 2;
+    const CONTROLLER_MISSING = 3;
+    const ACTION_MISSING = 4;
+    const ELEMENT_MISSING = 5;
+    const CONTROLLER_FILE_MISSING = 6;
+    const CONTROLLER_CLASS_MISSING = 7;
+    const MODEL_FILE_MISSING = 8;
+    const MODEL_CLASS_MISSING = 9;
+    const LIBRARY_FILE_MISSING = 10;
+    const LIBRARY_CLASS_MISSING = 11;
+    const ACTION_FORBIDDEN = 12;
+
     /**
      * Error code.
      *

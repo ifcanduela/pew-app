@@ -1,4 +1,4 @@
-<?php if (!defined('PEWPEWPEW')) exit('Forbidden');
+<?php
 
 /**
  * @package sys
@@ -281,7 +281,7 @@ class PewDatabase
      * @return void
      * @access protected
      */
-    protected function __clone() {die('Cloning Databases is a bad habit.');}
+    protected function __clone() { }
     
     /**
      * Obtains a singleton instance of the Database.
