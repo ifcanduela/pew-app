@@ -9,83 +9,80 @@
  *******************************IT**BEGINS**NAO********************************/
 
 /**
- * Filesystem separator.
- *
- * @var string
- * @name DS
+ * @var string Filesystem separator.
  */
 define('DS', DIRECTORY_SEPARATOR);
 
+/**
+ * @var array Configuration array.
+ */
 $cfg = array();
 
 /**
- * Server string. This goes before URL to assemble a full server URL.
- *
- * @var string
+ * @var string Server string. This goes before URL to assemble a full server URL.
  */
 $cfg['host'] = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['SERVER_NAME'];
 
 /**
- * Root path (url), '/' in case of root installation.
- *
- * @var string
+ * @var string Root path (url), '/' in case of root installation.
  */
 $cfg['path'] = str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']);
 
 /**
- * Full path (url) to the app, including server name and folder path.
- *
- * @var string
+ * @var string Full path (url) to the app, including server name and folder path.
 */
 $cfg['app_url'] = $cfg['host'] . $cfg['path'];
 
 /**
- * Full path to the base folder (filesystem).
- *
- * @var string
+ * @var string Full path to the base folder (filesystem).
  */
 $cfg['root_folder'] = getcwd() . DS;
 
 /**
- * Full path to the framework folder (filesystem).
- *
- * @var string
- * @name SYSTEM
+ * @var string Full path to the framework folder (filesystem).
  */
 $cfg['system_folder'] = dirname(__FILE__) . DS;
 
 /**
- * Framework version numbers.
+ * @var string Full path to the application folder (filesystem).
+ */
+$cfg['appp_folder'] = getcwd() . DS . 'app' . DS;
+
+/**
+ * @var string Full path to the public assets folder (filesystem).
+ */
+$cfg['www_folder'] = getcwd() . DS . 'www' . DS;
+
+/**
+ * @var string Framework version numbers.
  */
 $cfg['version_major'] = '0';
 $cfg['version_minor'] = '83';
 $cfg['version_date'] = '2012-12-06';
 
 /**
- * Whether the App is running on the localhost space.
+ * @var boolean Whether the App is running on the localhost space.
  */
 $cfg['localhost'] = in_array($_SERVER['REMOTE_ADDR'], array('localhost', '127.0.0.1', '::1'));
 
 /**
- * Option to use a prefix for action method names in controllers.
+ * @var string Option to use a prefix for action method names in controllers.
  */
 $cfg['action_prefix'] = '';
 
 /**
- * Define DEBUG if it's not defined in app/config 
+ * @var boolean Define DEBUG if it's not defined in app/config 
  */
 $cfg['debug'] = false;
 
 /**
- * Define DEBUG if it's not defined in app/config 
+ * @var integer Define DEBUG if it's not defined in app/config 
  */
 $cfg['log_level'] = 0;
 
 
 /**
- * Define extensions if user didn't.
- *
- * The values must include the first period (i.e., '.php')
+ * @var string Defaul file extensions for files. The values must include the first period (i.e., '.php')
  */
 $cfg['model_ext'] = '.class.php';
 $cfg['controller_ext'] = '.class.php';
@@ -95,7 +92,7 @@ $cfg['layout_ext'] = '.layout.php';
 $cfg['library_ext'] = '.class.php';
 
 /**
- * Set to true to use the Twig templating library for views.
+ * @var boolean Set to true to use the Twig templating library for views.
  */
 $cfg['use_twig'] = false;
 
@@ -103,6 +100,10 @@ require __DIR__ . DS .'functions.php';
 require __DIR__ . DS .'pew.class.php';
 
 Pew::config($cfg);
+
+spl_autoload_register(array('Pew', 'autoload'));
+
+return;
 
 /**
  * Application configuration

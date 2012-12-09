@@ -39,6 +39,11 @@ class Pew
     protected static $config = array();
 
     /**
+     * @var array Paths for class autoloading
+     */
+    protected static $paths = array();
+
+    /**
      * Special storage index for the main controller in the current request.
      */
     const CURRENT_REQUEST_CONTROLLER = '_current_request_controller_';
@@ -50,6 +55,20 @@ class Pew
      * @throws Exception
      */
     protected function __construct() { }
+
+    public static function autoload()
+    {
+        $paths = explode(';', get_include_path());
+
+        $found = false;
+
+        // foreach (self::config['app_path'])
+    }
+
+    public static function register_path($path)
+    {
+        
+    }
 
     /**
      * Checks if an object is stored in the registry.
@@ -140,13 +159,33 @@ class Pew
         Pew::log()->debug("Starting app in $app_folder");
 
         // 1. load app/config/config.php
+        $app_config = include(getcwd() . DS . $app_folder . DS . 'config' . DS . 'config.php');
+
         // 2. merge user config with Pew config
-        // 3. add config values for www folder
+        self::$config = array_merge(self::$config, $app_config);
+
+        // 3. add application path
+        self::$config['app_folder'] = getcwd() . DS . trim(basename($app_folder), '\\/') . DS;
+
         // 4. load app/config/bootstrap.php
+        if (file_exists(self::$config['app_folder'] . 'config' . DS . 'bootstrap.php')) {
+            require self::$config['app_folder'] . 'config' . DS . 'bootstrap.php';
+        }
+
         // 5. load app/config/database.php
+        if (file_exists(self::$config['app_folder'] . 'config' . DS . 'database.php')) {
+            self::$config['database_config'] = include self::$config['app_folder'] . 'config' . DS . 'database.php';
+        }
+
         // 6. load app/config/routes.php
+        if (file_exists(self::$config['app_folder'] . 'config' . DS . 'routes.php')) {
+            self::$config['routers_config'] = include self::$config['app_folder'] . 'config' . DS . 'routes.php';
+        }
+
+        var_dump(self::$config);
 
         if (!self::exists('app')) {
+            require __DIR__ . DS . 'app.class.php';
             self::set('app', new App($app_folder));
         }
 
@@ -297,20 +336,20 @@ class Pew
      */
     public static function request($uri_string = null)
     {
-        $class_name = self::$_classes['request'];
-
-        if (self::exists($class_name)) {
-            $request = self::get($class_name);
+        if (self::exists('request')) {
+            $request = self::get('request');
         } else {
             if (!is_string($uri_string)) {
                 throw new InvalidArgumentException('PewRequest must be initialized with a URI');
             }
 
+            require __DIR__ . DS . 'pew_request.class.php';
+
             # instantiate the request object
-            $request = self::get($class_name);
+            $request = new PewRequest($uri_string);
         
             # configure fallback controller and action
-            $request->set_default(DEFAULT_CONTROLLER, DEFAULT_ACTION);
+            $request->set_default(self::$config['default_controller'], self::$config['default_action']);
         
             # process user-configured routes
             $url = $request->remap($uri_string);
@@ -325,7 +364,8 @@ class Pew
     public static function log()
     {
         if (!self::exists('log')) {
-            self::set('log', new PewLog(self::$config['debug_level']));
+            require_once __DIR__ . DS . 'pew_log.class.php';
+            self::set('log', new PewLog(self::$config['log_level']));
         }
 
         return Pew::get('log');

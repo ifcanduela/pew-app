@@ -1,11 +1,16 @@
 <?php 
 
 /**
-* Class PewLog
-* 
-* Logs activities, including timestamps and levels.
-* 
-* @author ifcanduela <ifcanduela@gmail.com>
+ * @package sys
+ */
+
+/**
+ * Class PewLog
+ * 
+ * Logs activities, including timestamps and levels.
+ * 
+ * @author ifcanduela <ifcanduela@gmail.com>
+ * @package sys
 */
 class PewLog
 {
