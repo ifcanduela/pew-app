@@ -58,11 +58,14 @@ class Pew
 
     public static function autoload()
     {
-        $paths = explode(';', get_include_path());
+        $filename = 
+        $paths = explode(PATH_SEPARATOR, get_include_path());
 
-        $found = false;
-
-        // foreach (self::config['app_path'])
+        foreach ($paths as $path) {
+            if (file_exists($path . DIRECTORY_SEPARATOR . $file)) {
+                return true;
+            }     
+        }
     }
 
     public static function register_path($path)
@@ -156,18 +159,29 @@ class Pew
      */
     public static function app($app_folder)
     {
-        Pew::log()->debug("Starting app in $app_folder");
+        self::log()->debug("Starting app in $app_folder");
 
-        // 1. load app/config/config.php
+        // load app/config/config.php
         $app_config = include(getcwd() . DS . $app_folder . DS . 'config' . DS . 'config.php');
 
-        // 2. merge user config with Pew config
+        // merge user config with Pew config
         self::$config = array_merge(self::$config, $app_config);
 
-        // 3. add application path
+        // add application path
         self::$config['app_folder'] = getcwd() . DS . trim(basename($app_folder), '\\/') . DS;
 
-        // 4. load app/config/bootstrap.php
+        // update include_path
+        set_include_path(get_include_path() 
+                . PATH_SEPARATOR . self::$config['app_folder'] 
+                . PATH_SEPARATOR . self::$config['default_folder']
+                . PATH_SEPARATOR . self::$config['system_folder']
+            );
+
+        var_dump(get_include_path());
+
+        var_dump(file_exists('controller.class.php'));
+
+        // load app/config/bootstrap.php
         if (file_exists(self::$config['app_folder'] . 'config' . DS . 'bootstrap.php')) {
             require self::$config['app_folder'] . 'config' . DS . 'bootstrap.php';
         }
@@ -218,7 +232,7 @@ class Pew
      */
     public static function controller($class_name = null, $argument_list = null)
     {
-        Pew::log()->debug("Loading controller $class_name");
+        self::log()->debug("Loading controller $class_name");
 
         # check if the class name is omitted
         if (!isset($class_name)) {
@@ -230,6 +244,9 @@ class Pew
                 throw new InvalidArgumentException("No controller could be retrieved");
             }
         } else {
+            $filename = self::$config['controllers_folder'] . class_name_to_file_name($class_name) . self::$config['controller_ext'];
+            var_dump($filename);
+            var_dump(file_exists($filename));
             if (self::exists($class_name)) {
                 # if the controller was previously instanced
                 $controller = self::get($class_name);
@@ -263,7 +280,7 @@ class Pew
      */
     public static function model($class_name, $arguments = null)
     {
-        Pew::log()->debug("Loading model $class_name");
+        self::log()->debug("Loading model $class_name");
         
         # Make sure the suffix "Model" is added to the class name
         if (substr($class_name, -5) !== 'Model') {
@@ -368,7 +385,7 @@ class Pew
             self::set('log', new PewLog(self::$config['log_level']));
         }
 
-        return Pew::get('log');
+        return self::get('log');
     }
 
     /**
@@ -390,7 +407,7 @@ class Pew
     /**
      * Retrieves registered service objects.
      * 
-     * Services must be first registered with Pew::register. The following
+     * Services must be first registered with self::register. The following
      * services are registered by default: 
      * 
      *  - auth

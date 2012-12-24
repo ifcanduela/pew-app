@@ -44,9 +44,14 @@ $cfg['root_folder'] = getcwd() . DS;
 $cfg['system_folder'] = dirname(__FILE__) . DS;
 
 /**
+ * @var string Full path to the framework default folder (filesystem).
+ */
+$cfg['default_folder'] = $cfg['system_folder'] . 'default' . DS;
+
+/**
  * @var string Full path to the application folder (filesystem).
  */
-$cfg['appp_folder'] = getcwd() . DS . 'app' . DS;
+$cfg['app_folder'] = getcwd() . DS . 'app' . DS;
 
 /**
  * @var string Full path to the public assets folder (filesystem).
@@ -80,9 +85,20 @@ $cfg['debug'] = false;
  */
 $cfg['log_level'] = 0;
 
+/**
+ * @var string Default folder names for files.
+ *
+ * This is used for both the Default folder and the App folder
+ */
+$cfg['models_folder'] = 'models' . DS;
+$cfg['controllers_folder'] = 'controllers' . DS;
+$cfg['views_folder'] = 'views' . DS;
+$cfg['elements_folder'] = 'views' . DS . 'elements' . DS;
+$cfg['layouts_folder'] = 'views' . DS;
+$cfg['libraries_folder'] = '.class.php' . DS;
 
 /**
- * @var string Defaul file extensions for files. The values must include the first period (i.e., '.php')
+ * @var string Default file extensions for files. The values must include the first period (i.e., '.php')
  */
 $cfg['model_ext'] = '.class.php';
 $cfg['controller_ext'] = '.class.php';
@@ -90,6 +106,17 @@ $cfg['view_ext'] = '.php';
 $cfg['element_ext'] = '.php';
 $cfg['layout_ext'] = '.layout.php';
 $cfg['library_ext'] = '.class.php';
+$cgf['class_ext'] = '.class.php';
+
+/**
+ * @var string Default controller to use if none is specified (file name)
+ */
+$cfg['default_controller'] = 'pages';
+
+/**
+ * @var string Default action to use if none is specified (no prefix)
+ */
+$cfg['default_action'] = 'index';
 
 /**
  * @var boolean Set to true to use the Twig templating library for views.

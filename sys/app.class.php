@@ -103,8 +103,8 @@ class App
         
         # controller instantiation
         $controller_class = file_name_to_class_name($request->controller);
-        $this->controller = Pew::get_controller($controller_class, $request);
-        $this->view = Pew::get('View', $request);
+        $this->controller = Pew::controller($controller_class, $request);
+        $this->view = Pew::view();
         
         # check controller instantiation
         if (!is_object($this->controller)) {
