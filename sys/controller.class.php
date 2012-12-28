@@ -15,24 +15,6 @@
 abstract class Controller
 {
     /**
-     * Default window title to use in the view.
-     *
-     * @var string
-     * @access public
-     */
-    public $title = APPLICATION_TITLE;
-    
-    /**
-     * Default layout to use in the view.
-     *
-     * The selected layout must be in app/views/layout/{$layout}.layout.php
-     *
-     * @var string
-     * @access public
-     */
-    public $layout = DEFAULT_LAYOUT;
-    
-    /**
      * Data created by the action and used by the view.
      *
      * $data is an associative array. Its indices will be converted to
@@ -114,14 +96,6 @@ abstract class Controller
     public $output = '';
     
     /**
-     * The intended format of the view output
-     *
-     * @var string
-     * @ccess public
-    */
-    public $output_type = OUTPUT_TYPE_HTML;
-    
-    /**
      * Error flag for error pages.
      *
      * @var int
@@ -153,7 +127,7 @@ abstract class Controller
      * @var bool
      * @access protected
      */
-    protected $use_twig = USETWIG;
+    protected $use_twig = false;
     
     /**
      * Database access object instance.

@@ -56,15 +56,15 @@ class Pew
      */
     protected function __construct() { }
 
-    public static function autoload()
+    public static function autoload($class)
     {
-        $filename = 
-        $paths = explode(PATH_SEPARATOR, get_include_path());
+        $filename = class_name_to_file_name($class) . '.class.php';
 
-        foreach ($paths as $path) {
-            if (file_exists($path . DIRECTORY_SEPARATOR . $file)) {
-                return true;
-            }     
+        var_dump("Searching for class $class (file = $filename");
+
+        if (stream_resolve_include_path($filename)) {
+            require_once $filename;
+            return true;
         }
     }
 
@@ -245,8 +245,8 @@ class Pew
             }
         } else {
             $filename = self::$config['controllers_folder'] . class_name_to_file_name($class_name) . self::$config['controller_ext'];
-            var_dump($filename);
-            var_dump(file_exists($filename));
+            require_once $filename;
+
             if (self::exists($class_name)) {
                 # if the controller was previously instanced
                 $controller = self::get($class_name);
@@ -356,11 +356,8 @@ class Pew
         if (self::exists('request')) {
             $request = self::get('request');
         } else {
-            if (!is_string($uri_string)) {
-                throw new InvalidArgumentException('PewRequest must be initialized with a URI');
-            }
 
-            require __DIR__ . DS . 'pew_request.class.php';
+            require_once __DIR__ . DS . 'pew_request.class.php';
 
             # instantiate the request object
             $request = new PewRequest($uri_string);

@@ -67,6 +67,14 @@ class View
      * @access public
      */
     public $template_dir = '';
+
+    /**
+     * Default window title to use in the view.
+     *
+     * @var string
+     * @access public
+     */
+    public $title;
     
     /**
      * @param PewRequest $request 
