@@ -58,19 +58,25 @@ class Pew
 
     public static function autoload($class)
     {
-        $filename = class_name_to_file_name($class) . '.class.php';
-
-        var_dump("Searching for class $class (file = $filename");
+        $filename = class_name_to_file_name($class) . self::$config['class_ext'];
 
         if (stream_resolve_include_path($filename)) {
             require_once $filename;
             return true;
         }
+
+        return false;
     }
 
+    /**
+     * Adds a path to PHP's include path.
+     * 
+     * @param string $path Path to add
+     * @return mixed The old include path on success, false on error
+     */
     public static function register_path($path)
     {
-        
+        return set_include_path(get_include_path() . PATH_SEPARATOR . $path);
     }
 
     /**
@@ -177,10 +183,6 @@ class Pew
                 . PATH_SEPARATOR . self::$config['system_folder']
             );
 
-        var_dump(get_include_path());
-
-        var_dump(file_exists('controller.class.php'));
-
         // load app/config/bootstrap.php
         if (file_exists(self::$config['app_folder'] . 'config' . DS . 'bootstrap.php')) {
             require self::$config['app_folder'] . 'config' . DS . 'bootstrap.php';
@@ -195,8 +197,6 @@ class Pew
         if (file_exists(self::$config['app_folder'] . 'config' . DS . 'routes.php')) {
             self::$config['routers_config'] = include self::$config['app_folder'] . 'config' . DS . 'routes.php';
         }
-
-        var_dump(self::$config);
 
         if (!self::exists('app')) {
             require __DIR__ . DS . 'app.class.php';
@@ -218,7 +218,7 @@ class Pew
             self::$config = array_merge(self::$config, $config);
         }
 
-        return (object) $config;
+        return (object) self::$config;
     }
 
     /**
@@ -244,7 +244,7 @@ class Pew
                 throw new InvalidArgumentException("No controller could be retrieved");
             }
         } else {
-            $filename = self::$config['controllers_folder'] . class_name_to_file_name($class_name) . self::$config['controller_ext'];
+            $filename = self::$config['controllers_folder'] . class_name_to_file_name($class_name) . self::$config['class_ext'];
             require_once $filename;
 
             if (self::exists($class_name)) {
@@ -254,8 +254,10 @@ class Pew
                 # instance the controller
                 $controller = new $class_name(self::request());
                 self::set($class_name, $controller);
-                # maybe some dependency injection here (session, auth, log...)
-
+                # some dependency injection here
+                $controller->session = self::session();
+                $controller->auth = self::auth();
+                $controller->log = self::log();
                 # set the first controller that reaches this point as the current controller
                 if (!self::exists(self::CURRENT_REQUEST_CONTROLLER)) {
                     self::set(self::CURRENT_REQUEST_CONTROLLER, $controller);
@@ -327,21 +329,22 @@ class Pew
      */
     public static function database($config = null)
     {
-        if (!self::exists('PewDatabase')) {
-            if (USEDB !== false) {
-                $dbc = new DatabaseConfiguration();
-                $use = is_string($config) ? $config : (!is_string(USEDB) ? 'default' : USEDB);
+        $use_db = self::$config['use_db'];
+        $db_config = self::$config['database_config'];
+
+        if (!self::exists('database')) {
+            if ($use_db !== false) {
+                $use = is_string($config) ? $config : (!is_string($use_db) ? 'default' : $use_db);
                 
-                if (isset($dbc->config[$use])) {
-                    self::set('PewDatabase', new PewDatabase($dbc->config[$use]));
+                if (isset($db_config[$use])) {
+                    self::set('database', new PewDatabase($db_config[$use]));
                 } else {
                     throw new Exception("Database is disabled.");
                 }                
             }
-
         }
 
-        return self::get('PewDatabase');        
+        return self::get('database');
     }
     
     /**
@@ -375,14 +378,60 @@ class Pew
         return $request;
     }
 
+    /**
+     * Get or instance an authentication object
+     * 
+     * @return object The authentication object
+     */
+    public static function auth()
+    {
+        if (!self::exists('auth')) {
+            self::set('auth', new Auth(self::database(), self::session()));
+        }
+
+        return self::get('auth');
+    }
+
+    /**
+     * Get or instance a log object
+     * 
+     * @return object The log object
+     */
     public static function log()
     {
         if (!self::exists('log')) {
-            require_once __DIR__ . DS . 'pew_log.class.php';
             self::set('log', new PewLog(self::$config['log_level']));
         }
 
         return self::get('log');
+    }
+
+    /**
+     * Get or instance a session object
+     * 
+     * @return object The session object
+     */
+    public static function session()
+    {
+        if (!self::exists('session')) {
+            self::set('session', new Session());
+        }
+
+        return self::get('session');
+    }
+
+    /**
+     * Gets the current view and initialises it.
+     *
+     * @return View A view object
+     */
+    public static function view($name = '') {
+        if (!self::exists('view' . $name)) {
+            $view =  new View();
+            self::set('view' . $name, $view);
+        }
+
+        return self::get('view' . $name);
     }
 
     /**
@@ -424,6 +473,7 @@ class Pew
         if (self::exists($key, self::$map)) {
             return self::get($key);
         } else {
+            xdebug_print_function_stack();
             throw new BadMethodCallException("No service configured for [$key]");
         }
     }

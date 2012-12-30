@@ -156,17 +156,17 @@ abstract class Controller
      * Auth instance.
      *
      * @var Auth
-     * @access protected
+     * @access public
      */
-    protected $auth = null;
+    public $auth = null;
 
     /**
      * Session instance.
      *
      * @var Session
-     * @access protected
+     * @access public
      */
-    protected $session = null;
+    public $session = null;
     
     /**
      * Stores the controller's parameters.
@@ -202,20 +202,10 @@ abstract class Controller
         # Controller file name in the CONTROLLERS folder.
         $this->file_name = class_name_to_file_name(get_class($this));
         $this->view_folder = $request->controller;
-        
-        # Current Session object
-        if (USESESSION) {
-            $this->session = Pew::get_session();
-        }
-        
-        # Current Auth object
-        if (USEAUTH) {
-            $this->auth = Pew::get_auth();
-        }
 
         # Global action prefix override
-        if (!$this->action_prefix && ACTION_PREFIX) {
-            $this->action_prefix = ACTION_PREFIX;
+        if (!$this->action_prefix && Pew::config()->action_prefix) {
+            $this->action_prefix = Pew::config()->action_prefix;
         }
         
         # Function libraries
@@ -359,31 +349,5 @@ abstract class Controller
         }
         
         return null;
-    }
-    
-    /**
-     * Intercept the update of the $require_auth controller property to stop
-     * execution of the action as soon as possible.
-     *
-     * @param string $property Controller property to write
-     * @param mixed $value Value to write
-     * @return void
-     * @access public
-     */
-    public function __set($property, $value)
-    {
-        if (USEAUTH && $property === 'require_auth' && $value === true) {
-            # check if the user is authenticated
-            if (!$this->auth->gate()) {
-                # save the current request for later
-                $this->session->referrer = $this->parameters['uri'];
-                # display the login page
-                redirect('users/login');
-            }
-        }
-        
-        if ($property === 'model') {
-            $this->model = $value;
-        }
     }
 }

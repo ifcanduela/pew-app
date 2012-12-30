@@ -64,24 +64,15 @@ class Auth
      */
     private $db = null;
     
-    public function __construct()
+    public function __construct($db, $session)
     {
-        if (USEAUTH) {
-            if (USESESSION) {
-                $this->session = Pew::get_session();
-            } else {
-                throw new Exception("Auth requires sessions enabled");
-            }
-            
-            if (!USEDB) {
-                throw new Exception("Auth requires Database access");
-            }
-            
-            $this->auth = $this->session->read('auth', false);
-            
-            if ($this->session->exists('uuid')) {
-                $this->uuid = $this->session->read('uuid');
-            }
+        $this->session = $session;
+        $this->db = $db;
+
+        $this->auth = $this->session->read('auth', false);
+        
+        if ($this->session->exists('uuid')) {
+            $this->uuid = $this->session->read('uuid');
         }
     }
     

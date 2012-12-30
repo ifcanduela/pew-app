@@ -100,13 +100,10 @@ $cfg['libraries_folder'] = '.class.php' . DS;
 /**
  * @var string Default file extensions for files. The values must include the first period (i.e., '.php')
  */
-$cfg['model_ext'] = '.class.php';
-$cfg['controller_ext'] = '.class.php';
 $cfg['view_ext'] = '.php';
 $cfg['element_ext'] = '.php';
 $cfg['layout_ext'] = '.layout.php';
-$cfg['library_ext'] = '.class.php';
-$cgf['class_ext'] = '.class.php';
+$cfg['class_ext'] = '.class.php';
 
 /**
  * @var string Default controller to use if none is specified (file name)
@@ -117,6 +114,21 @@ $cfg['default_controller'] = 'pages';
  * @var string Default action to use if none is specified (no prefix)
  */
 $cfg['default_action'] = 'index';
+
+/**
+ * @var boolean Set to true to enable the use of the session functionality.
+ */
+$cfg['use_session'] = false;
+
+/**
+ * @var boolean Set to true to enable the use of database connections.
+ */
+$cfg['use_db'] = false;
+
+/**
+ * @var boolean Set to true to enable the use of the auth library.
+ */
+$cfg['use_auth'] = false;
 
 /**
  * @var boolean Set to true to use the Twig templating library for views.

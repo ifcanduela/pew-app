@@ -215,16 +215,16 @@ class PewDatabase
      * @access public
      * @throws InvalidArgumentException If the DB engine is not selected
      */
-    public function __construct($config = null)
+    public function __construct($config)
     {
-        if (isset($config)) {
-            $this->config['use'] = $config;
-        } elseif (defined('USEDB') && USEDB) {
-            $use = !is_string(USEDB) ? 'default' : USEDB;
-            $this->config['use'] = $this->config[$use];
+        if (!is_array($config)) {
+            debug_print_backtrace();
+            throw new Exception("No database configuration provided.");
         }
+        $this->config['use'] = $config;
         
         if (!isset($this->config['use']['engine'])) {
+            debug_print_backtrace();
             throw new InvalidArgumentException('Database engine was not selected');
         }
         

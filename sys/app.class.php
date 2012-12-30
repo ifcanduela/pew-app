@@ -61,16 +61,7 @@ class App
      */
     function __construct()
     {
-        # initialise Authentication if required
-        if (defined('USEAUTH') && USEAUTH) {
-            $this->auth = Pew::get_auth();
-        }
-        
-        # starts a session if required
-        if (defined('USESESSION') && USESESSION) {
-            $this->session = Pew::get_session();
-            $this->session->open();
-        }
+
     }
     
     /**
