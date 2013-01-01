@@ -73,7 +73,7 @@ class PewError extends Pages
         $this->subject = func_get_args();
         
         # If the script is not running on DEBUG, execution is definitely stopped
-        if (!DEBUG) {
+        if (!Pew::config()->debug) {
             # Render standard error page
             $this->show_404();
         } else {
@@ -241,7 +241,7 @@ ERROR_TEXT;
     public function show_404()
     {
         header("HTTP/1.0 404 Not Found");
-        include(SYSTEM . DS . 'default' . DS . 'views' . DS . 'pew_error' . DS . '404.php');
+        include(Pew::config()->default_folder . DS . 'views' . DS . 'pew_error' . DS . '404.php');
         exit();
     }
 }

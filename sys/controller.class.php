@@ -59,22 +59,14 @@ abstract class Controller
     public $libs = array();
     
     /**
-     * Folder in which view files are stored.
-     *
-     * @var string
-     * @access public
-     */
-    public $view_folder = '';
-
-    /**
      * The view file to use to render the action result.
      * 
      * Views will be found in app/views/{$controller}/{$view}.php
      *
-     * @var string
+     * @var View
      * @access public
      */
-    public $view = '';
+    public $view = null;
     
     /**
      * Whether to render a view after the action completes.
@@ -192,9 +184,11 @@ abstract class Controller
      * @return void
      * @access public
      */
-    public function __construct($request)
+    public function __construct($request, $view = false)
     {
+        # Assign Request and View objects
         $this->request = $request;
+        $this->view = $view;
         
         # Make sure $model is read through the __get magic method the first time
         unset($this->model);
@@ -287,7 +281,7 @@ abstract class Controller
                 case '@':
                     $this->output_type = OUTPUT_TYPE_XML;
                     # Actions prefixed with an at sign are XML
-                    if (file_exists(VIEWS . 'xml' . LAYOUT_EXT)) {
+                    if (file_exists(VIEWS . 'xml' . Pew::config()->layout_ext)) {
                         $this->layout = 'xml';
                     } else {
                         $this->layout = 'empty';
@@ -296,7 +290,7 @@ abstract class Controller
                 case ':':
                     $this->output_type = OUTPUT_TYPE_JSON;
                     # Actions prefixed with a colon are JSON
-                    if (file_exists(VIEWS . 'json' . LAYOUT_EXT)) {
+                    if (file_exists(VIEWS . 'json' . Pew::config()->layout_ext)) {
                         $this->layout = 'json';
                     } else {
                         $this->layout = 'empty';
@@ -310,11 +304,12 @@ abstract class Controller
             
             if (!method_exists($this, $this->action_prefix . $action)) {
                 # If the $action method does not exist, show an error page
-                new PewError(ACTION_MISSING, $this, $this->action_prefix . $action);
+                new PewError(PewError::ACTION_MISSING, $this, $this->action_prefix . $action);
             }
             
             # Everything's clear pink
-            call_user_func_array(array($this, $this->action_prefix . $action), $this->parameters['passed']);
+            $view_data = call_user_func_array(array($this, $this->action_prefix . $action), $this->parameters['passed']);
+            return $view_data;
         } else {
             new PewError(404);
         }

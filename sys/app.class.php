@@ -94,18 +94,18 @@ class App
         
         # controller instantiation
         $controller_class = file_name_to_class_name($request->controller);
-        $this->controller = Pew::controller($controller_class, $request);
-        $this->view = Pew::view();
-        
+        $controller = Pew::controller($controller_class, $request);
+        $view = $controller->view = Pew::view();
+
         # check controller instantiation
         if (!is_object($this->controller)) {
-            if (file_exists(VIEWS . $request->controller . DS . $request->action . VIEW_EXT)) {
+            if (file_exists(Pew::config()->views_folder . $request->controller . DS . $request->action . Pew::config()->view_ext)) {
                 # if the controller does not exist, but the view does, use Pages
-                $this->controller = Pew::get('Pages', $request);
-                $this->controller->view_folder = $request->controller;
+                $controller = Pew::controller('pages');
+                $view->templates_fir = $request->controller;
             } else {
                 # display an error page if the controller could not be instanced
-                new PewError(CONTROLLER_MISSING);
+                new PewError(PewError::CONTROLLER_MISSING, $request);
             }
         }
         
@@ -115,11 +115,11 @@ class App
         }
         
         # call the action method and let the controller decide what to do
-        $this->controller->_action();
+        $view_data = $this->controller->_action();
         
         # check if the controller action requires authentication
         # @deprecated
-        if (USEAUTH && $this->controller->require_auth) {
+        if (Pew::config()->use_auth && $this->controller->require_auth) {
             # check if the user is authenticated
             if (!$this->auth->gate()) {
                 # save the current request for later
@@ -136,10 +136,7 @@ class App
         
         # render the view, if not prevented
         if ($this->controller->render) {
-            $this->view->layout = $this->controller->layout;
-            $this->view->title = $this->controller->title;
-            
-            $this->view->render($this->controller->view, $this->controller->data);
+            $this->view->render($this->controller->view, $view_data);
             //$this->controller->_view();
         }
     }

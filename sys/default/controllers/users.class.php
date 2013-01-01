@@ -1,22 +1,18 @@
-<?php if (!defined('PEWPEWPEW')) exit('Forbidden');
+<?php
 
 /**
- * @package sys/default
+ * @package sys/default/controllers
  */
 
 /**
  * An example Users controller, to demonstrate common login and logout
  * procedures.The basic controller class, with some common methods and fields.
  * 
- * @version 0.2 4-april-2011
  * @author ifcanduela <ifcanduela@gmail.com>
- * @package sys/default
+ * @package sys/default/controllers
  */
 class Users extends Controller
 {
-    # no need to use the database, Auth takes over that
-    public $use_db = false;
-    
     /**
      * The login action displays a login form and validates its input
      *

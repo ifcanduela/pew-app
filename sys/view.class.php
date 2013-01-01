@@ -43,7 +43,7 @@ class View
      * @var string
      * @access public
      */
-    public $view = DEFAULT_ACTION;
+    public $view = '';
     
     /**
      * Layout name
@@ -51,7 +51,7 @@ class View
      * @var string
      * @access public
      */
-    public $layout = DEFAULT_LAYOUT;
+    public $layout = '';
     
     /**
      * Template data from the controller
@@ -77,13 +77,12 @@ class View
     public $title;
     
     /**
-     * @param PewRequest $request 
+     * 
      */
-    public function __construct(PewRequest $request)
+    public function __construct()
     {
-        $this->request = $request;
-        $this->session = Pew::Get('Session');
-        $this->auth = Pew::Get('Auth');
+        $this->request = Pew::request();
+        $this->session = Pew::session();
     }
     
     /**
@@ -96,7 +95,7 @@ class View
         $view_file = false;
         
         # Search in the app/views/{$controller} folder
-        if (!file_exists($view_file = VIEWS . $this->request->controller . DS . $this->view . VIEW_EXT)) {
+        if (!file_exists($view_file = Pew::config()->views_folder . $this->request->controller . DS . $this->view . Pew::config()->view_ext)) {
             # Search in the sys/default/views/{$controller} folder
             if (!file_exists($view_file = SYSTEM . '/default/views/' . $this->request->controller . DS . $this->view . '.php')) {
                 $view_file = false;
@@ -115,8 +114,8 @@ class View
     {
         # Check for special layouts in XML/JSON requests
         if ($this->request->output_type !== OUTPUT_TYPE_HTML) {
-            if (file_exists(VIEWS . $this->request->output_type . LAYOUT_EXT)) {
-                return VIEWS . $this->request->output_type . LAYOUT_EXT;
+            if (file_exists(VIEWS . $this->request->output_type . Pew::config()->layout_ext)) {
+                return VIEWS . $this->request->output_type . Pew::config()->layout_ext;
             } else {
                 return null;
             }
@@ -125,7 +124,7 @@ class View
         # If layout is falsy, use the framework default
         if (!$this->layout) {
             # Use the default layout file.
-            return SYSTEM . '/default/views/default.layout.php';
+            return Pew::config()->system_folder . '/default/views/default.layout.php';
         }
         
         # If layout is 'empty', the view does not use a layout
@@ -134,12 +133,12 @@ class View
         }
         
         # If the layout .php file cannot be found, show an error page.
-        if (!file_exists(VIEWS . $this->layout . LAYOUT_EXT)) {
-            new PewError(LAYOUT_MISSING, $this->layout);
+        if (!file_exists(Pew::config()->views_folder . $this->layout . Pew::config()->layout_ext)) {
+            new PewError(PewError::LAYOUT_MISSING, $this->layout);
         }
         
         # Return the configured layout file
-        return VIEWS . $this->layout . LAYOUT_EXT;
+        return Pew::config()->views_folder . $this->layout . Pew::config()->layout_ext;
     }
     
     /**
@@ -244,7 +243,7 @@ class View
     
     public function exists()
     {
-        return file_exists(VIEWS . $this->request->controller . DS . $this->request->action . VIEW_EXT);
+        return file_exists(Pew::config()->views_folder . $this->request->controller . DS . $this->request->action . Pew::config()->view_ext);
     }
     
     /**
@@ -258,9 +257,10 @@ class View
     public function element($element, $element_data = null)
     {
         # If the element .php file cannot be found, show an error page.
-        if (!file_exists(ELEMENTS . $element . '.php')) {
-            new PewError(ELEMENT_MISSING, $element);
+        if (!file_exists(Pew::config()->elements_folder . $element . Pew::config()->element_ext)) {
+            new PewError(PewError::ELEMENT_MISSING, $element);
         }
+
         # If there are variables, make them easily available to the template.
         if (is_array($element_data)) {
             extract($element_data);
@@ -268,7 +268,8 @@ class View
             $args = array_slice(func_get_args(), 1);
             extract($args, EXTR_PREFIX_ALL, 'param');
         }
+        
         # Render the element.
-        require ELEMENTS . $element . '.php';
+        require Pew::config()->elements_folder . $element . Pew::config()->element_ext;
     }
 }
