@@ -10,7 +10,6 @@
  * This is a class for error management, to be used by the framework. It can be
  * extended by the user.
  *
- * @version 0.3 20-oct-2011
  * @author ifcanduela <ifcanduela@gmail.com>
  * @package sys
  */

@@ -21,6 +21,11 @@
 class Pew
 {
     /**
+     * Special storage index for the main controller in the current request.
+     */
+    const CURRENT_REQUEST_CONTROLLER = '_current_request_controller_';
+
+    /**
      * The object store.
      *
      * @var array
@@ -44,11 +49,6 @@ class Pew
     protected static $paths = array();
 
     /**
-     * Special storage index for the main controller in the current request.
-     */
-    const CURRENT_REQUEST_CONTROLLER = '_current_request_controller_';
-
-    /**
      * Constructor is out of bounds.
      *
      * @access protected
@@ -58,9 +58,12 @@ class Pew
 
     public static function autoload($class)
     {
+        # build a filename        
         $filename = class_name_to_file_name($class) . self::$config['class_ext'];
 
+        # check if the file exists
         if (stream_resolve_include_path($filename)) {
+            # import it
             require_once $filename;
             return true;
         }
@@ -230,34 +233,43 @@ class Pew
      * @static
      * @throws InvalidArgumentException When no current controller exists and no class name is provided
      */
-    public static function controller($class_name = null, $argument_list = null)
+    public static function controller($controller_name = null)
     {
-        self::log()->debug("Loading controller $class_name");
+        self::log()->debug("Loading controller $controller_name");
 
         # check if the class name is omitted
-        if (!isset($class_name)) {
-            if (self::exists(CURRENT_REQUEST_CONTROLLER)) {
+        if (!isset($controller_name)) {
+            if (self::exists(self::CURRENT_REQUEST_CONTROLLER)) {
                 # if exists, return the current controller
-                $controller = self::get(self::CURRENT_REQUEST_CONTROLLER);
+                return self::get(self::CURRENT_REQUEST_CONTROLLER);
             } else {
                 # if not, throw an exception
                 throw new InvalidArgumentException("No controller could be retrieved");
             }
         } else {
-            $filename = self::$config['controllers_folder'] . class_name_to_file_name($class_name) . self::$config['class_ext'];
-            require_once $filename;
+            $class_name = file_name_to_class_name($controller_name);
+            if (!class_exists($class_name)) {
+                $filename = self::$config['controllers_folder'] . $controller_name . self::$config['class_ext'];
+                require_once $filename;
+            }
 
             if (self::exists($class_name)) {
                 # if the controller was previously instanced
                 $controller = self::get($class_name);
             } else  {
+
                 # instance the controller
                 $controller = new $class_name(self::request());
-                self::set($class_name, $controller);
+
                 # some dependency injection here
                 $controller->session = self::session();
                 $controller->auth = self::auth();
                 $controller->log = self::log();
+                $controller->view = self::view();
+
+                # save the controller to the registry
+                self::set($class_name, $controller);
+
                 # set the first controller that reaches this point as the current controller
                 if (!self::exists(self::CURRENT_REQUEST_CONTROLLER)) {
                     self::set(self::CURRENT_REQUEST_CONTROLLER, $controller);

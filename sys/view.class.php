@@ -7,7 +7,6 @@
 /**
  * This class encapsulates the view rendering functionality.
  * 
- * @version 0.5 29-apr-2012
  * @author ifcanduela <ifcanduela@gmail.com>
  * @package sys
  */
@@ -52,6 +51,13 @@ class View
      * @access public
      */
     public $layout = '';
+
+    /**
+     * Render the view or not.
+     * 
+     * @var boolean
+     */
+    public $render = true;
     
     /**
      * Template data from the controller
@@ -61,12 +67,28 @@ class View
     public $data = null;
     
     /**
-     * Base templates directory
+     * Base templates directory.
      * 
      * @var string
      * @access public
      */
-    public $template_dir = '';
+    public $folder = 'templates';
+
+    /**
+     * Template name.
+     * 
+     * @var string
+     * @access public
+     */
+    public $template = 'index';
+
+    /**
+     * Templates file extension.
+     * 
+     * @var string
+     * @access public
+     */
+    public $extension = '.php';
 
     /**
      * Default window title to use in the view.
@@ -87,19 +109,18 @@ class View
     
     /**
      * Finds the view file.
-     * 
+     *
+     * @param string $view View file to look for
      * @return string Full filesystem path to the view file
      */
-    public function get_view_file()
+    public function get_view_file($view = null)
     {
-        $view_file = false;
+        # folder and extension must be configured by the user
+        $view_file = $this->folder . $view . $this->extension;
         
-        # Search in the app/views/{$controller} folder
-        if (!file_exists($view_file = Pew::config()->views_folder . $this->request->controller . DS . $this->view . Pew::config()->view_ext)) {
-            # Search in the sys/default/views/{$controller} folder
-            if (!file_exists($view_file = SYSTEM . '/default/views/' . $this->request->controller . DS . $this->view . '.php')) {
-                $view_file = false;
-            }
+        # search in the templates folder
+        if (!file_exists($view_file)) {
+            $view_file = false;
         }
         
         return $view_file;
@@ -113,8 +134,8 @@ class View
     public function get_layout_file()
     {
         # Check for special layouts in XML/JSON requests
-        if ($this->request->output_type !== OUTPUT_TYPE_HTML) {
-            if (file_exists(VIEWS . $this->request->output_type . Pew::config()->layout_ext)) {
+        if ($this->request->output_type !== self::OUTPUT_TYPE_HTML) {
+            if (file_exists($this->template_dir . $this->request->output_type . Pew::config()->layout_ext)) {
                 return VIEWS . $this->request->output_type . Pew::config()->layout_ext;
             } else {
                 return null;
@@ -144,13 +165,15 @@ class View
     /**
      * Renders a view according to the request info
      *
-     * @param type $view View to render
      * @param type $data Template data
+     * @param type $view View to render
      */
-    public function render($view, $data)
+    public function render($data, $view = null)
     {
-        $this->view = $view;
         $this->data = $data;
+        if ($view) {
+            $this->view = $view;
+        }
         
         # Get the view file
         $view_file = $this->get_view_file();
@@ -244,6 +267,46 @@ class View
     public function exists()
     {
         return file_exists(Pew::config()->views_folder . $this->request->controller . DS . $this->request->action . Pew::config()->view_ext);
+    }
+
+    /**
+     * Set and get the templates folder.
+     *
+     *  Always includes a trailing slash (OS-dependent)
+     * 
+     * @param string $folder Folder where templates should be located
+     * @return string Folder where templates should be located
+     */
+    public function folder($folder = null)
+    {
+        if (isset($folder)) {
+            if (is_dir($folder)) {
+                $this->folder = trim($folder, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+            } else {
+                return false;
+            }
+        }
+
+        return trim($this->folder, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+    }
+
+    /**
+     * Set and get the templates to render.
+     * 
+     * @param string $template Name of the template
+     * @return string Name of the template
+     */
+    public function template($template = null)
+    {
+        if (isset($template)) {
+            if (file_exists($this->folder . $template . $this->extension)) {
+                $this->template = $template;
+            } else {
+                return false;
+            }
+        }
+
+        return $this->template;
     }
     
     /**

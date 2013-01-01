@@ -82,48 +82,42 @@ class App
      * @param string $params optional slash-separated string of url parameters
      * @access public
      */
-    public function run($uri_string = '')
+    public function run($uri_string = null)
     {
-        # get the URI segments, if they are available
-        if (!$uri_string && isset($_GET['url'])) {
-            $uri_string = $_GET['url'];
-        }
-        
-        # get the PewRequest object
-        $request = Pew::request($uri_string);
-        
-        # controller instantiation
-        $controller_class = file_name_to_class_name($request->controller);
-        $controller = Pew::controller($controller_class, $request);
+        # get the current request info
+        $request = Pew::request();
+
+        # instantiate a controller and a view
+        $controller = Pew::controller($request->controller);
         $view = $controller->view = Pew::view();
 
         # check controller instantiation
-        if (!is_object($this->controller)) {
+        if (!is_object($controller)) {
             if (file_exists(Pew::config()->views_folder . $request->controller . DS . $request->action . Pew::config()->view_ext)) {
                 # if the controller does not exist, but the view does, use Pages
                 $controller = Pew::controller('pages');
-                $view->templates_fir = $request->controller;
+                $view->templates_dir = $request->controller;
             } else {
                 # display an error page if the controller could not be instanced
                 new PewError(PewError::CONTROLLER_MISSING, $request);
             }
         }
-        
+
         # call the before_action method if it's defined
-        if (method_exists($this->controller, 'before_action')) {
-            $this->controller->before_action();
+        if (method_exists($controller, 'before_action')) {
+            $controller->before_action();
         }
-        
+
         # call the action method and let the controller decide what to do
-        $view_data = $this->controller->_action();
+        $view_data = $controller->_action();
         
         # check if the controller action requires authentication
         # @deprecated
-        if (Pew::config()->use_auth && $this->controller->require_auth) {
+        if (Pew::config()->use_auth && $controller->require_auth) {
             # check if the user is authenticated
-            if (!$this->auth->gate()) {
+            if (!Pew::auth()->gate()) {
                 # save the current request for later
-                $this->session->referrer = $request->uri;
+                Pew::session()->referrer = $request->uri;
                 # display the login page
                 redirect('users/login');
             }
@@ -135,9 +129,8 @@ class App
         }
         
         # render the view, if not prevented
-        if ($this->controller->render) {
-            $this->view->render($this->controller->view, $view_data);
-            //$this->controller->_view();
+        if ($view->render) {
+            $view->render($view_data);
         }
     }
 }
