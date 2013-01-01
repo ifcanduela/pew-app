@@ -97,7 +97,7 @@ class PewError extends Pages
                 break;
             # The file for the requested controller is not found in
             # app/controllers
-            case CONTROLLER_FILE_MISSING:
+            case self::CONTROLLER_FILE_MISSING:
                 $error_title = 'Controller File Missing';
                 $controller_name = $this->subject[1];
                 $controller_file_name = class_name_to_file_name($this->subject[1]) . '.class.php';
@@ -112,7 +112,7 @@ ERROR_TEXT;
                 
             # The class for the requested controller is not defined in the
             # controller file
-            case CONTROLLER_CLASS_MISSING:
+            case self::CONTROLLER_CLASS_MISSING:
                 $error_title = 'Controller Class Missing';
                 $controller_name = $this->subject[1];
                 $controller_file_name = $this->subject[2];
@@ -126,7 +126,7 @@ ERROR_TEXT;
                 
             # The class for the requested controller is not defined in the
             # controller file
-            case ACTION_MISSING:
+            case self::ACTION_MISSING:
                 $error_title = 'Action Missing';
                 $controller_name = get_class($this->subject[1]);
                 $action_name = $this->subject[2];
@@ -142,7 +142,7 @@ ERROR_TEXT;
             # The file for the model is not found in app/models
             # This error should not happen: if the file is not found, the base
             # Model class is instanced and a warning is logged
-            case MODEL_FILE_MISSING:
+            case self::MODEL_FILE_MISSING:
                 $error_title = 'Embarrasing Error';
                 $model_name = $this->subject[1];
                 $model_file_name = $this->subject[2] . MODEL_EXT;
@@ -157,7 +157,7 @@ ERROR_TEXT;
             
             # The file for the model was found, but the correct Model class is
             # not defined therein
-            case LAYOUT_MISSING:
+            case self::LAYOUT_MISSING:
                 $error_title = 'Layout Missing';
                 $layout_file_name = $this->subject[1] . LAYOUT_EXT;
                 $folder = VIEWS;
@@ -168,7 +168,7 @@ ERROR_TEXT;
             
             # The file for the model was found, but the correct Model class is
             # not defined therein
-            case VIEW_MISSING:
+            case self::VIEW_MISSING:
                 $error_title = 'View Missing';
                 $view_file_name = $this->subject[2] . VIEW_EXT;
                 $folder = VIEWS . $this->subject[1];
@@ -180,7 +180,7 @@ ERROR_TEXT;
             
             # The file for the model was found, but the correct Model class is
             # not defined therein
-            case ELEMENT_MISSING:
+            case self::ELEMENT_MISSING:
                 $error_title = 'Element Missing';
                 $element_file_name = $this->subject[1] . ELEMENT_EXT;
                 $folder = ELEMENTS;
@@ -191,7 +191,7 @@ ERROR_TEXT;
             
             # The file for the model was found, but the correct Model class is
             # not defined therein
-            case LIBRARY_CLASS_MISSING:
+            case self::LIBRARY_CLASS_MISSING:
                 $error_title = 'Library Missing';
                 $library_name = class_name_to_file_name($this->subject[1]) . ELEMENT_EXT;
                 $library_name = $this->subject[1];
@@ -205,7 +205,7 @@ ERROR_TEXT;
             
             # The file for the model was found, but the correct Model class is
             # not defined therein
-            case LIBRARY_FILE_MISSING:
+            case self::LIBRARY_FILE_MISSING:
                 $error_title = 'Library Missing';
                 $library_file_name = $this->subject[1] . LIBRARY_EXT;
                 $library_name = file_name_to_class_name($this->subject[1]);
@@ -225,7 +225,7 @@ ERROR_TEXT;
                 break;
         }
         
-        require SYSTEM . 'default/views/error.layout.php';
+        require Pew::config()->default_folder . 'views/error.layout.php';
         
         exit();
     }
