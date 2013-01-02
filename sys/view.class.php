@@ -13,58 +13,24 @@
 class View
 {
     /**
-     * Current request object
+     * View helpers, accessed through __get and __set.
      * 
-     * @var PewRequest
-     * @access public
+     * @var array
+     * @access protected
      */
-    public $request = null;
-
-    /**
-     * Current request object
-     * 
-     * @var PewRequest
-     * @access public
-     */
-    public $session = null;
+    protected $helpers = array(
+        'session' => null,
+        'auth' => null,
+        'log' => null,
+        'request' => null,
+    );
     
     /**
-     * Auth object
-     * 
-     * @var Auth
-     * @access public
-     */
-    public $auth = null;
-        
-    /**
-     * View file name
-     * 
-     * @var string
-     * @access public
-     */
-    public $view = '';
-    
-    /**
-     * Layout name
-     * 
-     * @var string
-     * @access public
-     */
-    public $layout = '';
-
-    /**
-     * Render the view or not.
+     * Enable use of the Twig templating engine.
      * 
      * @var boolean
      */
-    public $render = true;
-    
-    /**
-     * Template data from the controller
-     * 
-     * @var array
-     */
-    public $data = null;
+    public $twig = false;
     
     /**
      * Base templates directory.
@@ -72,7 +38,7 @@ class View
      * @var string
      * @access public
      */
-    public $folder = 'templates';
+    protected $folder = 'app/views/';
 
     /**
      * Template name.
@@ -80,7 +46,15 @@ class View
      * @var string
      * @access public
      */
-    public $template = 'index';
+    protected $template = 'index';
+    
+    /**
+     * Layout name.
+     * 
+     * @var string
+     * @access public
+     */
+    protected $layout= 'index';
 
     /**
      * Templates file extension.
@@ -88,7 +62,7 @@ class View
      * @var string
      * @access public
      */
-    public $extension = '.php';
+    protected $extension = '.php';
 
     /**
      * Default window title to use in the view.
@@ -96,70 +70,16 @@ class View
      * @var string
      * @access public
      */
-    public $title;
+    public $title = '';
     
     /**
-     * 
+     * @access public
      */
-    public function __construct()
+    public function __construct(array $helpers = array())
     {
-        $this->request = Pew::request();
-        $this->session = Pew::session();
-    }
-    
-    /**
-     * Finds the view file.
-     *
-     * @param string $view View file to look for
-     * @return string Full filesystem path to the view file
-     */
-    public function get_view_file($view = null)
-    {
-        # folder and extension must be configured by the user
-        $view_file = $this->folder . $view . $this->extension;
-        
-        # search in the templates folder
-        if (!file_exists($view_file)) {
-            $view_file = false;
+        foreach ($helpers as $key => $value) {
+            $this->helpers[$key] = $value;
         }
-        
-        return $view_file;
-    }
-    
-    /**
-     * Finds the layout file.
-     * 
-     * @return string Full filesystem path to the layout file
-     */
-    public function get_layout_file()
-    {
-        # Check for special layouts in XML/JSON requests
-        if ($this->request->output_type !== self::OUTPUT_TYPE_HTML) {
-            if (file_exists($this->template_dir . $this->request->output_type . Pew::config()->layout_ext)) {
-                return VIEWS . $this->request->output_type . Pew::config()->layout_ext;
-            } else {
-                return null;
-            }
-        }
-        
-        # If layout is falsy, use the framework default
-        if (!$this->layout) {
-            # Use the default layout file.
-            return Pew::config()->system_folder . '/default/views/default.layout.php';
-        }
-        
-        # If layout is 'empty', the view does not use a layout
-        if ($this->layout === 'empty') {
-            return null;
-        }
-        
-        # If the layout .php file cannot be found, show an error page.
-        if (!file_exists(Pew::config()->views_folder . $this->layout . Pew::config()->layout_ext)) {
-            new PewError(PewError::LAYOUT_MISSING, $this->layout);
-        }
-        
-        # Return the configured layout file
-        return Pew::config()->views_folder . $this->layout . Pew::config()->layout_ext;
     }
     
     /**
@@ -168,50 +88,26 @@ class View
      * @param type $data Template data
      * @param type $view View to render
      */
-    public function render($data, $view = null)
+    public function render($data, $template = null)
     {
-        $this->data = $data;
-        if ($view) {
-            $this->view = $view;
+        if (!$template) {
+            $template = $this->template;
         }
         
         # Get the view file
-        $view_file = $this->get_view_file();
+        $template_file = $this->folder() . $template . $this->extension();
         
-        switch ($this->request->output_type) {
-            case OUTPUT_TYPE_HTML: 
-                # Show an error page if the file is not found
-                if (!$view_file) {
-                    new PewError(VIEW_MISSING, $this->request->controller, $this->request->action);
-                }
-                
-                if (USETWIG) {
-                    $output = $this->render_twig($view_file, $this->data);
-                } else {
-                    $output = $this->render_html($view_file, $this->data);
-                }
-                break;
-            case OUTPUT_TYPE_JSON: 
-                $output = $this->render_json($this->data);
-                break;
-            case OUTPUT_TYPE_XML: 
-                $output = $this->render_xml($this->data);
-                break;
+        if (!$template_file) {
+            throw new Exception("Template file not found: $template_file");
         }
         
-        # find the layout file
-        $layout_file = $this->get_layout_file();
-        
-        if (!is_null($layout_file)) {
-            if (USETWIG) {
-                $output = $this->render_twig($layout_file, array('output' => $output, 'title' => $this->title));
-            } else {
-                $output = $this->render_html($layout_file, array('output' => $output, 'title' => $this->title));
-            }
-            echo $output;
+        if ($this->twig) {
+            $output = $this->render_twig($template_file, $data);
         } else {
-            echo $output;
+            $output = $this->render_html($template_file, $data);
         }
+        
+        return $output;
     }
     
     /**
@@ -224,7 +120,7 @@ class View
     {
         # Return null if the view file does not exist
         if (!file_exists($template_file)) {
-            return null;
+            throw new Exception("Template file does not exist: $template_file");
         }
         
         # Make the variables directly accessible in the template.
@@ -233,16 +129,14 @@ class View
         # Output the view and save it into a buffer.
         ob_start();
             require $template_file;
-            $_template_output = ob_get_contents();
+            $template_output = ob_get_contents();
         ob_end_clean();
         
-        return $_template_output;
+        return $template_output;
     }
     
     public function render_twig($view_file, $data)
     {
-        Log::in('Using Twig');
-        
         Twig_Autoloader::register();
         
         $twig_loader = new Twig_Loader_Filesystem(VIEWS . $this->request->controller);
@@ -253,20 +147,17 @@ class View
     
     public function render_json()
     {
-        $this->layout = 'empty';
-        return $this->output = json_encode($this->data);
+        return json_encode($this->data);
     }
     
     public function render_xml()
     {
-        $this->layout = 'empty';
-        $this->output = array_to_xml($this->data, $this->request->controller);
-        return $this->output;
+        return array_to_xml($this->data, $this->request->controller);
     }
     
-    public function exists()
+    public function exists($template = null)
     {
-        return file_exists(Pew::config()->views_folder . $this->request->controller . DS . $this->request->action . Pew::config()->view_ext);
+        return file_exists($this->folder() . $template . $this->extension());
     }
 
     /**
@@ -279,7 +170,7 @@ class View
      */
     public function folder($folder = null)
     {
-        if (isset($folder)) {
+        if (!is_null($folder)) {
             if (is_dir($folder)) {
                 $this->folder = trim($folder, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
             } else {
@@ -298,8 +189,8 @@ class View
      */
     public function template($template = null)
     {
-        if (isset($template)) {
-            if (file_exists($this->folder . $template . $this->extension)) {
+        if (!is_null($template)) {
+            if (file_exists($this->folder() . $template . $this->extension())) {
                 $this->template = $template;
             } else {
                 return false;
@@ -308,20 +199,73 @@ class View
 
         return $this->template;
     }
+
+    /**
+     * Set and get the view file extension.
+     * 
+     * @param string $extension View file extension
+     * @return string View file extension
+     */
+    public function extension($extension = null)
+    {
+        if (!is_null($extension)) {
+            $this->extension = '.' . ltrim($extension, '.');
+        } else {
+            return false;
+        }
+
+        return '.' . ltrim($this->extension, '.');
+    }
+
+    /**
+     * Set and get the layout to use.
+     * 
+     * @param string $layout Name of the layout
+     * @return string Name of the layout
+     */
+    public function layout($layout = null)
+    {
+        if (!is_null($layout)) {
+            if (file_exists($this->folder() . $layout . $this->extension())) {
+                $this->layout = $layout;
+            } else {
+                return false;
+            }
+        }
+
+        return $this->layout;
+    }
+
+    /**
+     * Set and get the view title.
+     * 
+     * @param string $title The title of the view
+     * @return string The title of the view
+     */
+    public function title($title = null)
+    {
+        if (!is_null($title)) {
+            $this->title = $title;
+        }
+
+        return $this->title;
+    }
     
     /**
-     * Load a snippet into the current view.
+     * Load and outputs a snippet into the current view.
      * 
-     * @param string $element The snippet to be loaded
-     * @param array $element_data Additional variables for use in the template
+     * @param string $element The snippet to be loaded, relative to the templates folder
+     * @param array $element_data Additional variables for use in the element
      * @return void
      * @access public
      */
     public function element($element, $element_data = null)
     {
+        $element_file = $this->folder() . $element . $this->extension();
+        
         # If the element .php file cannot be found, show an error page.
-        if (!file_exists(Pew::config()->elements_folder . $element . Pew::config()->element_ext)) {
-            new PewError(PewError::ELEMENT_MISSING, $element);
+        if (!file_exists($element_file)) {
+            throw new Exception("The element file $element_file ould not be found.");
         }
 
         # If there are variables, make them easily available to the template.
@@ -333,6 +277,20 @@ class View
         }
         
         # Render the element.
-        require Pew::config()->elements_folder . $element . Pew::config()->element_ext;
+        require $element_file;
+    }
+    
+    public function __get($key)
+    {
+        if (!array_key_exists($key, $this->helpers)) {
+            throw new InvalidArgumentException("$key index not found in helpers array.");
+        }
+        
+        return $this->helpers[$key];
+    }
+    
+    public function __set($key, $value)
+    {
+        $this->helpers[$key] = $value;
     }
 }

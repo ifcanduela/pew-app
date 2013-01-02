@@ -15,46 +15,6 @@
 class App
 {
     /**
-     * The $auth variable is initialized if USEAUTH is true in config.php.
-     *
-     * @access public
-     * @var Auth
-     */
-    public $auth = null;
-	
-	/**
-     * The URL segments for the current request.
-     *
-     * @var string
-     * @access public
-     */
-    public $url = '';
-    
-    /**
-     * HTTP request-related data.
-     *
-     * @var array
-     * @access public
-     */
-    public $segments = array();
-    
-    /**
-     * The main controller.
-     *
-     * @var Controller
-     * @access public
-     */
-    public $controller = null;
-
-    /**
-     * The view object.
-     *
-     * @var View
-     * @access public
-     */
-    public $view = null;
-    
-    /**
      * Initialization of components.
      *
      * @access public
@@ -82,26 +42,32 @@ class App
      * @param string $params optional slash-separated string of url parameters
      * @access public
      */
-    public function run($uri_string = null)
+    public function run($url_segment = 'url')
     {
         # get the current request info
         $request = Pew::request();
+        $segments = $request->get($pathKeyName);
+        $request->route($segments);
 
         # instantiate a controller and a view
         $controller = Pew::controller($request->controller);
-        $view = $controller->view = Pew::view();
+        $view = Pew::view();
 
         # check controller instantiation
         if (!is_object($controller)) {
             if (file_exists(Pew::config()->views_folder . $request->controller . DS . $request->action . Pew::config()->view_ext)) {
                 # if the controller does not exist, but the view does, use Pages
                 $controller = Pew::controller('pages');
+                $controller->view = $view;
                 $view->templates_dir = $request->controller;
             } else {
                 # display an error page if the controller could not be instanced
                 new PewError(PewError::CONTROLLER_MISSING, $request);
             }
         }
+        
+        # assign the curreent view to the controller
+        $controller->view = $view;
 
         # call the before_action method if it's defined
         if (method_exists($controller, 'before_action')) {
@@ -113,7 +79,7 @@ class App
         
         # check if the controller action requires authentication
         # @deprecated
-        if (Pew::config()->use_auth && $controller->require_auth) {
+        if (Pew::config()->use_auth && $controller->auth->require() ){
             # check if the user is authenticated
             if (!Pew::auth()->gate()) {
                 # save the current request for later
@@ -124,13 +90,18 @@ class App
         }
 
         # call the after_action method if it's defined
-        if (method_exists($this->controller, 'after_action')) {
-            $this->controller->after_action();
+        if (method_exists($controller, 'after_action')) {
+            $controller->after_action();
         }
         
         # render the view, if not prevented
         if ($view->render) {
-            $view->render($view_data);
+            $output = $view->render($view_data);
+            
+            # render the layout
+            $layout = Pew::view('layout');
+            $layout->template($view->layout());
+            $layout->render(array('title' => $view->title, 'output' => $output));
         }
     }
 }
