@@ -25,23 +25,15 @@
  *      $pdb = new PewDatabase();
  *      $my_cat = $pdb->where(array('name' => 'Cuddles'))->single('cats');
  * 
- * @version 0.12 14-may-2012
  * @author ifcanduela <ifcanduela@gmail.com>
  * @package sys
- * @todo Decouple this class from DatabaseConfiguration
  */
 class PewDatabase
 {
-    /**
-     * Database singleton.
-     * 
-     * @var PewDatabase
-     * @access protected
-     * @static
-     * @deprecated since 0.9
-     */
-    protected static $instance;
     
+    const MYSQL  = 'mysql';
+    const SQLITE = 'sqlite';
+
     /**
      * PHP Data Object for database access.
      *
@@ -69,7 +61,7 @@ class PewDatabase
      * @var array
      * @access protected
      */
-    protected $_config = false;
+    protected $_config = array();
 
     /**
      * Last query run
@@ -202,9 +194,6 @@ class PewDatabase
      */
     protected $having_tags = array();
     
-    const MYSQL  = 'mysql';
-    const SQLITE = 'sqlite';
-    
     /**
      * Build the connection string and connect to the selected database engine.
      *
@@ -215,24 +204,15 @@ class PewDatabase
      * @access public
      * @throws InvalidArgumentException If the DB engine is not selected
      */
-    public function __construct($config)
+    public function __construct(array $config)
     {
-        if (!is_array($config)) {
-            debug_print_backtrace();
-            throw new Exception("No database configuration provided.");
-        }
-        $this->config['use'] = $config;
-        
-        if (!isset($this->config['use']['engine'])) {
-            debug_print_backtrace();
+        if (!isset($config['engine'])) {
             throw new InvalidArgumentException('Database engine was not selected');
         }
-        
-        self::$instance = $this;
+
+        $this->config = $config;
         
         $this->connect();
-        
-        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
     
     /**
@@ -244,7 +224,7 @@ class PewDatabase
     protected function connect()
     {
         if (!$this->_is_connected) {
-            extract($this->config['use']);
+            extract($this->config);
             
             try {
                 switch ($engine) {
@@ -264,7 +244,6 @@ class PewDatabase
                     break;
                 }
                 
-                $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
                 $this->_is_connected = true;
             } catch (PDOException $e) {
                 $this->_is_connected = false;
@@ -272,37 +251,26 @@ class PewDatabase
             }
          }
         
+        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
         return $this->_is_connected;
     }
-    
+
     /**
-     * Private to prevent multiple instances of the data access object.
-     *
-     * @return void
-     * @access protected
+     * Sets and retrieves the PDO instance in use.
+     * 
+     * @param PDO $pdo Set a PDO instance for the wrapper.
+     * @return PDO The PDO instance
      */
-    protected function __clone() { }
-    
-    /**
-     * Obtains a singleton instance of the Database.
-     *
-     * Call this static function to begin using the class.
-     *
-     * @return PewDatabase The instance of the PewDatabase class
-     * @access public
-     * @static
-     * @deprecated since 0.9
-     */
-    public static function instance()
+    public function pdo(PDO $pdo = null)
     {
-        if (!self::$instance) {
-            $classname = __CLASS__;
-            return self::$instance = new $classname;
+        if ($pdo) {
+            $this->pdo = $pdo;
         }
-        
-        return self::$instance;
+
+        return $this->pdo;
     }
-    
+        
     /**
      * Sets the FROM field for subsequent queries.
      *
@@ -481,7 +449,7 @@ class PewDatabase
         
         $pk = array();
         
-        switch ($this->config['use']['engine']) {
+        switch ($this->config['engine']) {
             case self::SQLITE:
                 $sql = "PRAGMA table_info({$table})";
                 $primary_key_index = 'pk';
@@ -532,7 +500,7 @@ class PewDatabase
         
         $cols = array();
         
-        switch ($this->config['use']['engine']) {
+        switch ($this->config['engine']) {
             case self::SQLITE:
                 $sql = "PRAGMA table_info({$table})";
                 $table_name_index = 'name';
@@ -663,7 +631,7 @@ class PewDatabase
         if (!$this->connect()) {
             throw new PDOException;
         }
-        
+
         # Try to prepare the statement
         if (!$stm = $this->pdo->prepare($query)) {
             throw new PDOException("Query could not be prepared: $query");

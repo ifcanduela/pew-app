@@ -7,16 +7,13 @@
 /**
  * An object registry.
  * 
- * The Pew class is a bastard registry/factory that contains singleton-like
+ * The Pew class is a hybrid registry/factory that contains singleton-like
  * instances of classes in the framework. It's implemented as a collection
- * of static methods that return instances of Controllers and Models.
+ * of static methods that return instances of Controllers, Models and other 
+ * classes.
  * 
- * This class does not do file lookups. The classes must either be available or
- * be loaded by autoloading functions.
- * 
- * @version 0.6 18-may-2012
- * @author ifcanduela <ifcanduela@gmail.com>
  * @package sys
+ * @author ifcanduela <ifcanduela@gmail.com>
  */
 class Pew
 {
@@ -56,14 +53,23 @@ class Pew
      */
     protected function __construct() { }
 
+    /**
+     * Class autoloader.
+     *
+     * Converts a class name into a file name and includes the file. Paths
+     * must be setup elsewhere.
+     * 
+     * @param string $class Class name
+     * @return boolean True on success, false otherwise
+     */
     public static function autoload($class)
     {
-        # build a filename        
+        # Build a filename        
         $filename = class_name_to_file_name($class) . self::$config['class_ext'];
 
-        # check if the file exists
+        # Check if the file exists
         if (stream_resolve_include_path($filename)) {
-            # import it
+            # Import it
             require_once $filename;
             return true;
         }
@@ -146,20 +152,24 @@ class Pew
      */
     public static function get($index, $arguments = array())
     {
-        if (!self::exists($index)) {
+        $registry = Registry::instance();
+        if (!isset($registry->$index)) {
             if (class_exists($index)) {
                 $reflection_class = new ReflectionClass($index);
-                self::$map[$index] = $reflection_class->newInstanceArgs($arguments);
+                $registry->$index = $reflection_class->newInstanceArgs($arguments);
             } else {
                 throw new Exception("Class $index could not be found.");
             }
         }
         
-        return self::$map[$index];
+        return $registry->$index;
     }
 
     /**
      * Obtains the current instance of the Pew-Pew-Pew application.
+     *
+     * The folder parameter must be a sub-folder of the folder in which the
+     * main index.php file resides.
      *
      * @param $app_folder Folder name that holds the application folders and files
      * @return App Instance of the application
@@ -168,45 +178,44 @@ class Pew
      */
     public static function app($app_folder)
     {
-        self::log()->debug("Starting app in $app_folder");
+        $registry = Registry::instance();
 
-        // load app/config/config.php
-        $app_config = include(getcwd() . DS . $app_folder . DS . 'config' . DS . 'config.php');
+        if (!isset($registry->App)) {
+            // load app/config/config.php
+            $app_config = include(getcwd() . DS . $app_folder . DS . 'config' . DS . 'config.php');
 
-        // merge user config with Pew config
-        self::$config = array_merge(self::$config, $app_config);
+            // merge user config with Pew config
+            self::$config = array_merge(self::$config, $app_config);
 
-        // add application path
-        self::$config['app_folder'] = getcwd() . DS . trim(basename($app_folder), '\\/') . DS;
+            // add application path
+            self::$config['app_folder'] = getcwd() . DS . trim(basename($app_folder), '\\/') . DS;
 
-        // update include_path
-        set_include_path(get_include_path() 
-                . PATH_SEPARATOR . self::$config['app_folder'] 
-                . PATH_SEPARATOR . self::$config['default_folder']
-                . PATH_SEPARATOR . self::$config['system_folder']
-            );
+            // update include_path
+            set_include_path(get_include_path() 
+                    . PATH_SEPARATOR . self::$config['app_folder'] 
+                    . PATH_SEPARATOR . self::$config['default_folder']
+                    . PATH_SEPARATOR . self::$config['system_folder']
+                );
 
-        // load app/config/bootstrap.php
-        if (file_exists(self::$config['app_folder'] . 'config' . DS . 'bootstrap.php')) {
-            require self::$config['app_folder'] . 'config' . DS . 'bootstrap.php';
+            // load app/config/bootstrap.php
+            if (file_exists(self::$config['app_folder'] . 'config' . DS . 'bootstrap.php')) {
+                require self::$config['app_folder'] . 'config' . DS . 'bootstrap.php';
+            }
+
+            // load app/config/database.php
+            if (file_exists(self::$config['app_folder'] . 'config' . DS . 'database.php')) {
+                self::$config['database_config'] = include self::$config['app_folder'] . 'config' . DS . 'database.php';
+            }
+
+            // load app/config/routes.php
+            if (file_exists(self::$config['app_folder'] . 'config' . DS . 'routes.php')) {
+                self::$config['routers_config'] = include self::$config['app_folder'] . 'config' . DS . 'routes.php';
+            }
+
+            $registry->App = new App($app_folder);
         }
 
-        // 5. load app/config/database.php
-        if (file_exists(self::$config['app_folder'] . 'config' . DS . 'database.php')) {
-            self::$config['database_config'] = include self::$config['app_folder'] . 'config' . DS . 'database.php';
-        }
-
-        // 6. load app/config/routes.php
-        if (file_exists(self::$config['app_folder'] . 'config' . DS . 'routes.php')) {
-            self::$config['routers_config'] = include self::$config['app_folder'] . 'config' . DS . 'routes.php';
-        }
-
-        if (!self::exists('app')) {
-            require __DIR__ . DS . 'app.class.php';
-            self::set('app', new App($app_folder));
-        }
-
-        return self::get('app');
+        return $registry->App;
     }
 
     /**
@@ -360,10 +369,10 @@ class Pew
     }
     
     /**
-     * Retrieves and initialises the PewRequest object for the current request.
+     * Retrieves and initialises the Request object for the current request.
      * 
      * @param string $uri_string A list of slash-separated segments.
-     * @return PewRequest The initialised request object
+     * @return Request The initialised request object
      * @throws Exception When the class does not exist.
      */
     public static function request($uri_string = null)
@@ -375,7 +384,7 @@ class Pew
             require_once __DIR__ . DS . 'pew_request.class.php';
 
             # instantiate the request object
-            $request = new PewRequest($uri_string);
+            $request = new Request($uri_string);
         
             # configure fallback controller and action
             $request->set_default(self::$config['default_controller'], self::$config['default_action']);
@@ -411,7 +420,9 @@ class Pew
      */
     public static function log()
     {
-        if (!self::exists('log')) {
+        $registry = Registry::instance();
+
+        if (!isset($registry->Log)) {
             self::set('log', new PewLog(self::$config['log_level']));
         }
 
@@ -425,11 +436,13 @@ class Pew
      */
     public static function session()
     {
-        if (!self::exists('session')) {
-            self::set('session', new Session());
+        $registry = Registry::instance();
+
+        if (!isset($registry->Session)) {
+            $registry->Session = new Session();
         }
 
-        return self::get('session');
+        return $registry->Session;
     }
 
     /**
