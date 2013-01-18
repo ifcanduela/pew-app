@@ -44,13 +44,19 @@ class App
      */
     public function run($url_segment = 'url')
     {
-        # get the current request info
         $request = Pew::request();
-        $segments = $request->get($pathKeyName);
-        $request->route($segments);
+        $urlSegments = $request->get($url_segment);
+
+        $match = $request->route($urlSegments);
+
+        if ($match) {
+            $request = $match;
+        }
+
+        $controller_name = $request->segment(0) ? $request->segment(0) : Pew::config()->default_controller;
 
         # instantiate a controller and a view
-        $controller = Pew::controller($request->controller);
+        $controller = Pew::controller($controller_name);
         $view = Pew::view();
 
         # check controller instantiation

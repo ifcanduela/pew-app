@@ -12,7 +12,6 @@
  * @var string Filesystem separator.
  */
 define('DS', DIRECTORY_SEPARATOR);
-
 /**
  * @var array Configuration array.
  */
@@ -116,6 +115,11 @@ $cfg['default_controller'] = 'pages';
 $cfg['default_action'] = 'index';
 
 /**
+ * @var array Configured routes
+ */
+$cfg['routes'] = array();
+
+/**
  * @var boolean Set to true to enable the use of the session functionality.
  */
 $cfg['use_session'] = false;
@@ -135,14 +139,7 @@ $cfg['use_auth'] = false;
  */
 $cfg['use_twig'] = false;
 
-require __DIR__ . DS .'functions.php';
-require __DIR__ . DS .'pew.class.php';
-
-Pew::config($cfg);
-
-spl_autoload_register(array('Pew', 'autoload'));
-
-return;
+return $cfg;
 
 /**
  * Application configuration

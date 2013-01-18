@@ -84,4 +84,11 @@ class Registry
     {
         return array_key_exists($key, $this->items);
     }
+
+    public function import(array $data)
+    {
+        foreach ($data as $key => $value) {
+            $this->items[$key] = $value;
+        }
+    }
 }

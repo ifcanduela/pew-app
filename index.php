@@ -6,23 +6,16 @@
  * To this file.
  * 
  * @name Front controller
- * @version 0.14 29-sep-2011
  * @author ifcanduela <ifcanduela@gmail.com>
  * @package app
  */
 
-# protection against direct access to scripts
-define('PEWPEWPEW', true);
+# framework bootstrap
+require 'sys/pew.class.php';
 
-# framework configuration
-require 'sys/config.php';
-
-# some benchmarking
-cfg('start_time', get_execution_time());
-
+# ...and the magic begins!
 try {
-    # ...and the magic begins!
-    Pew::Get('App')->run();
+    Pew::app('app')->run('url');
 } catch (Exception $e) {
     echo $e->getMessage();
 }

@@ -7,9 +7,8 @@
 /**
  * The Pages controller can serve static views, useful for help or about pages.
  * 
- * @version 0.5 13-mar-2012
+ * @package sys/default/controllers
  * @author ifcanduela <ifcanduela@gmail.com>
- * @package sys/default
  */
 class Pages extends Controller
 {
@@ -31,15 +30,13 @@ class Pages extends Controller
      * Instead of this:  /pages/view/my-view-name
      * The url would be: /pages/my-view-name
      * 
-     * @author ifcanduela <ifcanduela@gmail.com>
-     * @version 0.2 31-march-2011
      * @access public
      */
     public function _action()
     {
         # the title for the view
-        if ($this->view) {
-            $this->view->title = ucwords(str_replace('_', ' ', $this->parameters['action']));
+        if ($this->request->segment(1)) {
+            $this->view->title = ucwords(str_replace('_', ' ', $this->request->segment(1)));
         }
     }
 }

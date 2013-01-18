@@ -7,10 +7,9 @@
 /**
  * The basic controller class, with some common methods and fields.
  * 
- * @version 0.31 29-apr-2012
+ * @package sys
  * @author ifcanduela <ifcanduela@gmail.com>
  * @abstract
- * @package sys
  */
 abstract class Controller
 {
@@ -132,7 +131,7 @@ abstract class Controller
     /**
      * The request information. 
      * 
-     * @var PewRequest
+     * @var Request
      * @access public
      */
     public $request = null;
@@ -195,7 +194,6 @@ abstract class Controller
         
         # Controller file name in the CONTROLLERS folder.
         $this->file_name = class_name_to_file_name(get_class($this));
-        $this->view_folder = $request->controller;
 
         # Global action prefix override
         if (!$this->action_prefix && Pew::config()->action_prefix) {
@@ -237,22 +235,6 @@ abstract class Controller
             if (isset($parameters['named']) && count($parameters['named']) !== 0) {
                 $this->get += $parameters['named'];
             }
-
-            # Add proper GET data from the URL
-            if ($request->get) {
-                $this->get += $request->get;
-            }
-
-            if (empty($this->get)) {
-                $this->get = false;
-            }
-        }
-        
-        if (isset($this->parameters['action'])) {
-            # By default, the view name is the same as the action.
-            $this->view = $this->parameters['action'];
-        } else {
-            $this->view = DEFAULT_ACTION;
         }
     }
     

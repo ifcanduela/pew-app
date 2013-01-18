@@ -4,6 +4,8 @@
  * @package sys
  */
 
+require __DIR__ . DIRECTORY_SEPARATOR . 'functions.php';
+
 /**
  * An object registry.
  * 
@@ -17,20 +19,6 @@
  */
 class Pew
 {
-    /**
-     * Special storage index for the main controller in the current request.
-     */
-    const CURRENT_REQUEST_CONTROLLER = '_current_request_controller_';
-
-    /**
-     * The object store.
-     *
-     * @var array
-     * @access protected
-     * @static
-     */
-    protected static $map = array();
-
     /**
      * Framework and application configuration settings.
      * 
@@ -64,8 +52,8 @@ class Pew
      */
     public static function autoload($class)
     {
-        # Build a filename        
-        $filename = class_name_to_file_name($class) . self::$config['class_ext'];
+        # Build a filename
+        $filename = class_name_to_file_name($class) . '.class.php';
 
         # Check if the file exists
         if (stream_resolve_include_path($filename)) {
@@ -89,18 +77,6 @@ class Pew
     }
 
     /**
-     * Checks if an object is stored in the registry.
-     * 
-     * @param string $index Index to check
-     * @return bool True if the index is occupied, false if it's available
-     * @access public
-     */
-    public static function exists($index)
-    {
-        return array_key_exists($index, self::$map);
-    }
-
-    /**
      * Registers a constructor for a service.
      * 
      * @param string $service Service name
@@ -114,29 +90,6 @@ class Pew
         } else {
             throw new InvalidArgumentException("Service name and Class name must be strings");
         }
-    }
-
-    /**
-     * Stores an object in the registry.
-     * 
-     * This function does not overwrite storage indexes.
-     * 
-     * @param string $index The index to use for storage
-     * @param mixed $obj The item to store
-     * @return boolean true if the object was stored, false on error
-     * @access public
-     * @static
-     */
-    public static function set($index, $obj)
-    {
-        if (is_string($index)) {
-            if (!isset(self::$map[$index])) {
-                self::$map[$index] = $obj;
-                return $obj;
-            }
-        }
-        
-        return false;
     }
 
     /**
@@ -178,38 +131,44 @@ class Pew
      */
     public static function app($app_folder)
     {
+        spl_autoload_register(array('Pew', 'autoload'));
+
         $registry = Registry::instance();
+
+        $pew_config = require __DIR__ . DIRECTORY_SEPARATOR . 'config.php';
+        self::$config = new Registry();
+        self::$config->import($pew_config);
 
         if (!isset($registry->App)) {
             // load app/config/config.php
             $app_config = include(getcwd() . DS . $app_folder . DS . 'config' . DS . 'config.php');
 
             // merge user config with Pew config
-            self::$config = array_merge(self::$config, $app_config);
+            self::$config->import($app_config);
 
             // add application path
-            self::$config['app_folder'] = getcwd() . DS . trim(basename($app_folder), '\\/') . DS;
+            self::$config->app_folder = getcwd() . DS . trim(basename($app_folder), '\\/') . DS;
 
             // update include_path
             set_include_path(get_include_path() 
-                    . PATH_SEPARATOR . self::$config['app_folder'] 
-                    . PATH_SEPARATOR . self::$config['default_folder']
-                    . PATH_SEPARATOR . self::$config['system_folder']
+                    . PATH_SEPARATOR . self::$config->app_folder
+                    . PATH_SEPARATOR . self::$config->default_folder
+                    . PATH_SEPARATOR . self::$config->system_folder
                 );
 
             // load app/config/bootstrap.php
-            if (file_exists(self::$config['app_folder'] . 'config' . DS . 'bootstrap.php')) {
-                require self::$config['app_folder'] . 'config' . DS . 'bootstrap.php';
+            if (file_exists(self::$config->app_folder . 'config' . DS . 'bootstrap.php')) {
+                require self::$config->app_folder . 'config' . DS . 'bootstrap.php';
             }
 
             // load app/config/database.php
-            if (file_exists(self::$config['app_folder'] . 'config' . DS . 'database.php')) {
-                self::$config['database_config'] = include self::$config['app_folder'] . 'config' . DS . 'database.php';
+            if (file_exists(self::$config->app_folder . 'config' . DS . 'database.php')) {
+                self::$config->database_config = include self::$config->app_folder . 'config' . DS . 'database.php';
             }
 
             // load app/config/routes.php
-            if (file_exists(self::$config['app_folder'] . 'config' . DS . 'routes.php')) {
-                self::$config['routers_config'] = include self::$config['app_folder'] . 'config' . DS . 'routes.php';
+            if (file_exists(self::$config->app_folder . 'config' . DS . 'routes.php')) {
+                self::$config->routes = include self::$config->app_folder . 'config' . DS . 'routes.php';
             }
 
             $registry->App = new App($app_folder);
@@ -222,15 +181,15 @@ class Pew
      * Merges configuration arrays an return the resulting configuration.
      * 
      * @param array $config An array with configuration keys
-     * @return object Object with configuration properties
+     * @return Registry Object with configuration properties
      */
     public static function config(array $config = null)
     {
         if ($config) {
-            self::$config = array_merge(self::$config, $config);
+            self::$config->import = $config;
         }
 
-        return (object) self::$config;
+        return self::$config;
     }
 
     /**
@@ -243,14 +202,14 @@ class Pew
      * @throws InvalidArgumentException When no current controller exists and no class name is provided
      */
     public static function controller($controller_name = null)
-    {
-        self::log()->debug("Loading controller $controller_name");
+    {   
+        $registry = Registry::instance();
 
         # check if the class name is omitted
         if (!isset($controller_name)) {
-            if (self::exists(self::CURRENT_REQUEST_CONTROLLER)) {
+            if (isset($registry->CurrentRequestController)) {
                 # if exists, return the current controller
-                return self::get(self::CURRENT_REQUEST_CONTROLLER);
+                return $registry->CurrentRequestController;
             } else {
                 # if not, throw an exception
                 throw new InvalidArgumentException("No controller could be retrieved");
@@ -258,15 +217,14 @@ class Pew
         } else {
             $class_name = file_name_to_class_name($controller_name);
             if (!class_exists($class_name)) {
-                $filename = self::$config['controllers_folder'] . $controller_name . self::$config['class_ext'];
+                $filename = self::$config->controllers_folder . $controller_name . self::$config->class_ext;
                 require_once $filename;
             }
 
-            if (self::exists($class_name)) {
+            if (isset($registry->$class_name)) {
                 # if the controller was previously instanced
-                $controller = self::get($class_name);
+                $controller = $registry->$class_name;
             } else  {
-
                 # instance the controller
                 $controller = new $class_name(self::request());
 
@@ -277,11 +235,11 @@ class Pew
                 $controller->view = self::view();
 
                 # save the controller to the registry
-                self::set($class_name, $controller);
+                $registry->$class_name = $controller;
 
                 # set the first controller that reaches this point as the current controller
-                if (!self::exists(self::CURRENT_REQUEST_CONTROLLER)) {
-                    self::set(self::CURRENT_REQUEST_CONTROLLER, $controller);
+                if (!isset($registry->CurrentRequestController)) {
+                    $registry->CurrentRequestController = $controller;
                 }
             }
         }
@@ -303,22 +261,29 @@ class Pew
      */
     public static function model($class_name, $arguments = null)
     {
-        self::log()->debug("Loading model $class_name");
-        
+        $registry = Registry::instance();
+
         # Make sure the suffix "Model" is added to the class name
         if (substr($class_name, -5) !== 'Model') {
             $class_name .= 'Model';
         }
 
-        if (class_exists($class_name)) {
-            $obj = self::get($class_name, array(self::get_database()));
-        } else {
+        # Check that the model has not been previously instantiated
+        if (!isset($registry->$class_name)) {
+            # Instantiate Model if the derived class is not available
+            if (!class_exists($class_name)) {
+                $class_name = 'Model';
+            }
+        
+            # Dependencies
+            $db = self::database();
             $table_name = class_name_to_file_name(substr($class_name, 0, -5));
-            $obj = new Model(self::get_database(), $table_name);
-            self::set($class_name, $obj);
+
+            # Instantiation and storage
+            $registry->$class_name = new $class_name($db, $table);
         }
         
-        return $obj;
+        return $registry->$class_name;
     }
 
     /**
@@ -350,22 +315,23 @@ class Pew
      */
     public static function database($config = null)
     {
-        $use_db = self::$config['use_db'];
-        $db_config = self::$config['database_config'];
+        $registry = Registry::instance();
+        $use_db = self::$config->use_db;
+        $db_config = self::$config->database_config;
 
-        if (!self::exists('database')) {
+        if (!isset($registry->PewDatabase)) {
             if ($use_db !== false) {
                 $use = is_string($config) ? $config : (!is_string($use_db) ? 'default' : $use_db);
                 
                 if (isset($db_config[$use])) {
-                    self::set('database', new PewDatabase($db_config[$use]));
+                    $registry->PewDatabase = new PewDatabase($db_config[$use]);
                 } else {
                     throw new Exception("Database is disabled.");
                 }                
             }
         }
 
-        return self::get('database');
+        return $registry->PewDatabase;
     }
     
     /**
@@ -377,26 +343,17 @@ class Pew
      */
     public static function request($uri_string = null)
     {
-        if (self::exists('request')) {
-            $request = self::get('request');
-        } else {
+        $registry = Registry::instance();
 
-            require_once __DIR__ . DS . 'pew_request.class.php';
-
+        if (!isset($registry->Request)) {
             # instantiate the request object
-            $request = new Request($uri_string);
-        
-            # configure fallback controller and action
-            $request->set_default(self::$config['default_controller'], self::$config['default_action']);
-        
-            # process user-configured routes
-            $url = $request->remap($uri_string);
-        
-            # parse the resulting URI string (throws exception on error)
-            $request->parse($url);
+            $registry->Request = $request = new Request($uri_string);
+            foreach (self::$config->routes as $from => $to) {
+                $request->add_route($from, $to);
+            }
         }
 
-        return $request;
+        return $registry->Request;
     }
 
     /**
@@ -406,11 +363,15 @@ class Pew
      */
     public static function auth()
     {
-        if (!self::exists('auth')) {
-            self::set('auth', new Auth(self::database(), self::session()));
+        $registry = Registry::instance();
+
+        if (!isset($request->Auth)) {
+            $db = self::database();
+            $session = self::session();
+            $request->Auth = new Auth($db, $session);
         }
 
-        return self::get('auth');
+        return $registry->Auth;
     }
 
     /**
@@ -423,10 +384,10 @@ class Pew
         $registry = Registry::instance();
 
         if (!isset($registry->Log)) {
-            self::set('log', new PewLog(self::$config['log_level']));
+            $registry->Log = new PewLog(self::$config->log_level);
         }
 
-        return self::get('log');
+        return $registry->Log;
     }
 
     /**
@@ -451,28 +412,13 @@ class Pew
      * @return View A view object
      */
     public static function view($name = '') {
-        if (!self::exists('view' . $name)) {
-            $view =  new View();
-            self::set('view' . $name, $view);
+        $registry = Registry::instance();
+
+        if (!isset($registry->CurrentView)) {
+            $registry->CurrentView = new View;
         }
 
-        return self::get('view' . $name);
-    }
-
-    /**
-     * Resets the object store.
-     *
-     * This method will only reset the registry, it will not delete the objects
-     * previously created. Existing references will continue to work. This will
-     * allow to create objects different from the old ones.
-     *
-     * @return void
-     * @access public
-     * @static
-     */
-    public static function clean()
-    {
-        self::$map = array();
+        return $registry->CurrentView;
     }
 
     /**
@@ -495,10 +441,11 @@ class Pew
      */
     public static function __callStatic($key, $arguments)
     {
-        if (self::exists($key, self::$map)) {
-            return self::get($key);
+        $registry = Registry::instance();
+
+        if (isset($registry->$key)) {
+            return $registry->$key;
         } else {
-            xdebug_print_function_stack();
             throw new BadMethodCallException("No service configured for [$key]");
         }
     }

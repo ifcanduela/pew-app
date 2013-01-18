@@ -26,6 +26,13 @@ class View
     );
     
     /**
+     * Render the view or not.
+     * 
+     * @var boolean
+     */
+    public $render = true;
+    
+    /**
      * Enable use of the Twig templating engine.
      * 
      * @var boolean
@@ -283,6 +290,7 @@ class View
     public function __get($key)
     {
         if (!array_key_exists($key, $this->helpers)) {
+            debug_print_backtrace();
             throw new InvalidArgumentException("$key index not found in helpers array.");
         }
         
