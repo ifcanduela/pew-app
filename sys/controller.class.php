@@ -202,16 +202,15 @@ abstract class Controller
         
         # Function libraries
         # @todo Move this to the __get function
-        if ($this->libs) {
-            if (is_string($this->libs)) {
-                $this->libs = array($this->libs);
-            }
+        if (is_array($this->libs)) {
             foreach ($this->libs as $library_class_name) {
-                $this->libs[$library_class_name] = Pew::get_library($library_class_name);
+                $lib = Pew::library($library_class_name);
                 
-                if ($this->libs[$library_class_name] === false) {
-                    Log::in($this->libs[$library_class_name], 'Missing library file');
+                if ($lib === false) {
+                    throw new RuntimeException("Library $library_class_name cound not be found.");
                 }
+
+                $this->libs[$library_class_name] = $lib;
             }
         }
         

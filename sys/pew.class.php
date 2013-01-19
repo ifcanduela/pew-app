@@ -227,11 +227,6 @@ class Pew
             } else  {
                 # instance the controller
                 $controller = new $class_name(self::request());
-
-                # some dependency injection here
-                $controller->session = self::session();
-                $controller->auth = self::auth();
-                $controller->log = self::log();
                 $controller->view = self::view();
 
                 # save the controller to the registry
@@ -365,10 +360,13 @@ class Pew
     {
         $registry = Registry::instance();
 
-        if (!isset($request->Auth)) {
+        if (!isset($registry->Auth)) {
             $db = self::database();
             $session = self::session();
-            $request->Auth = new Auth($db, $session);
+            // if (!$db || !$session) {
+            //     throw new RuntimeException('Auth requires Database and Session providers');
+            // }
+            $registry->Auth = new Auth($db, $session);
         }
 
         return $registry->Auth;

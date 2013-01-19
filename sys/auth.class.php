@@ -64,7 +64,13 @@ class Auth
      */
     private $db = null;
     
-    public function __construct($db, $session)
+    /**
+     * Builds an instance of the Auth class
+     * 
+     * @param PewDatabase $db Database provides
+     * @param Session $session Session access provider
+     */
+    public function __construct(PewDatabase $db, Session $session)
     {
         $this->session = $session;
         $this->db = $db;
@@ -181,43 +187,44 @@ class Auth
     }
     
     /**
-     * Changes configuration parameters for the Auth instance.
-     * 
-     * @param String $property the Auth property to configure
-     * @param Mixed $value the value to be assigned to $property
-     * @access public
-     */
-    public function configure($property, $value)
-    {
-        if (in_array($property, array('fields', 'table', 'nothing_else'), true)) {
-            # if the property is in the allowed list, create or update it
-            $this->$property = $value;
-        } else {
-            # if not, trigger a run-time error
-            trigger_error('Attempt to initialize non-existent or forbidden property.');
-        }
-    }
-    
-    /**
      * Hashes a password using a default algorithm, or a custom_hash function
      * defined elsewhere by the user.
      * 
-     * @param array $user_info the user-provided fields from the form
-     * @param array $user      the existing user information from the database
+     * @param array $user_info The user-provided fields from the form
+     * @param array $dbdata The existing user information from the database
      * @access public
      */
-    public function password($userdata, $user = null)
+    public function password($userdata, $dbdata = null)
     {
         if (function_exists('custom_hash')) {
             # if the custom_hash function has been defined, use it
-            return custom_hash($userdata, $user);
+            return custom_hash($userdata, $dbdata);
         } else {
             # if not, use PHP's crypt function
-            if (isset($user)) {
-                return crypt($userdata[$this->fields['password']], $user[$this->fields['password']]);
-            } else {
-                return crypt($userdata[$this->fields['password']]);
+
+            $salt = null;
+            # Check if the user data from the db is available
+
+            if (isset($dbdata)) {
+               $salt = $dbdata[$this->fields['password']];
             }
+
+            return crypt($userdata[$this->fields['password']], $salt);
         }
+    }
+
+    /**
+     * Manages the URL to return to after login.
+     * 
+     * @param string $referrer URL string
+     * @return string URL string
+     */
+    public function referrer($referrer = null)
+    {
+        if (!is_null($referrer)) {
+            $this->session->referrer = $referrer;
+        }
+
+        return $this->session->referrer;
     }
 }

@@ -84,12 +84,11 @@ class App
         $view_data = $controller->_action();
         
         # check if the controller action requires authentication
-        # @deprecated
-        if (Pew::config()->use_auth && $controller->auth->require() ){
+        if (isset($controller->auth) && $controller->auth->require()) {
             # check if the user is authenticated
-            if (!Pew::auth()->gate()) {
+            if (!$controller->auth->gate()) {
                 # save the current request for later
-                Pew::session()->referrer = $request->uri;
+                $controller->auth->referrer($request->uri);
                 # display the login page
                 redirect('users/login');
             }

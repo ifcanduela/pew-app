@@ -7,15 +7,20 @@
  * a random value.
  *
  * @param array $input Array with credential used for login
- * @param array $data Array with credentials to compare
+ * @param array $data Array with credentials from DB
  * @return string The hashed data
- * @version 0.2 21-oct-2012
  * @author ifcanduela <ifcanduela@gmail.com>
  */
-//function custom_hash($input, $data)
-//{
-//    return md5($data['username'] . md5($data['password']));
-//}
+// function custom_hash($input, $data)
+// {
+//     $salt = null;
+    
+//     if (isset($data['password']) {
+//         $salt = $data['password'];
+//     }
+   
+//     return crypt($input['password'], $salt);
+// }
 
 /**
  * Bootstraps a SQLite file database.
@@ -29,7 +34,6 @@
  *
  * @param PDO $db PDO database handle
  * @return bool False on error
- * @version 0.1 03-aug-2011
  * @author ifcanduela <ifcanduela@gmail.com>
  */
 //function sqlite_init(PDO $db)

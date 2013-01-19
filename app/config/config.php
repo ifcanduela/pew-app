@@ -2,8 +2,6 @@
 
 return array(
 
-        'default_controller' => 'pages',
+        'application_title' => 'Pew-Pew-Pew',
 
-        'default_action' => 'index',
-        
     );

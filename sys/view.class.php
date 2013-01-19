@@ -127,6 +127,7 @@ class View
     {
         # Return null if the view file does not exist
         if (!file_exists($template_file)) {
+            var_dump(debug_backtrace());
             throw new Exception("Template file does not exist: $template_file");
         }
         
