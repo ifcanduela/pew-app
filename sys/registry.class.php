@@ -6,7 +6,7 @@
  * Can be instantiated with the new keyword or as s singleton through
  * the instance() method.
  *
- * @package sys
+ * @package pew
  * @author ifcanduela <ifcanduela@gmail.com>
  */
 class Registry

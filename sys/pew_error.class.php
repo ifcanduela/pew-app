@@ -1,17 +1,13 @@
 <?php
 
 /**
- * @package sys
- */
-
-/**
  * Error management class.
  *
  * This is a class for error management, to be used by the framework. It can be
  * extended by the user.
  *
  * @author ifcanduela <ifcanduela@gmail.com>
- * @package sys
+ * @package pew
  */
 class PewError extends Pages
 {

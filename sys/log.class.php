@@ -1,200 +1,210 @@
-<?php
+<?php 
 
 /**
- * package sys
- */
-
-/**
- * The Log class manages debugging messages.
+ * Class PewLog
  * 
- * To use the Log class, call Log::in() with one or two String parameters
- * wherever in your application. To display the logged values, use Log::out()
- * in a view or layout, or modify app.class.php to output the Log after the view
- * is rendered.
+ * Logs activities, including timestamps and levels.
  * 
- * Use Log::to_file and provide a filename and an optional directory to save the
- * contents of the log to a file.
- *
- * The Log::out() method prints the log event if DEBUG is 0. On the other hand,
- * the Debug element (available by default) is aware of the DEBUG constant and
- * will only work if DEBUG is greater than 0.
- *
- * @version 0.4 16-may-2012
+ * @package pew
  * @author ifcanduela <ifcanduela@gmail.com>
- * @package sys
- */
+*/
 class Log
 {
     /**
-     * Stores the entries to the log, in numeric or string indexes.
-     *
+     * Error level constants.
+     */
+    const DEBUG = 0;
+    const INFO  = 2;
+    const ALERT = 4;
+    const ERROR = 6;
+    const FATAL = 8;
+    const OFF   = 10;
+
+    /**
+     * String labels for the error level constants
+     * 
+     * @var array
+     * @access protected
+     */
+    protected $_level_names = array(
+            self::DEBUG => 'DEBUG',
+            self::INFO =>  'INFO',
+            self::ALERT => 'ALERT',
+            self::ERROR => 'ERROR',
+            self::FATAL => 'FATAL',
+            self::OFF   => '',
+        );
+
+    /**
+     * String labels for the error level constants.
+     * 
      * @var array
      * @access protected
      */
     protected $_log = array();
-
-    public function __construct()
-    {
-        $this->_log = array();
-    }
-
-    /**
-     * Appends entries to the log.
-     *
-     * @param string $value The value to be logged
-     * @param string $title A title for the logged value
-     * @param array $caller_data An associative array with function, line and file indexes
-     * @return void
-     * @access public
-     */
-    public function in($value, $title = null, array $caller_data = null)
-    {
-        # Current timestamp
-        $time = microtime(true);
-        
-        # Function name, file name and line number which called in()
-        $backtrace = debug_backtrace();
-        $caller_info = $backtrace[0];
-        $caller_info['function'] = isset($backtrace[1]) ? $backtrace[1]['function'] : 'main';
-        $caller_info = array_merge($caller_info, (array) $caller_data);
-
-        $caller['file'] = $caller_info['file'];
-        $caller['line'] = $caller_info['line'];
-        $caller['function'] = $caller_info['function'];
-
-        # Collect log entry info
-        $entry = compact('time', 'caller', 'value', 'title');
-
-        # Add entry to log
-        $this->_log[] = $entry;
-        
-        # Return entry
-        return $entry;
-    }
     
     /**
-     * Prints and returns the contents of the log.
-     *
-     * @param  bool $print If false, the output is not printed
-     * @return string|bool Returns false when there is no output
-     * @access public
+     * String format for the date field in the lof.
+     * 
+     * @var string
+     * @access protected
      */
-    function out($print = true)
+     protected $_date_format = 'Y-m-d';
+    
+    /**
+     * String format for the date field in the lof.
+     * 
+     * @var string
+     * @access protected
+     */
+    protected $_time_format = 'H:m:s';
+
+    /**
+     * Folder name where the log files are saved.
+     * 
+     * @var string
+     * @access protected
+     */
+    protected $_log_folder = 'logs';
+    
+    /**
+     * File name for the log output.
+     * 
+     * @var string
+     * @access protected
+     */
+    protected $_log_filename = null;
+
+    /**
+     * Class constructor.
+     *
+     * @param string $filename    Name of the log file
+     * @param string $date_format Date format
+     * @param string $time_format Time format
+     */
+    function __construct($filename = null, $date_format = null, $time_format = null)
     {
-        if ($this->_log && count($this->_log)) {
+        if (!is_string($filename)) {
+            $filename = date('Y-m-d') . 'log.txt';
+        }
 
-            ob_start();
+        $this->log_file($filename);
+        $this->level(self::OFF);
+        $this->date_format($date_format);
+        $this->time_format($time_format);
+    }
 
-            echo '<dl id="asterisc-log">' . PHP_EOL;
-            foreach ($this->_log as $key => $value) {
-                echo "<dt>Logged: <em>{$value['title']} ({$value['time']})</em></dt>" . PHP_EOL;
-                echo '<dd>' . PHP_EOL;
-                var_dump($value['value']);
-                echo '</dd>' . PHP_EOL;
-            } // foreach _log
-            echo '</dl> <!-- asterisc-log -->' . PHP_EOL;
-            
-            $log_contents = ob_get_contents();
-            ob_end_clean();
+    function __destruct()
+    {
+        $this->dump();
+    }
 
-            if ($print) {
-                echo $log_contents;
-            }
+    protected function log($message, $level = self::INFO)
+    {
+        $time = time();
 
-            return $log_contents;
-        }  else {
-            return false;
+        $this->_log[$time] = array(
+                'level' => $this->get_level_name($level),
+                'message' => $message,
+                'date' => date($this->date_format(), $time),
+                'time' => date($this->time_format(), $time),
+            );
+    }
+
+    public function alert($message)
+    {
+        $this->log($message, self::ALERT);
+    }
+
+    public function debug($message)
+    {
+        $this->log($message, self::DEBUG);        
+    }
+
+    public function error($message)
+    {
+        $this->log($message, self::ERROR);
+    }
+
+    public function fatal($message)
+    {
+        $this->log($message, self::FATAL);
+    }
+
+    public function info($message)
+    {
+        $this->log($message, self::INFO);
+    }
+
+    public function get_level_name($level)
+    {
+        if (array_key_exists($level, $this->_level_names)) {
+            return $this->_level_names[$level];
+        } else {
+            return null;
         }
     }
-    
-    function to_file($filename, $location = null)
+
+    public function date_format($format = null)
     {
-        if ($this->_log) {
-            if (!$location) {
-                $location = ROOT . 'logs';
-            } else {
-                $location = rtrim($location, "/\\") . DIRECTORY_SEPARATOR;
+        if (is_string($format)) {
+            $this->_date_format = $format;
+        }
+        
+        return $this->_date_format;
+    }
+
+    public function dump($clear = true)
+    {
+        if (count($this->_log) > 0) {
+            if (!is_dir(dirname($this->log_file()))) {
+                mkdir(dirname($this->log_file()));
             }
-            
-            if (!file_exists($location)) {
-                if (!mkdir($location) || !file_exists($location)) {
-                    return false;
+
+            $entries = array();
+
+            foreach ($this->_log as $entry) {
+                if ($entry['level'] > $this->level()) {
+                    extract($entry);
+                    $entries[] = "[{$date} {$time}] --{$level}-- {$message}" . PHP_EOL;
                 }
             }
-            
-            $log_contents = "Log started on " . date(DATE_RFC822) . PHP_EOL;
-            $log_contents .= "- - - - -" . PHP_EOL;
-            
-            foreach ($this->_log as $k => $entry) {
-                $log_contents .= $entry['time'] . ' ' . ($entry['title'] ? : '') . PHP_EOL;
-                $log_contents .= $entry['caller']['file'] . ':' . $entry['caller']['line'] . ' >> ' . $entry['caller']['function'] . PHP_EOL;
-                $log_contents .= print_r($entry['value'], true) . PHP_EOL;
-                $log_contents .= "- - - - -" . PHP_EOL;
+
+            if (!empty($entries)) {
+                file_put_contents($this->log_file(), join('', $entries), FILE_APPEND);
             }
-            
-            file_put_contents($location . DIRECTORY_SEPARATOR . $filename, $log_contents);
+
+            if ($clear) {
+                $this->_log = array();
+            }
         }
     }
-    
-    /**
-     * Prints and returns the contents of the $_SESSION variable.
-     * 
-     * @param  boolean $print If false, the log is not printed
-     * @return string|bool The contents of the log, or false if there is no session
-     * @deprecated 2012.5.21
-     */
-    function session($print = true)
+
+    public function level($level = null)
     {
-        # Check if the session is in use
-        if (isset($_SESSION) and count($_SESSION > 0)) {
-            
-            ob_start();
+        if (is_numeric($level)) {
+            $this->_log_level = $level;
+        }
 
-            echo '<dl id="session-log">' . PHP_EOL;
-            foreach ($_SESSION as $key => $value) {
-                echo "<dt>Logged: <em>{$key}</em></dt>" . PHP_EOL;
-                echo '<dd>' . PHP_EOL;
-                var_dump($value);
-                echo '</dd>' . PHP_EOL;
-            } // foreach _log
-            echo '</dl> <!-- asterisc-log -->' . PHP_EOL;
-            
-            $log_contents = ob_get_contents();
-            ob_end_clean();
+        return $this->_log_level;
+    }
 
-            if ($print){
-                echo $log_contents;
-            }
-
-            return $log_contents;
+    public function log_file($filename = null)
+    {
+        if (is_string($filename)) {
+            $this->_log_folder = dirname($filename);
+            $this->_log_filename = basename($filename);
         }
         
-        return false;
+        return $this->_log_folder . DIRECTORY_SEPARATOR . $this->_log_filename;
     }
 
-    /**
-     * Remove the previously logged entries.
-     * 
-     * @return int Amount of log entries removed
-     */
-    function clear()
+    public function time_format($format = null)
     {
-        # Count the amount of items that will be removed
-        $count = $this->count();
+        if (is_string($format)) {
+            $this->_time_format = $format;
+        }
 
-        # Reset the log
-        $this->_log = array();
-
-        return $count;
-    }
-
-    /**
-     * Count the number of log entries.
-     * 
-     * @return int Amount of entries currently in the log
-     */
-    function count()
-    {
-        return count($this->_log);
+        return $this->_time_format;
     }
 }

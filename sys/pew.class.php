@@ -1,10 +1,6 @@
 <?php
 
-/**
- * @package sys
- */
-
-require __DIR__ . DIRECTORY_SEPARATOR . 'functions.php';
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'functions.php';
 
 /**
  * An object registry.
@@ -14,7 +10,7 @@ require __DIR__ . DIRECTORY_SEPARATOR . 'functions.php';
  * of static methods that return instances of Controllers, Models and other 
  * classes.
  * 
- * @package sys
+ * @package pew
  * @author ifcanduela <ifcanduela@gmail.com>
  */
 class Pew

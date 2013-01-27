@@ -1,10 +1,6 @@
 <?php
 
 /**
- * @package sys
- */
-
-/**
  * The PewDatabase class encapsulates database access.
  *
  * PewDatabase implements PHP Data Objects (PDO) to provide a homogeneous
@@ -25,8 +21,8 @@
  *      $pdb = new PewDatabase();
  *      $my_cat = $pdb->where(array('name' => 'Cuddles'))->single('cats');
  * 
+ * @package pew
  * @author ifcanduela <ifcanduela@gmail.com>
- * @package sys
  */
 class PewDatabase
 {

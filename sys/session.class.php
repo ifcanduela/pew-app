@@ -1,15 +1,10 @@
 <?php
 
 /**
- * @package sys
- */
-
-/**
  * A simple session management class.
  *
- * @version 0.5 03-oct-2011
+ * @package pew
  * @author ifcanduela <ifcanduela@gmail.com>
- * @package sys
  */
 class Session
 {

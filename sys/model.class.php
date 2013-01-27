@@ -1,15 +1,10 @@
 <?php
 
 /**
- * @package sys
- */
-
-/**
  * The basic model class, with database description and access methods.
  *
- * @version 0.11 22-sep-2011
+ * @package pew
  * @author ifcanduela <ifcanduela@gmail.com>
- * @package sys
  */
 class Model
 {

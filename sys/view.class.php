@@ -1,14 +1,10 @@
 <?php
 
 /**
- * @package sys
- */
-
-/**
  * This class encapsulates the view rendering functionality.
  * 
+ * @package pew
  * @author ifcanduela <ifcanduela@gmail.com>
- * @package sys
  */
 class View
 {

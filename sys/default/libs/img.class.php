@@ -1,13 +1,6 @@
 <?php
 
 /**
- * @package sys
- */
- 
-defined('THUMBNAIL_WIDTH')  or define('THUMBNAIL_WIDTH',  100);
-defined('THUMBNAIL_HEIGHT') or define('THUMBNAIL_HEIGHT', 100);
-
-/**
  * The Img library class contains simple methods to manage pictures.
  * 
  * The user can load a picture from the local drives or use a submitted form
@@ -17,9 +10,8 @@ defined('THUMBNAIL_HEIGHT') or define('THUMBNAIL_HEIGHT', 100);
  * The Img class methods employ the GD image library functions, since installing
  * ImageMagick is such a pain in the ass -- at least for Windows.
  *
- * @version 0.4 22-jul-2011
+ * @package pew/default/libs
  * @author ifcanduela <ifcanduela@gmail.com>
- * @package sys
  */
 class Img
 {

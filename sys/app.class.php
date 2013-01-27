@@ -1,16 +1,11 @@
 <?php
 
 /**
- * @package sys
- */
-
-/**
  * The App class is a simple interface between the front controller and the
  * rest of the controllers.
  * 
- * @version 0.20 13-mar-2012
+ * @package pew
  * @author ifcanduela <ifcanduela@gmail.com>
- * @package sys
  */
 class App
 {

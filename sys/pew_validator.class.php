@@ -1,10 +1,6 @@
 <?php
 
 /**
- * @package sys
- */
-
-/**
  * A class to validate values against one or multiple rules.
  *
  * The available validation rules are:
@@ -20,9 +16,8 @@
  * - is_email:value
  * - is_in_array:value:val1:val3:...:valN
  *
- * @version 0.1 05-10-2011
+ * @package pew
  * @author ifcanduela <ifcanduela@gmail.com>
- * @package sys
  */
 class PewValidator
 {

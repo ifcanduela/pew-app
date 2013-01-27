@@ -1,13 +1,9 @@
 <?php
 
 /**
- * @package sys/default/controllers
- */
-
-/**
  * The Pages controller can serve static views, useful for help or about pages.
  * 
- * @package sys/default/controllers
+ * @package pew/default/controllers
  * @author ifcanduela <ifcanduela@gmail.com>
  */
 class Pages extends Controller

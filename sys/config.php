@@ -1,17 +1,18 @@
 <?php
 
 /**
- * @package sys
- */
-
-/******************************************************************************
+ ******************************************************************************
  *     P E W - P E W - P E W   D E F A U L T   C O N F I G U R A T I O N      *
- *******************************IT**BEGINS**NAO********************************/
+ *******************************IT**BEGINS**NAO********************************
+ *
+ * @package pew
+ */
 
 /**
  * @var string Filesystem separator.
  */
 define('DS', DIRECTORY_SEPARATOR);
+
 /**
  * @var array Configuration array.
  */

@@ -1,17 +1,13 @@
 <?php
 
 /**
- * @package sys
- */
-
-/**
  * The Request class handles data coming from the server.
  * 
  * This class is meant to simplify handling of requests inside the App class and
  * provide a reusable repository of general information about the current task
  * of the application.
  *
- * @package sys
+ * @package pew
  * @author ifernandez <ifcanduela@gmail.com>
  */
 class Request

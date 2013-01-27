@@ -1,13 +1,9 @@
 <?php
 
 /**
- * @package sys
- */
-
-/**
  * The basic controller class, with some common methods and fields.
  * 
- * @package sys
+ * @package pew
  * @author ifcanduela <ifcanduela@gmail.com>
  * @abstract
  */

@@ -1,15 +1,11 @@
 <?php
 
 /**
- * @package sys/default/controllers
- */
-
-/**
  * An example Users controller, to demonstrate common login and logout
  * procedures.The basic controller class, with some common methods and fields.
  * 
+ * @package pew/default/controllers
  * @author ifcanduela <ifcanduela@gmail.com>
- * @package sys/default/controllers
  */
 class Users extends Controller
 {

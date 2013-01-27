@@ -1,17 +1,10 @@
 <?php 
 
 /**
- * @package sys
- */
-
-/**
  * User login data and procedures.
  * 
- * @uses PewDatabase Database access is required to retrieve user information
- * @uses Session Session management is made through the Session class
- * @version 0.1 15-mar-2011
+ * @package pew
  * @author ifcanduela <ifcanduela@gmail.com>
- * @package sys
  */
 class Auth
 {

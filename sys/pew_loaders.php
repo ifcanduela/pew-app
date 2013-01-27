@@ -1,6 +1,10 @@
 <?php
 
 /**
+ * @package pew
+ */
+
+/**
  * Function that loads classes from the global include path
  * 
  * This should be used to autoload PEAR clases by adding the PEAR folder to

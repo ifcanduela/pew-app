@@ -1,9 +1,11 @@
 <?php
 
 /**
- * This class can save PHP data to files and retrieve said data.
+ * This class just saves and leads PHP data to files, checking the dates
+ * of the files.
  *
- * @author Igor F. Canduela <ifcanduela@gmail.com>
+ * @package pew/default/libs
+ * @author ifcanduela <ifcanduela@gmail.com>
  */
 class Cache
 {
@@ -74,7 +76,7 @@ class Cache
      * @param integer $interval Number of seconds
      * @return boolean True is the file is in the cache, false otherwise
      */
-    public function cached($filename, $interval = null)
+    public function check($filename, $interval = null)
     {
         $file = $this->folder . DIRECTORY_SEPARATOR . $filename;
 
@@ -98,7 +100,7 @@ class Cache
      * @param mixed $data Data to cache
      * @return boolean False on file write failure, othewise size of cache file
      */
-    public function set($filename, $data)
+    public function write($filename, $data)
     {
         $file = $this->folder. DIRECTORY_SEPARATOR . $filename;
         $serialized_data = serialize($data);
@@ -116,7 +118,7 @@ class Cache
      * @param string $filename Name of the cache file
      * @return mixed Data read
      */
-    public function get($filename)
+    public function read($filename)
     {
         $file = $this->folder . DIRECTORY_SEPARATOR . $filename;
         
@@ -131,5 +133,19 @@ class Cache
         }
 
         return unserialize($serialized_data);
+    }
+
+    public function __get($key)
+    {
+        if ($this->check($key)) {
+            return $this->read($key);
+        }
+
+        return null;
+    }
+
+    public function __set($key, $value)
+    {
+        return $this->write($key, $value);
     }
 }

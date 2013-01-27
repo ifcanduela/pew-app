@@ -1,10 +1,6 @@
 <?php 
 
 /**
- * @package sys
- */
-
-/**
  * Gathers css and js files and outputs them where requested.
  *
  * Use this class by calling the add_css and add_js static methods in the
@@ -18,9 +14,8 @@
  * LESS files into CSS files (using the less-php library by Leaf Corcoran 
  * (http://leafo.net/lessphp).
  * 
- * @version 0.4 16-may-2012
+ * @package pew
  * @author ifcanduela <ifcanduela@gmail.com>
- * @package sys
  */
 class Asset
 {

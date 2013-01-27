@@ -1,7 +1,9 @@
 <?php 
 
 /**
- * @package sys
+ * Assorted functions and shortcuts.
+ * 
+ * @package pew
  */
 
 /**
