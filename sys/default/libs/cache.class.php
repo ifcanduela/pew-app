@@ -1,11 +1,9 @@
 <?php
 
 /**
- * This class just saves and leads PHP data to files, checking the dates
- * of the files.
+ * This class can save PHP data to files and retrieve said data.
  *
- * @package pew/default/libs
- * @author ifcanduela <ifcanduela@gmail.com>
+ * @author Igor F. Canduela <ifcanduela@gmail.com>
  */
 class Cache
 {
@@ -20,9 +18,19 @@ class Cache
     private $folder = '';
 
     /**
-     * @var boolean Use gzip compression in cache files
+     * @var boolean Use Gzip compression in cache files
      */
     private $gzip = true;
+
+    /**
+     * @var boolean Whether Gzip funcionality is available
+     */
+    private $gzip_enabled = true;
+
+    /**
+     * @var string Suffix for Gziped cache files
+     */
+    private $gzip_suffix = '.gz';
 
     /**
      * Create a cache manager.
@@ -34,30 +42,53 @@ class Cache
         $this->folder = $folder;
         $this->interval($seconds);
 
+        # Create the cache folder if it does not exist
         if (!is_dir($this->folder)) {
             mkdir($this->folder, 0777, true);
+        }
+
+        # The gzencode function exists in PHP 5.3, but gzdecode caould not exist
+        if (!function_exists('gzdecode')) {
+            # If there is not gzdecode function, disable Gzip functionality
+            $this->gzip_enabled = false;
+            $this->gzip = false;
         }
     }
 
     /**
-     * Configure Gzip compression of cached files.
+     * Enable, disable or check the status of the Gzip functionality.
      * 
-     * @param boolean $gzip Enable or disable compression
-     * @return boolean Current compression configuration
+     * @param boolean $gzip Either true, false or null
+     * @return boolean True if Gzip is available and enabled, false otherwise
      */
     public function gzip($gzip = null)
     {
-        if (!is_null($gzip)) {
-            $this->gzip = $gzip;
+        if ($this->gzip_enabled && !is_null($gzip)) {
+            $this->gzip = $this->gzip_enabled && $gzip;
         }
 
         return $this->gzip;
     }
 
     /**
-     * Configure the default interval.
+     * Set or get the suffix for Gzipped cache files.
      * 
-     * @param integer $seconds Seconds
+     * @param string $gzip Either true, false or null
+     * @return string The current suffix
+     */
+    public function gzip_suffix($suffix = null)
+    {
+        if (!is_null($suffix) && is_string($suffix)) {
+            $this->gzip_suffix = $suffix;
+        }
+
+        return $this->gzip_suffix;
+    }
+
+    /**
+     * Configure the default cache interval.
+     * 
+     * @param integer $seconds Interval duration in seconds
      * @return integer Seconds
      */
     public function interval($seconds = null)
@@ -70,15 +101,33 @@ class Cache
     }
 
     /**
+     * Build the filename for a cache item.
+     * 
+     * @param string $key Cache item key
+     * @return string Path and filename
+     */
+    protected function filename($key)
+    {
+        $filename = $this->folder . DIRECTORY_SEPARATOR . $key;
+
+        # Add an optional suffix for Gzipped cache files
+        if ($this->gzip()) {
+            $filename .= $this->gzip_suffix();
+        }
+
+        return $filename;
+    }
+
+    /**
      * Checks if the file is cached.
      * 
-     * @param string $filename Cache file
+     * @param string $key Cache file
      * @param integer $interval Number of seconds
      * @return boolean True is the file is in the cache, false otherwise
      */
-    public function check($filename, $interval = null)
+    public function cached($key, $interval = null)
     {
-        $file = $this->folder . DIRECTORY_SEPARATOR . $filename;
+        $file = $this->filename($key);
 
         if (!file_exists($file)) {
             return false;
@@ -94,15 +143,16 @@ class Cache
     }
 
     /**
-     * Caches data to a file.
+     * Save data to the cache.
      * 
-     * @param string $filename name of the cache file
-     * @param mixed $data Data to cache
-     * @return boolean False on file write failure, othewise size of cache file
+     * @param string $key Cache key to store the data
+     * @param mixed $data Data to store
+     * @return int|bool Number of bytes written to cache, or false on failure
      */
-    public function write($filename, $data)
+    public function save($key, $data)
     {
-        $file = $this->folder. DIRECTORY_SEPARATOR . $filename;
+        $file = $this->filename($key);
+
         $serialized_data = serialize($data);
 
         if ($this->gzip) {
@@ -113,17 +163,18 @@ class Cache
     }
 
     /**
-     * Retrieves data from a cache file.
-     * 
-     * @param string $filename Name of the cache file
-     * @return mixed Data read
+     * Load data from a cache file.
+     *
+     * @param string $key Cache key to read
+     * @return mixed The cached data
+     * @throws RuntimeException If the cache file does not exit
      */
-    public function read($filename)
+    public function load($key)
     {
-        $file = $this->folder . DIRECTORY_SEPARATOR . $filename;
+        $file = $this->filename($key);
         
         if (!file_exists($file)) {
-            throw new Exception("FileNotFound: {$file}");
+            throw new RuntimeException("Cache file not found: {$file}");
         }
 
         $serialized_data = file_get_contents($file);
@@ -135,17 +186,17 @@ class Cache
         return unserialize($serialized_data);
     }
 
+    public function __set($key, $value)
+    {
+        $this->save($key, $value);
+    }
+
     public function __get($key)
     {
-        if ($this->check($key)) {
-            return $this->read($key);
+        if ($this->cached($key)) {
+            return $this->load($key);
         }
 
         return null;
-    }
-
-    public function __set($key, $value)
-    {
-        return $this->write($key, $value);
     }
 }

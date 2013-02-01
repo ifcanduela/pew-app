@@ -12,13 +12,13 @@
 class Registry
 {
     /**
-     * @var Registry
+     * @var Registry Singleton instance of the regstry
      * @access  protected
      */
     protected static $instance = null;
 
     /** 
-     * @var array
+     * @var array Key/value list
      * @access protected
      */
     protected $items = array();
@@ -46,6 +46,23 @@ class Registry
         }
 
         return self::$instance;
+    }
+
+    /**
+     * Import a set of keys and values into the current registry.
+     * 
+     * @param array $data Associative array with keys and values to import.
+     * @return int Number of new values
+     */
+    public function import(array $data)
+    {
+        $prev_count = count($this->items);
+
+        foreach ($data as $key => $value) {
+            $this->items[$key] = $value;
+        }
+
+        return count($this->items) - $prev_count;
     }
 
     /**
@@ -83,12 +100,5 @@ class Registry
     public function __isset($key)
     {
         return array_key_exists($key, $this->items);
-    }
-
-    public function import(array $data)
-    {
-        foreach ($data as $key => $value) {
-            $this->items[$key] = $value;
-        }
     }
 }
