@@ -459,10 +459,8 @@ class Model
     /**
      * Retrieve all items from a table.
      *
-     * @param array $where An associative array with field name/field value
-     *                   pairs for the WHERE clause.
-     * @return array An indexed array with all fetched rows, in associative
-     *               arrays, or false if nothing was returned
+     * @param array $where An associative array with WHERE conditions.
+     * @return array An array with the resulting records
      * @access public
      */
     public function find_all($where = null)
@@ -506,8 +504,8 @@ class Model
                 }
             }
         } else {
-            # return null if there was no result
-            $result = false;
+            # return empty array if there was no result
+            $result = array();
         }
 
         return $result;
@@ -539,7 +537,6 @@ class Model
 
         return $result;
     }
-
 
     /**
      * Saves a row to the table.
