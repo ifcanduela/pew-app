@@ -199,4 +199,9 @@ class Cache
 
         return null;
     }
+
+    public function __isset($key)
+    {
+        return $this->cached($key);
+    }
 }
