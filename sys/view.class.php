@@ -41,7 +41,7 @@ class View
      * @var string
      * @access public
      */
-    protected $folder = 'app/views/';
+    protected $folder = 'app/views';
 
     /**
      * Template name.
@@ -84,6 +84,15 @@ class View
             $this->helpers[$key] = $value;
         }
     }
+
+    protected function template_filename($template = null)
+    {
+        if (!$template) {
+            $template = $this->template;
+        }
+
+        return $this->folder() . DIRECTORY_SEPARATOR . $template . $this->extension;
+    }
     
     /**
      * Renders a view according to the request info
@@ -99,6 +108,7 @@ class View
         
         # Get the view file
         $template_file = $this->folder() . $template . $this->extension();
+        $template_file = $this->template_filename($template);
         
         if (!$template_file) {
             throw new Exception("Template file not found: $template_file");
@@ -122,7 +132,7 @@ class View
     public function render_html($template_file, $template_data)
     {
         # Return null if the view file does not exist
-        if (!file_exists($template_file)) {
+        if (!file_exists($template_file . $this->extension)) {
             var_dump(debug_backtrace());
             throw new Exception("Template file does not exist: $template_file");
         }
@@ -132,7 +142,7 @@ class View
 
         # Output the view and save it into a buffer.
         ob_start();
-            require $template_file;
+            require $template_file . $this->extension;
             $template_output = ob_get_contents();
         ob_end_clean();
         

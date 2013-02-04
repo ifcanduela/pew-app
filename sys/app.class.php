@@ -96,7 +96,7 @@ class App
         
         # render the view, if not prevented
         if ($view->render) {
-            $output = $view->render($view_data);
+            $output = $view->render($view_data, $request->segment(0) . '/' . $request->segment(1));
             
             # render the layout
             $layout = Pew::view('layout');
