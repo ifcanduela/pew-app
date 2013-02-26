@@ -183,7 +183,7 @@ class Img
             # Get file info
             $path_info = pathinfo($file);
             
-            if (!isset($path_info['extension']) || !in_array($path_info['extension'], array('jpeg', 'jpg', 'png', 'gif'))) {
+            if (!isset($path_info['extension']) || !in_array(strtolower($path_info['extension']), array('jpeg', 'jpg', 'png', 'gif'))) {
                 $this->error = 'For the moment, only JPG, GIF and PNG image files are supported [' . $path_info['extension'] . ']';
                 return false;
             }
