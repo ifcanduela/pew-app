@@ -9,19 +9,20 @@
  */
 
 /**
- * @var string Filesystem separator.
+ * Filesystem separator.
  */
 define('DS', DIRECTORY_SEPARATOR);
 
 /**
  * @var array Configuration array.
  */
-$cfg = array();
+$cfg = [];
 
 /**
  * @var string Server string. This goes before URL to assemble a full server URL.
  */
-$cfg['host'] = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['SERVER_NAME'];
+$cfg['host'] = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') 
+             . $_SERVER['SERVER_NAME'];
 
 /**
  * @var string Root path (url), '/' in case of root installation.
@@ -81,7 +82,7 @@ $cfg['action_prefix'] = '';
 $cfg['debug'] = false;
 
 /**
- * @var integer Define DEBUG if it's not defined in app/config 
+ * @var integer Logging level -- the higher, the more things get logged
  */
 $cfg['log_level'] = 0;
 
@@ -95,15 +96,17 @@ $cfg['controllers_folder'] = 'controllers' . DS;
 $cfg['views_folder'] = 'views' . DS;
 $cfg['elements_folder'] = 'views' . DS . 'elements' . DS;
 $cfg['layouts_folder'] = 'views' . DS;
-$cfg['libraries_folder'] = '.class.php' . DS;
+$cfg['libraries_folder'] = 'libs' . DS;
 
 /**
- * @var string Default file extensions for files. The values must include the first period (i.e., '.php')
+ * @var string Default file extensions for files.
+ * 
+ * The values must include the first period (i.e., '.php')
  */
 $cfg['view_ext'] = '.php';
 $cfg['element_ext'] = '.php';
 $cfg['layout_ext'] = '.layout.php';
-$cfg['class_ext'] = '.class.php';
+$cfg['class_ext'] = '.php';
 
 /**
  * @var string Default controller to use if none is specified (file name)
@@ -116,9 +119,9 @@ $cfg['default_controller'] = 'pages';
 $cfg['default_action'] = 'index';
 
 /**
- * @var array Configured routes
+ * @var array Configured routes.
  */
-$cfg['routes'] = array();
+$cfg['routes'] = [];
 
 /**
  * @var boolean Set to true to enable the use of the session functionality.
@@ -140,64 +143,19 @@ $cfg['use_auth'] = false;
  */
 $cfg['use_twig'] = false;
 
+/**
+ * Base URL of the application (the location of index.php).
+ */
+define('APP_URL', $cfg['app_url']);
+
+/**
+ * Base URL of the application (the location of index.php).
+ */
+define('PEW_PATH', $cfg['system_folder']);
+
+/**
+ * Full path to the base folder (filesystem).
+ */
+define('BASE_PATH', $cfg['root_folder']);
+
 return $cfg;
-
-/**
- * Application configuration
- */
-if (file_exists(APP . 'config' . DS . 'config.php')) {
-    require_once APP . 'config' . DS . 'config.php';
-}
-
-/**
- * Full path to the assets folder (url).
- *
- * @var string
- * @name WWW
- */
-defined('WWW') or define('WWW', URL . 'www' . PS);
-
-/**
- * General components
- *
- */
-defined('USESESSION') or define('USESESSION', false);
-defined('USEDB')      or define('USEDB', false);
-defined('USEAUTH')    or define('USEAUTH', false);
-
-/**
- * Enable strict error reporting according to config.
- */
-if ((DEBUG && PEW_LOCAL) || DEBUG > 1) {
-	error_reporting(E_ALL | E_STRICT);
-}
-
-/**
- * Define main component constants if user didn't.
- */
-defined('DEFAULT_CONTROLLER') or define('DEFAULT_CONTROLLER', 'pages');
-defined('DEFAULT_ACTION')     or define('DEFAULT_ACTION', 'index');
-defined('DEFAULT_LAYOUT')     or define('DEFAULT_LAYOUT', '');
-
-/**
- * This one is somewhat hidden from the user.
- */
-defined('DEFAULT_RESPONSE_FORMAT') or define('DEFAULT_RESPONSE_FORMAT', RESPONSE_FORMAT_HTML);
-
-/**
- * Include the autoloading functions
- */
-require_once SYSTEM . 'pew_loaders.php';
-
-/**
- * Include basic functions
- */
-require_once SYSTEM . 'functions.php';
-
-/**
- * Application bootstrapping
- */
-if (file_exists(APP . 'config' . DS . 'bootstrap.php')) {
-	include APP . 'config' . DS . 'bootstrap.php';
-}
-

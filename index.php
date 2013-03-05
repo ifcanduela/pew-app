@@ -15,7 +15,7 @@ require 'sys/pew.class.php';
 
 # ...and the magic begins!
 try {
-    Pew::app('app')->run('url');
+    Pew::app('app', 'config')->run('url');
 } catch (Exception $e) {
     echo $e->getMessage();
 }
