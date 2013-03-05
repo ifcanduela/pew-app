@@ -1,7 +1,7 @@
 <?php
 
-return array(
+return [
 
-        'application_title' => 'Pew-Pew-Pew',
+    'application_title' => 'Pew-Pew-Pew',
 
-    );
+];
