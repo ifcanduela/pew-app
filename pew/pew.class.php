@@ -125,13 +125,13 @@ class Pew
      * @access public
      * @static
      */
-    public static function app($app_folder)
+    public static function app($app_folder, $config_file = 'config')
     {
         spl_autoload_register(array('Pew', 'autoload'));
 
         $registry = Registry::instance();
 
-        $pew_config = require __DIR__ . DIRECTORY_SEPARATOR . 'config.php';
+        $pew_config = require __DIR__ . DIRECTORY_SEPARATOR . $config_file . '.php';
         self::$config = new Registry();
         self::$config->import($pew_config);
 
