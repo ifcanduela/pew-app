@@ -1,5 +1,7 @@
 <?php
 
+namespace pew;
+
 /**
  * The basic controller class, with some common methods and fields.
  * 

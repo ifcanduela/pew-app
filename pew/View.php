@@ -1,5 +1,7 @@
 <?php
 
+namespace pew;
+
 /**
  * This class encapsulates the view rendering functionality.
  * 

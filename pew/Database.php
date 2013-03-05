@@ -1,5 +1,7 @@
 <?php
 
+namespace pew;
+
 /**
  * The PewDatabase class encapsulates database access.
  *

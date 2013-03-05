@@ -1,5 +1,7 @@
 <?php
 
+namespace pew;
+
 /**
  * Simple registry class to store key/value pairs.
  *

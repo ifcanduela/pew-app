@@ -1,5 +1,7 @@
 <?php
 
+namespace pew;
+
 /**
  * The basic model class, with database description and access methods.
  *

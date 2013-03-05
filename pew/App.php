@@ -1,5 +1,7 @@
 <?php
 
+namespace pew;
+
 /**
  * The App class is a simple interface between the front controller and the
  * rest of the controllers.

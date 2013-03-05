@@ -1,5 +1,7 @@
 <?php
 
+namespace pew;
+
 /**
  * A class to validate values against one or multiple rules.
  *

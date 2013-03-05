@@ -1,5 +1,7 @@
 <?php
 
+namespace pew;
+
 /**
  * @package pew
  */

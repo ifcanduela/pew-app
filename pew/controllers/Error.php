@@ -1,5 +1,7 @@
 <?php
 
+namespace pew\controllers;
+
 /**
  * Error management class.
  *

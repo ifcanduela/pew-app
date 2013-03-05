@@ -1,5 +1,7 @@
 <?php
 
+namespace pew\controllers;
+
 /**
  * The Pages controller can serve static views, useful for help or about pages.
  * 

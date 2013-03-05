@@ -1,5 +1,7 @@
 <?php
 
+namespace pew\models;
+
 /**
  * The Pew model is a base model for user models to extend.
  * 

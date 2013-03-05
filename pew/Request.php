@@ -1,5 +1,7 @@
 <?php
 
+namespace pew;
+
 /**
  * The Request class handles data coming from the server.
  * 

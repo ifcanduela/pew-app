@@ -1,5 +1,7 @@
 <?php 
 
+namespace pew;
+
 /**
  * Gathers css and js files and outputs them where requested.
  *

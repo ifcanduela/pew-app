@@ -1,5 +1,7 @@
 <?php
 
+namespace pew\libs;
+
 /**
  * This class can save PHP data to files and retrieve said data.
  *

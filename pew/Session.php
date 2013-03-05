@@ -1,5 +1,7 @@
 <?php
 
+namespace pew;
+
 /**
  * A simple session management class.
  *

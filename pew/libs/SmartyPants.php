@@ -1,5 +1,7 @@
 <?php
 
+namespace pew\libs;
+
 #
 # SmartyPants  -  Smart punctuation for web sites
 #

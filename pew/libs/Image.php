@@ -1,5 +1,7 @@
 <?php
 
+namespace pew\libs;
+
 /**
  * The Img library class contains simple methods to manage pictures.
  * 
@@ -13,7 +15,7 @@
  * @package pew/default/libs
  * @author ifcanduela <ifcanduela@gmail.com>
  */
-class Img
+class Image
 {
     /**
      * The image bitstream data.

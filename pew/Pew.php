@@ -1,5 +1,7 @@
 <?php
 
+namespace pew;
+
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'functions.php';
 
 /**
