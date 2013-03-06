@@ -7,11 +7,11 @@
  */
 
 # framework bootstrap
-require __DIR__ . '/pew/pew.class.php';
+require __DIR__ . '/pew/Pew.php';
 
 # ...and the magic begins!
 try {
-    Pew::app('app', 'config')->run('url');
+	pew\Pew::app('app', 'config')->run();
 } catch (Exception $e) {
     echo $e->getMessage();
 }

@@ -2,6 +2,8 @@
 
 namespace pew;
 
+use pew\libs;
+
 /**
  * The basic controller class, with some common methods and fields.
  * 
@@ -177,11 +179,11 @@ abstract class Controller
      * The constructor instantiates the database and populates the instance
      * parameters.
      * 
-     * @param PewRequest $request The request information
+     * @param pew\libs\Request $request The request information
      * @return void
      * @access public
      */
-    public function __construct($request, $view = false)
+    public function __construct(\pew\libs\Request $request, $view = false)
     {
         # Assign Request and View objects
         $this->request = $request;

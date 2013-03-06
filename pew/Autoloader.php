@@ -3,10 +3,6 @@
 namespace pew;
 
 /**
- * @package pew
- */
-
-/**
  * Inplementation of the PSR-0 autoloader.
  * 
  * Simplified from Jonathan H. Wage's Gist at https://gist.github.com/jwage/221634
@@ -56,19 +52,20 @@ class Autoloader
     public function load_class($class)
     {
         $namespaceName = $this->namespace . self::NAMESPACE_SEPARATOR;
+
         if (null === $this->namespace || $namespaceName === substr($class, 0, strlen($namespaceName))) {
             $fileName = '';
             $namespace = '';
             
-            if (false !== ($lastNsPos = strripos($class, $this->_namespaceSeparator))) {
+            if (false !== ($lastNsPos = strripos($class, self::NAMESPACE_SEPARATOR))) {
                 $namespace = substr($class, 0, $lastNsPos);
                 $class = substr($class, $lastNsPos + 1);
                 $fileName = str_replace(self::NAMESPACE_SEPARATOR, DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR;
             }
 
-            $fileName .= str_replace('_', DIRECTORY_SEPARATOR, $class) . $this->_fileExtension;
+            $fileName .= str_replace('_', DIRECTORY_SEPARATOR, $class) . self::CLASS_FILE_EXTENSION;
 
-            require ($this->base_path !== null ? $this->base_path . DIRECTORY_SEPARATOR : '') . $fileName;
+            @include_once ($this->base_path !== null ? $this->base_path . DIRECTORY_SEPARATOR : '') . $fileName;
         }
     }
 }

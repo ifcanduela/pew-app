@@ -1,6 +1,6 @@
 <?php
 
-namespace pew;
+namespace pew\libs;
 
 /**
  * The Request class handles data coming from the server.
@@ -9,7 +9,7 @@ namespace pew;
  * provide a reusable repository of general information about the current task
  * of the application.
  *
- * @package pew
+ * @package pew\libs
  * @author ifernandez <ifcanduela@gmail.com>
  */
 class Request

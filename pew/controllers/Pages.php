@@ -8,7 +8,7 @@ namespace pew\controllers;
  * @package pew/default/controllers
  * @author ifcanduela <ifcanduela@gmail.com>
  */
-class Pages extends Controller
+class Pages extends \pew\Controller
 {
     /**
      * Whether to instance a database controller or not.

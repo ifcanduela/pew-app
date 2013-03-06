@@ -5,12 +5,12 @@ return [
 	'default' => 'sqlite',
 
     'sqlite' => [
-        'engine' => SQLITE,
+        'engine' => 'sqlite',
         'file' => 'app/config/db.sqlite3'
     ],
 
     'mysql' => [
-        'engine' => MYSQL,
+        'engine' => 'mysql',
         'host' => 'localhost',
         'user' => 'username',
         'pass' => 'password',

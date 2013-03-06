@@ -1,6 +1,6 @@
 <?php
 
-namespace pew;
+namespace pew\libs;
 
 /**
  * Simple registry class to store key/value pairs.

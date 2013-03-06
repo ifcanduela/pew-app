@@ -41,7 +41,7 @@ class App
      */
     public function run($url_segment = 'url')
     {
-        $request = Pew::request();
+        $request = new libs\Request;
         $urlSegments = $request->get($url_segment);
 
         $match = $request->route($urlSegments);
@@ -53,14 +53,14 @@ class App
         $controller_name = $request->segment(0) ? $request->segment(0) : Pew::config()->default_controller;
 
         # instantiate a controller and a view
-        $controller = Pew::controller($controller_name);
+        $controller = Pew::controller($controller_name, $request);
         $view = Pew::view();
 
         # check controller instantiation
         if (!is_object($controller)) {
             if (file_exists(Pew::config()->views_folder . $request->controller . DS . $request->action . Pew::config()->view_ext)) {
                 # if the controller does not exist, but the view does, use Pages
-                $controller = Pew::controller('pages');
+                $controller = new controllers\Pages($request);
                 $controller->view = $view;
                 $view->templates_dir = $request->controller;
             } else {

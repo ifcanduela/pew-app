@@ -31,13 +31,6 @@ class View
     public $render = true;
     
     /**
-     * Enable use of the Twig templating engine.
-     * 
-     * @var boolean
-     */
-    public $twig = false;
-    
-    /**
      * Base templates directory.
      * 
      * @var string
@@ -113,14 +106,10 @@ class View
         $template_file = $this->template_filename($template);
         
         if (!$template_file) {
-            throw new Exception("Template file not found: $template_file");
+            throw new \Exception("Template file not found: $template_file");
         }
         
-        if ($this->twig) {
-            $output = $this->render_twig($template_file, $data);
-        } else {
-            $output = $this->render_html($template_file, $data);
-        }
+        $output = $this->render_html($template_file, $data);
         
         return $output;
     }
@@ -136,7 +125,7 @@ class View
         # Return null if the view file does not exist
         if (!file_exists($template_file . $this->extension)) {
             var_dump(debug_backtrace());
-            throw new Exception("Template file does not exist: $template_file");
+            throw new \Exception("Template file does not exist: $template_file");
         }
         
         # Make the variables directly accessible in the template.
@@ -149,16 +138,6 @@ class View
         ob_end_clean();
         
         return $template_output;
-    }
-    
-    public function render_twig($view_file, $data)
-    {
-        Twig_Autoloader::register();
-        
-        $twig_loader = new Twig_Loader_Filesystem(VIEWS . $this->request->controller);
-        $twig = new Twig_Environment($twig_loader);
-        
-        return $twig->render(basename($view_file), $this->data);
     }
     
     public function render_json()
@@ -281,7 +260,7 @@ class View
         
         # If the element .php file cannot be found, show an error page.
         if (!file_exists($element_file)) {
-            throw new Exception("The element file $element_file ould not be found.");
+            throw new \Exception("The element file $element_file ould not be found.");
         }
 
         # If there are variables, make them easily available to the template.
@@ -300,7 +279,7 @@ class View
     {
         if (!array_key_exists($key, $this->helpers)) {
             debug_print_backtrace();
-            throw new InvalidArgumentException("$key index not found in helpers array.");
+            throw new \InvalidArgumentException("$key index not found in helpers array.");
         }
         
         return $this->helpers[$key];
