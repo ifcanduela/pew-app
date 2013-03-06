@@ -3,11 +3,12 @@
 namespace pew\libs;
 
 /**
- * This class can save PHP data to files and retrieve said data.
+ * This class can save and load serialized data to and from files.
  *
  * @author Igor F. Canduela <ifcanduela@gmail.com>
+ * @package pew/libs
  */
-class Cache
+class FileCache
 {
     /**
      * @var integer Seconds to cache data

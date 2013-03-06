@@ -4,14 +4,10 @@
  * Everything is relative.
  *
  * To this file.
- * 
- * @name Front controller
- * @author ifcanduela <ifcanduela@gmail.com>
- * @package app
  */
 
 # framework bootstrap
-require 'sys/pew.class.php';
+require __DIR__ . '/pew/pew.class.php';
 
 # ...and the magic begins!
 try {
