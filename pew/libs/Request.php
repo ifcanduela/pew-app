@@ -14,144 +14,105 @@ namespace pew\libs;
  */
 class Request
 {
-    /**
-     * Character that separates URL segments.
-     * 
-     * @var string
-     * @access  private
-     */
-    private $segment_separator = '/';
-
-    /**
-     * GET key/value pairs for the request.
-     * 
-     * @var array
-     * @access  private
-     */
-    private $get = array();
-
-    /**
-     * POST key/value pairs for the request.
-     * 
-     * @var array
-     * @access  private
-     */
-    private $post = array();
-
-    /**
-     * List of segments.
-     * 
-     * @var array
-     * @access  private
-     */
-    private $segments = array();
-
-    /**
-     * List of configured routes.
-     * 
-     * @var array
-     * @access  private
-     */
-    private $routes = array();
+    private $method;
+    private $headers;
+    private $scheme;
+    private $host;
+    private $port;
+    private $path;
+    private $script;
     
-    /**
-     * 
-     */
+    private $segments;
+
+    private $get;
+    private $post;
+    private $files;
+    private $cookie;
+
+    private $local;
+
     public function __construct()
     {
-        $this->get = $_GET;
-        $this->post = $_POST;
-    }
+        if (PHP_SAPI === 'cli') {
+            $this->method = 'CLI';
+        } else {
+            $this->method   = isSet($_POST['_method']) ? $_POST['_method'] : $_SERVER['REQUEST_METHOD'];
+            $this->headers  = getAllHeaders();
+            $this->scheme   = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+            $this->host     = $_SERVER['SERVER_NAME'];
+            $this->port     = $_SERVER['SERVER_PORT'];
+            $this->path     = str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']);
+            $this->script   = basename($_SERVER['SCRIPT_NAME']);
 
-    /**
-     * Builds a request based on the segments.
-     * 
-     * @param string $segment_string Segments in string format
-     * @param string $segment_separator Options segment separator character
-     * @return Request The request object
-     */
-    public function build($segment_string, $segment_separator = null)
-    {
-        if (!$segment_separator) {
-            $segment_separator = $this->segment_separator;
+            if (isSet($_SERVER['PATH_INFO'])) {
+                $this->segments = $_SERVER['PATH_INFO'];
+            } else {
+                $request_script_name = substr($_SERVER['REQUEST_URI'], 0, strpos($_SERVER['REQUEST_URI'], '?'));
+                $script_relative = str_replace(dirname($_SERVER['SCRIPT_NAME']), '', $request_script_name);
+                $segments = str_replace(basename($_SERVER['SCRIPT_NAME']), '', $script_relative);
+                $this->segments = '/' . trim($segments, '/');   
+            }
+            
+
+            $this->get      = $_GET;
+            $this->post     = $_POST;
+            $this->files    = $_FILES;
+            $this->cookie   = $_COOKIE;
+
+            $this->local = in_array($_SERVER['REMOTE_ADDR'], ['localhost', '127.0.0.1', '::1']);
+
+            // @todo: remove this call
+            $this->dump_vars();
         }
-        
-        $this->segments = array_filter(explode($segment_separator, $segment_string));
-
-        /// @todo Gather additional request info, like referrer and other stuff
-
-        return $this;
     }
-    
-    protected function fetch($collection, $key, $fallback)
+
+    // @todo: remove this method
+    private function dump_vars()
+    {
+        $vars = ['_SERVER' => $_SERVER, '_GET' => $_GET, '_POST' => $_POST, '_FILES' => $_FILES, '_COOKIE' => $_COOKIE];
+        var_dump($vars);
+    }
+
+    private function fetch(array $array, $key, $default)
+    {
+        if (array_key_exists($key, $array)) {
+            return $array[$key];
+        }
+
+        return $default;
+    }
+
+    public function get($key = null, $default = null)
     {
         if (is_null($key)) {
-            return $collection;
-        } elseif (array_key_exists($key, $collection)) {
-            return $collection[$key];
+            return $this->get;
+        } else {
+            return $this->fetch($this->get, $key, $default);
         }
-        
-        return $fallback;
-    }
-    
-    public function get($key = null, $fallback = null)
-    {
-        return $this->fetch($this->get, $key, $fallback);
-    }
-    
-    public function post($key = null, $fallback = null)
-    {
-        return $this->fetch($this->post, $key, $fallback);
     }
 
-    public function segment($index, $fallback = null)
+    public function post($key = null, $default = null)
     {
-        return $this->fetch($this->segments, $index, $fallback);
-    }
-
-    public function segments()
-    {
-        return $this->segments;
-    }
-    
-    public function add_route($from, $to, $method = 'get')
-    {
-        $route = array(
-                'from' => ltrim($from, '/'),
-                'to' => ltrim($to, '/'),
-                'method' => $method,
-                'regexp' => '~' . preg_replace('/\*/', '([A-Za-z0-9-_]*)', $from) . '~',
-            );
-        $this->routes[] = $route;
+        if (is_null($key)) {
+            return $this->post;
+        } else {
+            return $this->fetch($this->get, $key, $default);
+        }
     }
 
     /**
-     * Transforms the request according to the configured routes.
+     * Get the value of a specified property.
      * 
-     * @param string $path Path to check
-     * @return Request A new Request object if there's a match, null otherwise
+     * @param string $property Property name
+     * @param array $args Function arguments
+     * @return mixed Property value
      */
-    public function route($path)
+    public function __call($property, array $args = [])
     {
-        $path = $this->segment_separator . trim($path, $this->segment_separator);
-
-        foreach ($this->routes as $r) {
-            preg_match($r['regexp'], $path, $matches);
-
-            if (!empty($matches)) {
-                $destination = $r['to'];
-                $additional_segments = str_replace($matches[0], '', $path);
-
-                foreach ($matches as $key => $value) {
-                    $destination = str_replace(":$key", $matches[$key], $destination);
-                }
-                $remap = clone $this;
-                $remap->build($destination . $additional_segments);
-
-                return $remap;
-            }
+        if (isSet($this->$property)) {
+            return $this->$property;
         }
 
-        return null;
+        throw new \RuntimeException("Unknown method $key");
     }
 }
