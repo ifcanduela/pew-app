@@ -60,17 +60,7 @@ class Request
             $this->cookie   = $_COOKIE;
 
             $this->local = in_array($_SERVER['REMOTE_ADDR'], ['localhost', '127.0.0.1', '::1']);
-
-            // @todo: remove this call
-            $this->dump_vars();
         }
-    }
-
-    // @todo: remove this method
-    private function dump_vars()
-    {
-        $vars = ['_SERVER' => $_SERVER, '_GET' => $_GET, '_POST' => $_POST, '_FILES' => $_FILES, '_COOKIE' => $_COOKIE];
-        var_dump($vars);
     }
 
     private function fetch(array $array, $key, $default)
@@ -113,6 +103,6 @@ class Request
             return $this->$property;
         }
 
-        throw new \RuntimeException("Unknown method $key");
+        throw new \RuntimeException("Unknown method $property");
     }
 }

@@ -51,21 +51,21 @@ class Autoloader
      */
     public function load_class($class)
     {
-        $namespaceName = $this->namespace . self::NAMESPACE_SEPARATOR;
+        $namespace_name = $this->namespace . self::NAMESPACE_SEPARATOR;
 
-        if (null === $this->namespace || $namespaceName === substr($class, 0, strlen($namespaceName))) {
-            $fileName = '';
+        if (null === $this->namespace || $namespace_name === substr($class, 0, strlen($namespace_name))) {
+            $file_name = '';
             $namespace = '';
             
             if (false !== ($lastNsPos = strripos($class, self::NAMESPACE_SEPARATOR))) {
                 $namespace = substr($class, 0, $lastNsPos);
                 $class = substr($class, $lastNsPos + 1);
-                $fileName = str_replace(self::NAMESPACE_SEPARATOR, DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR;
+                $file_name = str_replace(self::NAMESPACE_SEPARATOR, DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR;
             }
 
-            $fileName .= str_replace('_', DIRECTORY_SEPARATOR, $class) . self::CLASS_FILE_EXTENSION;
+            $file_name .= str_replace('_', DIRECTORY_SEPARATOR, $class) . self::CLASS_FILE_EXTENSION;
 
-            @include_once ($this->base_path !== null ? $this->base_path . DIRECTORY_SEPARATOR : '') . $fileName;
+            @include_once ($this->base_path !== null ? $this->base_path . DIRECTORY_SEPARATOR : '') . $file_name;
         }
     }
 }

@@ -25,7 +25,7 @@
 function cfg($key, $value = null, $default = null)
 {
     # static storage
-    static $_config_values = array();
+    static $_config_values = [];
     
     # return all values in special case
     if ($key === true) {
@@ -53,6 +53,30 @@ function cfg($key, $value = null, $default = null)
         # and return it
         return $value;
     }
+}
+
+/**
+ * Builds a path out of several segments.
+ *
+ * The first argument can be asingle-character separator.              
+ *
+ * @param string Path segments to join
+ * @return string The full path
+ */
+function make_path()
+{
+    $separator = DIRECTORY_SEPARATOR;
+    $arguments = func_get_args();
+
+    if (strlen($arguments[0]) === 1) {
+        $separator = array_shift($arguments);
+    }
+
+    $segments = array_map(function ($segment) use ($separator) {
+        return preg_replace('~[\\\/]+~' , $separator, trim($segment, '\\/'));
+    }, $arguments);
+
+    return join($separator, array_filter($segments));
 }
 
 /**
@@ -380,7 +404,7 @@ function array_reap($data, $filter)
 function array_flatten($data)
 {
     # store results here
-    $flat = array();
+    $flat = [];
     
     # loop through the $data array
     foreach ($data as $key => $value) {
@@ -522,7 +546,7 @@ function redirect($url)
 function check_dirs($path)
 {
     # Normalize de directory separators
-    $path = str_replace(array(DIRECTORY_SEPARATOR, '\\'), DIRECTORY_SEPARATOR, $path);
+    $path = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $path);
     
     if (file_exists($path))
         return true;
@@ -590,7 +614,7 @@ function slugify($str)
  */
 function to_underscores($str)
 {
-    return str_replace(array(' ', '-'), '_', $str);
+    return str_replace([' ', '-'], '_', $str);
 }
 
 /**

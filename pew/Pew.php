@@ -20,15 +20,10 @@ class Pew
     /**
      * Framework and application configuration settings.
      * 
-     * @var array
+     * @var \pew\libs\Registry
      * @static
      */
-    protected static $config = array();
-
-    /**
-     * @var array Paths for class autoloading
-     */
-    protected static $paths = array();
+    protected static $config = null;
 
     /**
      * Constructor is out of bounds.
@@ -50,7 +45,7 @@ class Pew
      * @return Object An instance of the required class
      * @static
      */
-    public static function get($index, $arguments = array())
+    public static function get($index, $arguments = [])
     {
         $registry = libs\Registry::instance();
         if (!isset($registry->$index)) {
@@ -103,8 +98,7 @@ class Pew
             $app_folder_name = trim(basename($app_folder));
             self::$config->app_namespace = '\\' . $app_folder_name;
             self::$config->app_folder = realpath($app_folder);
-
-            var_dump(self::$config->app_namespace, self::$config->app_folder);
+            self::$config->app_config = $config_file;
 
             // load app/config/bootstrap.php
             if (file_exists(self::$config->app_folder . 'config' . DS . 'bootstrap.php')) {
@@ -279,13 +273,44 @@ class Pew
 
         if (!isset($registry->Request)) {
             # instantiate the request object
-            $registry->Request = $request = new Request($uri_string);
+            $registry->Request = $request = new libs\Request($uri_string);
             foreach (self::$config->routes as $from => $to) {
                 $request->add_route($from, $to);
             }
         }
 
         return $registry->Request;
+    }
+
+    /**
+     * Retrieves and initialises a Router object.
+     * 
+     * @param string $uri_string A list of slash-separated segments.
+     * @return Router The initialised request object
+     * @throws Exception When the class does not exist.
+     */
+    public static function router($uri_string = null)
+    {
+        $registry = libs\Registry::instance();
+
+        if (!isset($registry->Router)) {
+            $routes = [];
+            # fetch the routes configuration
+            $route_file = make_path(self::$config->app_folder, 'config', 'routes.php');
+
+            if (file_exists($route_file)) {
+                $routes = include $route_file;
+            }
+
+            # instantiate the router object
+            $router = new libs\Router($routes);
+            $router->default_controller(self::$config->default_controller);
+            $router->default_action(self::$config->default_action);
+
+            $registry->Router = $router;
+        }
+
+        return $registry->Router;
     }
 
     /**

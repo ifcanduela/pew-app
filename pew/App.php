@@ -39,18 +39,15 @@ class App
      * @param string $params optional slash-separated string of url parameters
      * @access public
      */
-    public function run($url_segment = 'url')
+    public function run()
     {
         $request = new libs\Request;
-        $urlSegments = $request->get($url_segment);
+        $router  = Pew::router();
+        var_dump($router);
+        $route   = $router->route($request->segments());
 
-        $match = $request->route($urlSegments);
 
-        if ($match) {
-            $request = $match;
-        }
-
-        $controller_name = $request->segment(0) ? $request->segment(0) : Pew::config()->default_controller;
+        $controller_name = $route->segment(0) ? $route->segment(0) : Pew::config()->default_controller;
 
         # instantiate a controller and a view
         $controller = Pew::controller($controller_name, $request);

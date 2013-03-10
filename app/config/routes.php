@@ -13,8 +13,8 @@
 return [
 
 	# this is an example route
-    '/*' => 'pages/view/:1',
+    ['/*',  'pages/view/:1', ['get', 'post']],
 
-    '/' => 'pages/index',
+    ['/', 'pages/index'],
 
 ];
