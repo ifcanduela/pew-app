@@ -10,9 +10,4 @@
 require __DIR__ . '/pew/Pew.php';
 
 # ...and the magic begins!
-try {
-	pew\Pew::app('app', 'config')->run();
-} catch (Exception $e) {
-    echo $e->getMessage();
-    var_dump($e->getTrace());
-}
+pew\Pew::app('app', 'config')->run();
