@@ -7,6 +7,10 @@ class Router
     private $default_controller = '';
     private $default_action     = '';
 
+    private $controller;
+    private $action;
+    private $parameters = [];
+
     private $routes = [];
 
     public function __construct(array $routes = [])
@@ -45,35 +49,102 @@ class Router
         }
     }
 
-    public function default_controller($controller)
+    /**
+     * Set or get the default controller.
+     *
+     * @param string $controller
+     * @return string The controller name
+     */
+    public function default_controller($controller = null)
     {
-        if (!is_string($controller)) {
-            throw new \InvalidArgumentException(__CLASS__ . '::' . __FUNCTION__ . '  expects a string');
+        if (!is_null($controller)) {
+            if (is_string($controller)) {
+                $this->default_controller = $controller;
+            } else {
+                throw new \InvalidArgumentException(__CLASS__ . '::' . __FUNCTION__ . '  expects a string');
+            }
         }
 
-        $this->default_controller = $controller;
+        return $this->default_controller;
     }
 
-    public function default_action($action)
+    /**
+     * Set or get the default action.
+     *
+     * @param  string $action
+     * @return string The action name
+     */
+    public function default_action($action = null)
     {
-        if (!is_string($action)) {
-            throw new \InvalidArgumentException(__CLASS__ . '::' . __FUNCTION__ . '  expects a string');
+        if (!is_null($action)) {
+            if (is_string($action)) {
+                $this->default_action = $action;
+            } else {
+                throw new \InvalidArgumentException(__CLASS__ . '::' . __FUNCTION__ . '  expects a string');
+            }
         }
 
-        $this->default_action = $action;
+        return $this->default_action;
     }
 
-    public function route($segments, $request_method = 'GET')
+
+    /**
+     * Get the controller.
+     * 
+     * @return string The controller name
+     */
+    public function controller()
+    {
+        return $this->controller ? : $this->default_controller;
+    }
+
+    /**
+     * Get the action.
+     * 
+     * @return string The action name
+     */
+    public function action()
+    {
+        return $this->action ? : $this->default_action;
+    }
+
+    /**
+     * Get the parameters array.
+     * 
+     * @return array Parameters
+     */
+    public function parameters()
+    {
+        return $this->parameters;
+    }
+
+    /**
+     * Extracts controller, action and parameters from a URI.
+     * 
+     * @param string $uri Uri from the browser
+     * @param string $request_method HTTP request verb
+     * @return Router The Router object
+     */
+    public function route($uri, $request_method = 'GET')
     {
         $request_method = strtoupper($request_method);
 
         foreach ($this->routes[$request_method] as $route) {
-            if ($matches = $this->match_route($route, $segments)) {
-                return $this->build_route($segments, $route);
+            if ($matches = $this->match_route($route, $uri)) {
+                $built_route = $this->build_route($uri, $route);
+                break;
             }
         }
 
-        return $this->build_route($segments);
+        if (!isSet($built_route)) {
+            throw new \Exception("No route found");
+        }
+
+        $this->controller   = $built_route['controller'];
+        $this->action       = $built_route['action'];
+        $this->parameters   = $built_route['parameters'];
+
+        return $this;
     }
 
     /**
@@ -110,7 +181,7 @@ class Router
      * @param array $matches Transformation values
      * @return array The transformed URI elements
      */
-    public function build_route($segments, $route = null)
+    private function build_route($segments, $route = null)
     {
         $transformed = $route[0];
         $destination = $route[1];
@@ -125,8 +196,8 @@ class Router
 
         $controller = isSet($segments[0]) ? $segments[0] : $this->default_controller;
         $action     = isSet($segments[1]) ? $segments[1] : $this->default_action;
-        $arguments  = isSet($segments[2]) ? array_slice($segments, 2) : array();
+        $parameters = isSet($segments[2]) ? array_slice($segments, 2) : array();
 
-        return compact('controller', 'action', 'arguments');
+        return compact('controller', 'action', 'parameters');
     }
 }
