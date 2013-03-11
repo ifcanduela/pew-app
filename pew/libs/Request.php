@@ -47,10 +47,14 @@ class Request
             if (isSet($_SERVER['PATH_INFO'])) {
                 $this->segments = $_SERVER['PATH_INFO'];
             } else {
-                $request_script_name = substr($_SERVER['REQUEST_URI'], 0, strpos($_SERVER['REQUEST_URI'], '?'));
+                if (false !== $question_mark_position = strpos($_SERVER['REQUEST_URI'], '?')) {
+                    $request_script_name = substr($_SERVER['REQUEST_URI'], 0, $question_mark_position);
+                } else {
+                    $request_script_name = $_SERVER['REQUEST_URI'];
+                }
                 $script_relative = str_replace(dirname($_SERVER['SCRIPT_NAME']), '', $request_script_name);
                 $segments = str_replace(basename($_SERVER['SCRIPT_NAME']), '', $script_relative);
-                $this->segments = '/' . trim($segments, '/');   
+                $this->segments = '/' . trim($segments, '/');    
             }
             
 

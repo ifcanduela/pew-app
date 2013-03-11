@@ -23,7 +23,25 @@ class Router
      */
     public function add_route(array $route)
     {
-        # code...
+        if (count($route) < 2) {
+            return;
+        }
+
+        list($url, $dest) = $route;
+
+        if (isSet($route[2])) {
+            $methods = preg_split('/\W+/', strtoupper($route[2]));
+        } else {
+            $methods = ['GET'];
+        }
+
+        foreach ($methods as $method) {
+            if (!isSet($this->routes[$method])) {
+                $this->routes[$method] = [];
+            }
+
+            $this->routes[$method][] = $route;
+        }
     }
 
     public function default_controller($controller)
@@ -44,8 +62,25 @@ class Router
         $this->default_action = $action;
     }
 
-    public function route($segments)
+    public function route($segments, $request_method = 'GET')
     {
+        $request_method = strtoupper($request_method);
+
+        foreach ($this->routes[$request_method] as $route) {
+            if ($this->match_route($route, $segments));
+        }
+
+        var_dump($this->routes[$request_method]);
         throw new \Exception("Not yet implemented");
+    }
+
+    private function match_route($route, $segments)
+    {
+        $pattern = preg_replace('~:([^/]+)~', '(?P<$1>[^\/]+)', $route[0]);
+        var_dump("matching [$segments] to [{$pattern}]");
+
+        if (preg_match("~$pattern~", $segments, $matches)) {
+            var_dump($matches);
+        }
     }
 }
