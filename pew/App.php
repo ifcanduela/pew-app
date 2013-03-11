@@ -41,13 +41,12 @@ class App
      */
     public function run()
     {
-        $request = new libs\Request;
+        $request = Pew::request();
         $router  = Pew::router();
-        var_dump($router);
-        $route   = $router->route($request->segments());
 
+        $router->route($request->segments(), $request->method());
 
-        $controller_name = $route->segment(0) ? $route->segment(0) : Pew::config()->default_controller;
+        $controller_name = $router->controller();
 
         # instantiate a controller and a view
         $controller = Pew::controller($controller_name, $request);
@@ -55,11 +54,11 @@ class App
 
         # check controller instantiation
         if (!is_object($controller)) {
-            if (file_exists(Pew::config()->views_folder . $request->controller . DS . $request->action . Pew::config()->view_ext)) {
+            if (file_exists(Pew::config()->views_folder . $router->controller() . DS . $router->action() . Pew::config()->view_ext)) {
                 # if the controller does not exist, but the view does, use Pages
                 $controller = new controllers\Pages($request);
                 $controller->view = $view;
-                $view->templates_dir = $request->controller;
+                $view->templates_dir = $router->controller();
             } else {
                 # display an error page if the controller could not be instanced
                 new PewError(PewError::CONTROLLER_MISSING, $request);
@@ -75,14 +74,14 @@ class App
         }
 
         # call the action method and let the controller decide what to do
-        $view_data = $controller->_action();
+        $view_data = $controller->_action($router->action(), $router->parameters());
         
         # check if the controller action requires authentication
         if (isset($controller->auth) && $controller->auth->require()) {
             # check if the user is authenticated
             if (!$controller->auth->gate()) {
                 # save the current request for later
-                $controller->auth->referrer($request->uri);
+                $controller->auth->referrer($router->uri());
                 # display the login page
                 redirect('users/login');
             }
@@ -95,7 +94,7 @@ class App
         
         # render the view, if not prevented
         if ($view->render) {
-            $output = $view->render($view_data, $request->segment(0) . '/' . $request->segment(1));
+            $output = $view->render($view_data, $router->action() . '/' . $router->action());
             
             # render the layout
             $layout = Pew::view('layout');

@@ -248,52 +248,45 @@ abstract class Controller
      * @access protected
      * @see Pages
      */
-    public function _action()
+    public function _action($action, $parameters)
     {
-        # In normal situations, an 'action' parameter exists
-        if (isset($this->parameters['action'])) {
-            $action =& $this->parameters['action'];
-            
-            switch ($action{0}) {
-                case '_':
-                    # Actions prefixed with an underscore are private
-                    new PewError(ACTION_FORBIDDEN, $this, $action);
-                    break;
-                case '@':
-                    $this->output_type = OUTPUT_TYPE_XML;
-                    # Actions prefixed with an at sign are XML
-                    if (file_exists(VIEWS . 'xml' . Pew::config()->layout_ext)) {
-                        $this->layout = 'xml';
-                    } else {
-                        $this->layout = 'empty';
-                    }
-                    break;
-                case ':':
-                    $this->output_type = OUTPUT_TYPE_JSON;
-                    # Actions prefixed with a colon are JSON
-                    if (file_exists(VIEWS . 'json' . Pew::config()->layout_ext)) {
-                        $this->layout = 'json';
-                    } else {
-                        $this->layout = 'empty';
-                    }
-            }
-            
-            if (!ctype_alpha($action{0})) {
-                # Strip the flag character from the action name
-                $this->view = $action = substr($action, 1);
-            }
-            
-            if (!method_exists($this, $this->action_prefix . $action)) {
-                # If the $action method does not exist, show an error page
-                new PewError(PewError::ACTION_MISSING, $this, $this->action_prefix . $action);
-            }
-            
-            # Everything's clear pink
-            $view_data = call_user_func_array(array($this, $this->action_prefix . $action), $this->parameters['passed']);
-            return $view_data;
-        } else {
-            new PewError(404);
+        switch ($action{0}) {
+            case '_':
+                # Actions prefixed with an underscore are private
+                new PewError(ACTION_FORBIDDEN, $this, $action);
+                break;
+            case '@':
+                $this->output_type = OUTPUT_TYPE_XML;
+                # Actions prefixed with an at sign are XML
+                if (file_exists(VIEWS . 'xml' . Pew::config()->layout_ext)) {
+                    $this->layout = 'xml';
+                } else {
+                    $this->layout = 'empty';
+                }
+                break;
+            case ':':
+                $this->output_type = OUTPUT_TYPE_JSON;
+                # Actions prefixed with a colon are JSON
+                if (file_exists(VIEWS . 'json' . Pew::config()->layout_ext)) {
+                    $this->layout = 'json';
+                } else {
+                    $this->layout = 'empty';
+                }
         }
+        
+        if (!ctype_alpha($action{0})) {
+            # Strip the flag character from the action name
+            $this->view = $action = substr($action, 1);
+        }
+        
+        if (!method_exists($this, $this->action_prefix . $action)) {
+            # If the $action method does not exist, show an error page
+            new PewError(PewError::ACTION_MISSING, $this, $this->action_prefix . $action);
+        }
+        
+        # Everything's clear pink
+        $view_data = call_user_func_array(array($this, $this->action_prefix . $action), $parameters);
+        return $view_data;
     }
     
     /**

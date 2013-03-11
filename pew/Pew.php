@@ -110,11 +110,6 @@ class Pew
                 self::$config->database_config = include self::$config->app_folder . 'config' . DS . 'database.php';
             }
 
-            // load app/config/routes.php
-            if (file_exists(self::$config->app_folder . 'config' . DS . 'routes.php')) {
-                self::$config->routes = include self::$config->app_folder . 'config' . DS . 'routes.php';
-            }
-
             $registry->App = new App($app_folder);
         }
 
@@ -296,10 +291,10 @@ class Pew
         if (!isset($registry->Router)) {
             $routes = [];
             # fetch the routes configuration
-            $route_file = make_path(self::$config->app_folder, 'config', 'routes.php');
 
-            if (file_exists($route_file)) {
-                $routes = include $route_file;
+            // load app/config/routes.php
+            if (file_exists(self::$config->app_folder . DS . 'config' . DS . 'routes.php')) {
+                $routes = include self::$config->app_folder . DS .'config' . DS . 'routes.php';
             }
 
             # instantiate the router object

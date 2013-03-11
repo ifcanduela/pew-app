@@ -2,6 +2,8 @@
 
 namespace pew\controllers;
 
+use \pew\Pew as Pew;
+
 /**
  * The Pages controller can serve static views, useful for help or about pages.
  * 
@@ -33,8 +35,8 @@ class Pages extends \pew\Controller
     public function _action()
     {
         # the title for the view
-        if ($this->request->segment(1)) {
-            $this->view->title = ucwords(str_replace('_', ' ', $this->request->segment(1)));
+        if (Pew::router()->action()) {
+            $this->view->title = ucwords(str_replace('_', ' ', Pew::router()->action()));
         }
     }
 }

@@ -13,8 +13,8 @@
 return [
 
 	# this is an example route
-    ['/*',  'pages/view/:1', ['get', 'post']],
+    ['/:id',  'pages/view/:id', 'get post'],
 
-    ['/', 'pages/index'],
+    ['/', 'pages/view/index'],
 
 ];

@@ -13,6 +13,8 @@ class Router
 
     private $routes = [];
 
+    private $uri;
+
     public function __construct(array $routes = [])
     {
         foreach ($routes as $key => $route) {
@@ -113,9 +115,27 @@ class Router
      * 
      * @return array Parameters
      */
-    public function parameters()
+    public function parameters($n = null)
     {
-        return $this->parameters;
+        if (is_numeric($n)) {
+            if (array_key_exists($n, $this->parameters)) {
+                return $this->parameters[$n];
+            } else {
+                throw new \RuntimeException("Route parameter not found: $n");
+            }
+        } else {
+            return $this->parameters;
+        }
+    }
+
+    /**
+     * Get the current URI.
+     * 
+     * @return string The URI
+     */
+    public function uri()
+    {
+        return $this->uri;
     }
 
     /**
@@ -127,6 +147,8 @@ class Router
      */
     public function route($uri, $request_method = 'GET')
     {
+        $this->uri = $uri;
+
         $request_method = strtoupper($request_method);
 
         foreach ($this->routes[$request_method] as $route) {
