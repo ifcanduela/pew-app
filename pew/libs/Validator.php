@@ -1,6 +1,6 @@
 <?php
 
-namespace pew;
+namespace pew\libs;
 
 /**
  * A class to validate values against one or multiple rules.
@@ -18,7 +18,7 @@ namespace pew;
  * - is_email:value
  * - is_in_array:value:val1:val3:...:valN
  *
- * @package pew
+ * @package pew\libs
  * @author ifcanduela <ifcanduela@gmail.com>
  */
 class PewValidator
