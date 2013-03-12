@@ -80,15 +80,6 @@ class View
         }
     }
 
-    protected function template_filename($template = null)
-    {
-        if (!$template) {
-            $template = $this->template;
-        }
-
-        return $this->folder() . DIRECTORY_SEPARATOR . $template . $this->extension;
-    }
-    
     /**
      * Renders a view according to the request info
      *
@@ -100,14 +91,9 @@ class View
         if (!$template) {
             $template = $this->template;
         }
-        
+
         # Get the view file
         $template_file = $this->folder() . $template . $this->extension();
-        $template_file = $this->template_filename($template);
-        
-        if (!$template_file) {
-            throw new \Exception("Template file not found: $template_file");
-        }
         
         $output = $this->render_html($template_file, $data);
         
@@ -120,20 +106,14 @@ class View
      * @return string The output from the rendered view file
      * @access protected
      */
-    public function render_html($template_file, $template_data)
+    public function render_html($template_file, $template_data = [])
     {
-        # Return null if the view file does not exist
-        if (!file_exists($template_file . $this->extension)) {
-            var_dump(debug_backtrace());
-            throw new \Exception("Template file does not exist: $template_file");
-        }
-        
         # Make the variables directly accessible in the template.
         extract($template_data);
 
         # Output the view and save it into a buffer.
         ob_start();
-            require $template_file . $this->extension;
+            require $template_file;
             $template_output = ob_get_contents();
         ob_end_clean();
         
@@ -152,6 +132,10 @@ class View
     
     public function exists($template = null)
     {
+        if (is_null($template)) {
+            $template = $this->template;
+        }
+
         return file_exists($this->folder() . $template . $this->extension());
     }
 
@@ -167,13 +151,13 @@ class View
     {
         if (!is_null($folder)) {
             if (is_dir($folder)) {
-                $this->folder = trim($folder, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+                $this->folder = rtrim($folder, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
             } else {
                 return false;
             }
         }
 
-        return trim($this->folder, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        return rtrim($this->folder, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
     }
 
     /**
@@ -185,11 +169,7 @@ class View
     public function template($template = null)
     {
         if (!is_null($template)) {
-            if (file_exists($this->folder() . $template . $this->extension())) {
-                $this->template = $template;
-            } else {
-                return false;
-            }
+            $this->template = $template;
         }
 
         return $this->template;
@@ -205,8 +185,6 @@ class View
     {
         if (!is_null($extension)) {
             $this->extension = '.' . ltrim($extension, '.');
-        } else {
-            return false;
         }
 
         return '.' . ltrim($this->extension, '.');
@@ -221,11 +199,7 @@ class View
     public function layout($layout = null)
     {
         if (!is_null($layout)) {
-            if (file_exists($this->folder() . $layout . $this->extension())) {
-                $this->layout = $layout;
-            } else {
-                return false;
-            }
+            $this->layout = $layout;
         }
 
         return $this->layout;

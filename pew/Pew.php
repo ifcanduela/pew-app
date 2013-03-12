@@ -125,7 +125,7 @@ class Pew
     public static function config(array $config = null)
     {
         if ($config) {
-            self::$config->import = $config;
+            self::$config->import($config);
         }
 
         return self::$config;
@@ -362,18 +362,24 @@ class Pew
     }
 
     /**
-     * Gets the current view and initialises it.
+     * Gets a view and initialises it.
+     *
+     * Call this method without arguments to retrieve the base view. Use a key
+     * to create and initialize a view conforming to the following parameters:
+     *
+     * $key = 'default' -> the base folder is the views folder of the framework
+     * $key = !null     -> the view is a new instance
      *
      * @return View A view object
      */
-    public static function view()
+    public static function view($key = null)
     {
         $registry = libs\Registry::instance();
 
-        if (!isset($registry->CurrentView)) {
-            $registry->CurrentView = new View;
+        if (!isset($registry->View)) {
+            $registry->View = new View;
         }
 
-        return $registry->CurrentView;
+        return $registry->View;
     }
 }

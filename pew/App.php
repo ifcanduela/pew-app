@@ -52,22 +52,21 @@ class App
         $controller = Pew::controller($controller_name, $request);
         $view = Pew::view();
 
+        $view->folder(Pew::config()->app_folder . DIRECTORY_SEPARATOR . 'views');
+        $view->template($router->controller() . '/' . $router->action());
+        $view->layout(Pew::config()->default_layout);
+
         # check controller instantiation
         if (!is_object($controller)) {
             if (file_exists(Pew::config()->views_folder . $router->controller() . DS . $router->action() . Pew::config()->view_ext)) {
                 # if the controller does not exist, but the view does, use Pages
-                $controller = new controllers\Pages($request);
-                $controller->view = $view;
-                $view->templates_dir = $router->controller();
+                $controller = new controllers\Pages($request, $view);
             } else {
                 # display an error page if the controller could not be instanced
                 new PewError(PewError::CONTROLLER_MISSING, $request);
             }
         }
         
-        # assign the curreent view to the controller
-        $controller->view = $view;
-
         # call the before_action method if it's defined
         if (method_exists($controller, 'before_action')) {
             $controller->before_action();
@@ -75,7 +74,7 @@ class App
 
         # call the action method and let the controller decide what to do
         $view_data = $controller->_action($router->action(), $router->parameters());
-        
+
         # check if the controller action requires authentication
         if (isset($controller->auth) && $controller->auth->require()) {
             # check if the user is authenticated
@@ -91,15 +90,32 @@ class App
         if (method_exists($controller, 'after_action')) {
             $controller->after_action();
         }
-        
+
+        $this->response($view, $view_data);
+    }
+
+    public function response($view, $data)
+    {
         # render the view, if not prevented
         if ($view->render) {
-            $output = $view->render($view_data, $router->action() . '/' . $router->action());
-            
+            if (!$view->exists()) {
+                $defaultView = clone $view;
+                $defaultView->folder(Pew::config()->system_folder . 'views');
+
+                if ($defaultView->exists()) {
+                    $output = $defaultView->render($data);
+                } else {
+                    throw new \Exception("View file could not be found");
+                }
+            } else {
+                $output = $view->render($data);
+            }
+
             # render the layout
-            $layout = Pew::view('layout');
+            $layout = clone $view;
+            $layout->extension(Pew::config()->layout_ext);
             $layout->template($view->layout());
-            $layout->render(array('title' => $view->title, 'output' => $output));
+            echo $layout->render(['title' => $view->title, 'output' => $output]);
         }
     }
 }

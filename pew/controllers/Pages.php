@@ -32,11 +32,16 @@ class Pages extends \pew\Controller
      * 
      * @access public
      */
-    public function _action()
+    public function _action($action, array $parameters = [])
     {
-        # the title for the view
-        if (Pew::router()->action()) {
-            $this->view->title = ucwords(str_replace('_', ' ', Pew::router()->action()));
+        if (isSet($parameters[0])) {
+            $this->view->title(ucwords(str_replace('_', ' ', $parameters[0])));
+            $this->view->template($this->file_name . '/' . $parameters[0]);
+        } else {
+            $this->view->title(ucwords(str_replace('_', $this->file_name)));
+            $this->view->template($this->file_name . '/' . 'index');
         }
+
+        return [];
     }
 }

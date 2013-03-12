@@ -111,14 +111,6 @@ abstract class Controller
      * @access protected
      */
     protected $use_db = true;
-
-    /**
-     * Whether to instance a database controller or not.
-     *
-     * @var bool
-     * @access protected
-     */
-    protected $use_twig = false;
     
     /**
      * Database access object instance.
@@ -187,13 +179,24 @@ abstract class Controller
     {
         # Assign Request and View objects
         $this->request = $request;
-        $this->view = $view;
+        if ($view) {
+            $this->view = $view;
+        } else {
+            $this->view = Pew::view();
+        }
         
         # Make sure $model is read through the __get magic method the first time
         unset($this->model);
         
-        # Controller file name in the CONTROLLERS folder.
-        $this->file_name = class_name_to_file_name(get_class($this));
+        # Controller file name in the /views/ folder.
+        $this->file_name = class_name_to_file_name(
+                join('', 
+                    array_slice(
+                        explode('\\', get_class($this)), 
+                        -1
+                    )
+                )
+        );
 
         # Global action prefix override
         if (!$this->action_prefix && Pew::config()->action_prefix) {
@@ -252,12 +255,12 @@ abstract class Controller
     {
         switch ($action{0}) {
             case '_':
-                # Actions prefixed with an underscore are private
+                # actions prefixed with an underscore are private
                 new PewError(ACTION_FORBIDDEN, $this, $action);
                 break;
             case '@':
                 $this->output_type = OUTPUT_TYPE_XML;
-                # Actions prefixed with an at sign are XML
+                # actions prefixed with an at sign are XML
                 if (file_exists(VIEWS . 'xml' . Pew::config()->layout_ext)) {
                     $this->layout = 'xml';
                 } else {
@@ -266,7 +269,7 @@ abstract class Controller
                 break;
             case ':':
                 $this->output_type = OUTPUT_TYPE_JSON;
-                # Actions prefixed with a colon are JSON
+                # actions prefixed with a colon are JSON
                 if (file_exists(VIEWS . 'json' . Pew::config()->layout_ext)) {
                     $this->layout = 'json';
                 } else {
@@ -275,17 +278,24 @@ abstract class Controller
         }
         
         if (!ctype_alpha($action{0})) {
-            # Strip the flag character from the action name
-            $this->view = $action = substr($action, 1);
+            $action = substr($action, 1);
         }
         
         if (!method_exists($this, $this->action_prefix . $action)) {
             # If the $action method does not exist, show an error page
             new PewError(PewError::ACTION_MISSING, $this, $this->action_prefix . $action);
         }
-        
-        # Everything's clear pink
+
+        # set default template before calling the action
+        $this->view->template($this->file_name . '/' . $action);
+
+        # everything's clear pink
         $view_data = call_user_func_array(array($this, $this->action_prefix . $action), $parameters);
+
+        if (!is_array($view_data)) {
+            $view_data = [$view_data];
+        }
+
         return $view_data;
     }
     

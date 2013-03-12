@@ -109,7 +109,7 @@ $cfg['layout_ext'] = '.layout.php';
 $cfg['class_ext'] = '.php';
 
 /**
- * @var string Default controller to use if none is specified (file name)
+ * @var string Default controller to use if none is specified (slug)
  */
 $cfg['default_controller'] = 'pages';
 
@@ -117,6 +117,12 @@ $cfg['default_controller'] = 'pages';
  * @var string Default action to use if none is specified (no prefix)
  */
 $cfg['default_action'] = 'index';
+
+/**
+ * @var string Default layout to use if none is specified (no extension)
+ */
+$cfg['default_layout'] = 'default';
+
 
 /**
  * @var array Configured routes.
