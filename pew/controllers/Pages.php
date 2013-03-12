@@ -34,13 +34,8 @@ class Pages extends \pew\Controller
      */
     public function _action($action, array $parameters = [])
     {
-        if (isSet($parameters[0])) {
-            $this->view->title(ucwords(str_replace('_', ' ', $parameters[0])));
-            $this->view->template($this->file_name . '/' . $parameters[0]);
-        } else {
-            $this->view->title(ucwords(str_replace('_', $this->file_name)));
-            $this->view->template($this->file_name . '/' . 'index');
-        }
+    	$this->view->title(ucwords(str_replace('_', ' ', $action)));
+        $this->view->template($this->file_name . '/' . $action);
 
         return [];
     }

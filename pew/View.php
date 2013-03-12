@@ -94,7 +94,7 @@ class View
 
         # Get the view file
         $template_file = $this->folder() . $template . $this->extension();
-        
+     
         $output = $this->render_html($template_file, $data);
         
         return $output;

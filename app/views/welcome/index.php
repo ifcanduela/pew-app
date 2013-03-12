@@ -1,3 +1,3 @@
 <h1>Welcome!</h1>
 
-<p>This is <code><?php __FILE__ ?></code>.</p>
+<p>This is <code><?= __FILE__ ?></code>.</p>

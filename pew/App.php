@@ -16,7 +16,7 @@ class App
      *
      * @access public
      */
-    function __construct()
+    public function __construct()
     {
 
     }
@@ -47,20 +47,21 @@ class App
         $router->route($request->segments(), $request->method());
 
         $controller_name = $router->controller();
-
-        # instantiate a controller and a view
-        $controller = Pew::controller($controller_name, $request);
+        # Instantiate the main view
         $view = Pew::view();
 
         $view->folder(Pew::config()->app_folder . DIRECTORY_SEPARATOR . 'views');
         $view->template($router->controller() . '/' . $router->action());
         $view->layout(Pew::config()->default_layout);
 
+        # instantiate the controller
+        $controller = Pew::controller($controller_name, $request);
+        
         # check controller instantiation
         if (!is_object($controller)) {
-            if (file_exists(Pew::config()->views_folder . $router->controller() . DS . $router->action() . Pew::config()->view_ext)) {
-                # if the controller does not exist, but the view does, use Pages
+            if ($view->exists()) {
                 $controller = new controllers\Pages($request, $view);
+                $skip_action = true;
             } else {
                 # display an error page if the controller could not be instanced
                 new PewError(PewError::CONTROLLER_MISSING, $request);
@@ -73,7 +74,11 @@ class App
         }
 
         # call the action method and let the controller decide what to do
-        $view_data = $controller->_action($router->action(), $router->parameters());
+        if (isSet($skip_action) && $skip_action) {
+            $view_data = array();
+        } else {
+            $view_data = $controller->_action($router->action(), $router->parameters());
+        }
 
         # check if the controller action requires authentication
         if (isset($controller->auth) && $controller->auth->require()) {

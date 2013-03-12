@@ -88,24 +88,25 @@ class Pew
         self::$config->import($pew_config);
 
         if (!isset($registry->App)) {
-            // load app/config/config.php
+            # load app/config/config.php
             $app_config = include getcwd() . DS . $app_folder . DS . 'config' . DS . $config_file . '.php';
 
             // merge user config with Pew config
             self::$config->import($app_config);
 
-            // add application namespace and path
+            # add application namespace and path
             $app_folder_name = trim(basename($app_folder));
             self::$config->app_namespace = '\\' . $app_folder_name;
             self::$config->app_folder = realpath($app_folder);
             self::$config->app_config = $config_file;
 
-            // load app/config/bootstrap.php
+            # load app/config/bootstrap.php
             if (file_exists(self::$config->app_folder . 'config' . DS . 'bootstrap.php')) {
                 require self::$config->app_folder . 'config' . DS . 'bootstrap.php';
             }
 
-            // load app/config/database.php
+            # load app/config/database.php
+            # @todo: move this to Pew::database()
             if (file_exists(self::$config->app_folder . 'config' . DS . 'database.php')) {
                 self::$config->database_config = include self::$config->app_folder . 'config' . DS . 'database.php';
             }
@@ -151,7 +152,7 @@ class Pew
                 return $registry->CurrentRequestController;
             } else {
                 # if not, throw an exception
-                throw new InvalidArgumentException("No controller could be retrieved");
+                throw new InvalidArgumentException("No current controller could be retrieved");
             }
         } else {
             $class_name = file_name_to_class_name($controller_name);

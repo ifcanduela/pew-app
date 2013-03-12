@@ -65,7 +65,13 @@ class Autoloader
 
             $file_name .= str_replace('_', DIRECTORY_SEPARATOR, $class) . self::CLASS_FILE_EXTENSION;
 
-            @include_once ($this->base_path !== null ? $this->base_path . DIRECTORY_SEPARATOR : '') . $file_name;
+            $file = ($this->base_path !== null ? $this->base_path . DIRECTORY_SEPARATOR : '') . $file_name;
+
+            if (file_exists($file)) {
+            	@include_once ($this->base_path !== null ? $this->base_path . DIRECTORY_SEPARATOR : '') . $file_name;
+            } else {
+            	return false;
+            }
         }
     }
 }
