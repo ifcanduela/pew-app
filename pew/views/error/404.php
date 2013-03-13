@@ -37,8 +37,8 @@
         <p>Sorry, the page you were looking for does not exist. Try one of the following:</p>
         
         <ul>
-            <li><a href="<?php url(Pew::Get('App')->url); ?>">Try again</a>: If you think it might help.</li>
-            <li><a href="<?php url(); ?>">Go home</a>: And start from the beginning.</li>
+            <li><a href="<?= $_SERVER['REQUEST_URI'] ?>">Try again</a>: If you think it might help.</li>
+            <li><a href="<?= APP_URL ?>">Go home</a>: And start from the beginning.</li>
         </ul>
         
         <p>In compensation, a picture of a cat:</p>
