@@ -64,7 +64,8 @@ class App
                 $skip_action = true;
             } else {
                 # display an error page if the controller could not be instanced
-                new PewError(PewError::CONTROLLER_MISSING, $request);
+                $controller = new controllers\Error($request);
+                $controller->set_error(controllers\Error::CONTROLLER_MISSING);
             }
         }
         

@@ -11,7 +11,7 @@ namespace pew\controllers;
  * @author ifcanduela <ifcanduela@gmail.com>
  * @package pew
  */
-class PewError extends Pages
+class Error extends Pages
 {
     const NO_ERROR = 0;
     const VIEW_MISSING = 1;
@@ -26,6 +26,8 @@ class PewError extends Pages
     const LIBRARY_FILE_MISSING = 10;
     const LIBRARY_CLASS_MISSING = 11;
     const ACTION_FORBIDDEN = 12;
+
+    public $layout = 'error';
 
     /**
      * Error code.
@@ -63,20 +65,20 @@ class PewError extends Pages
      *                       
      * @access public
      */
-    public function __construct($error_code = 404)
+    public function __construct($request)
     {
-        $this->error_code = $error_code;
-        
-        $this->subject = func_get_args();
-        
+        parent::__Construct($request);
+
         # If the script is not running on DEBUG, execution is definitely stopped
-        if (!Pew::config()->debug) {
+        if (!\pew\Pew::config()->debug) {
             # Render standard error page
             $this->show_404();
-        } else {
-            # Render the error page
-            $this->_render();
         }
+    }
+
+    public function _set_error($error_code)
+    {
+        $this->error_code = $error_code;
     }
 
     /**
@@ -222,7 +224,7 @@ ERROR_TEXT;
                 break;
         }
         
-        require Pew::config()->default_folder . 'views/error.layout.php';
+        require \pew\Pew::config()->default_folder . 'views/error.layout.php';
         
         exit();
     }
@@ -238,7 +240,7 @@ ERROR_TEXT;
     public function show_404()
     {
         header("HTTP/1.0 404 Not Found");
-        include(Pew::config()->default_folder . DS . 'views' . DS . 'pew_error' . DS . '404.php');
-        exit();
+        include(\pew\Pew::config()->system_folder . DS . 'views' . DS . $this->file_name . DS . '404.php');
+        exit(404);
     }
 }

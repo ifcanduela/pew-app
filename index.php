@@ -10,4 +10,4 @@
 require __DIR__ . '/pew/Pew.php';
 
 # ...and the magic begins!
-pew\Pew::app('app', 'config')->run();
+\pew\Pew::app('app', 'config')->run();
