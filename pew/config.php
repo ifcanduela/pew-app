@@ -45,11 +45,6 @@ $cfg['root_folder'] = getcwd() . DS;
 $cfg['system_folder'] = dirname(__FILE__) . DS;
 
 /**
- * @var string Full path to the framework default folder (filesystem).
- */
-$cfg['default_folder'] = $cfg['system_folder'] . 'default' . DS;
-
-/**
  * @var string Full path to the application folder (filesystem).
  */
 $cfg['app_folder'] = getcwd() . DS . 'app' . DS;
@@ -123,21 +118,12 @@ $cfg['default_action'] = 'index';
  */
 $cfg['default_layout'] = 'default';
 
-
 /**
  * @var array Configured routes.
  */
-$cfg['routes'] = [];
-
-/**
- * @var boolean Set to true to enable the use of the session functionality.
- */
-$cfg['use_session'] = false;
-
-/**
- * @var boolean Set to true to enable the use of database connections.
- */
-$cfg['use_db'] = false;
+$cfg['routes'] = [
+	['/', "/{$cfg['default_controller']}/{$cfg['default_action']}"],
+];
 
 /**
  * @var boolean Set to true to enable the use of the auth library.
@@ -145,17 +131,12 @@ $cfg['use_db'] = false;
 $cfg['use_auth'] = false;
 
 /**
- * @var boolean Set to true to use the Twig templating library for views.
- */
-$cfg['use_twig'] = false;
-
-/**
  * Base URL of the application (the location of index.php).
  */
 define('APP_URL', $cfg['app_url']);
 
 /**
- * Base URL of the application (the location of index.php).
+ * Path to the Pew-Pew-Pew files.
  */
 define('PEW_PATH', $cfg['system_folder']);
 

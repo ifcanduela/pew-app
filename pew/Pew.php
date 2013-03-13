@@ -270,10 +270,7 @@ class Pew
 
         if (!isset($registry->Request)) {
             # instantiate the request object
-            $registry->Request = $request = new libs\Request($uri_string);
-            foreach (self::$config->routes as $from => $to) {
-                $request->add_route($from, $to);
-            }
+            $registry->Request = $request = new libs\Request();
         }
 
         return $registry->Request;

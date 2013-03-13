@@ -1,5 +1,6 @@
 body {
-  background-color: #b7d478;      
+  background: #b7d478 url(../img/pew-bg.png) no-repeat bottom left;
+  background-attachment: fixed;
   font: normal 16px/165% candara, 'trebuchet-ms', sans-serif;
   margin: 0;
   overflow-y: scroll;
@@ -61,9 +62,6 @@ body > footer{
 }
 
 #main {
-  background: #b7d478 url(../img/pew-bg.png) no-repeat bottom left;
-  background-attachment: fixed;
-/*background-position: -10%;*/
   color: #575;
   margin-bottom: 40px;
   margin-top: 40px;
