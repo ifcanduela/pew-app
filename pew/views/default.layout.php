@@ -3,18 +3,16 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <base href="<?php url() ?>">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <base href="<?= APP_URL ?>">
     <title><?= $title; ?></title>
-    <link rel="shortcut icon" href="<?php url('favicon.png'); ?>">
-    <link rel="stylesheet" href="<?php www('css/reset.css'); ?>">
-    <link rel="stylesheet" href="<?php www('css/styles.css'); ?>">
-    <script type="text/javascript" src="<?php www('js/jquery.js'); ?>"></script>
+    <link rel="stylesheet" href="www/css/default.css">
 </head>
 
-<body id="<?= $this->request->controller; ?>" class="<?= $this->request->action; ?>">
+<body>
     
     <header>
-        <h1>Pew-Pew-Pew</h1>
+        <h1><?= $title ?></h1>
     </header>
 
     <div id="main">
@@ -22,9 +20,10 @@
     </div>
 
     <footer>
-        <p>&copy; 2011 ifcanduela | Powered by Pew-Pew-Pew <?= VERSION; ?></p>
+        <p>2011-2013 ifcanduela | Powered by <a href="https://github.com/ifcanduela/Pew-Pew-Pew">Pew-Pew-Pew</a></p>
     </footer>
     
-    <?php $this->element('debug'); ?>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="www/js/app.js"></script>
 </body>
 </html>
