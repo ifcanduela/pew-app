@@ -1,20 +1,29 @@
 <?php
 
 /*
- * Add routes to this array, they will be processed from top to bottom.
+ * Add routes to this array, they will be checked from top to bottom.
  *
- * A route consists of a possible URL (beginning with a forward slash) 
- * and  a controller/action/parameters string to transform the URL into.
+ * A route consists of a possible URI (beginning with a forward slash) 
+ * and a route (/controller/action[/parameters]) to transform the URL 
+ * into.
  *
- * You can add $ to the end of the URL to make it strictly ignore any 
- * addiotional segments. Otherwise, those segments will be added to the
+ * Use tags like :tag to match segments from the URI (left) to the 
+ * route (right).
+ *
+ * A third array element restricts the HTTP methods for a given route. You 
+ * can use any non-alphanumeric character to separate HTTP methods. If no 
+ * methods are specified, GET is used.
+ *
+ * Add $ to the end of the URL to make it strictly ignore any 
+ * additional segments. Otherwise, those segments will be added to the
  * end of the result.
  */
 return [
 
 	# this is an example route
-    //['/:id',  'pages/view/:id', 'get post'],
+    ['/welcome/:name', '/welcome/index/:name', 'get post'],
 
+    # this last route will use the default controller and action
     ['/', '/'],
 
 ];

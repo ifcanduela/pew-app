@@ -30,7 +30,7 @@ class Router
     public function add_route(array $route)
     {
         if (count($route) < 2) {
-            return;
+            throw new \Exception("Malformed route found.");
         }
 
         $route[0] = '/'. trim($route[0], '/');

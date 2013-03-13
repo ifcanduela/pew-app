@@ -2,6 +2,8 @@
 
 namespace pew;
 
+use \pew\libs\Registry as Registry;
+
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'functions.php';
 
 /**
@@ -47,7 +49,7 @@ class Pew
      */
     public static function get($index, $arguments = [])
     {
-        $registry = libs\Registry::instance();
+        $registry = Registry::instance();
         if (!isset($registry->$index)) {
             if (class_exists($index)) {
                 $reflection_class = new ReflectionClass($index);
@@ -81,10 +83,10 @@ class Pew
         $pewLoader = new Autoloader('pew', dirname(__DIR__));
         $pewLoader->register();
         
-        $registry = libs\Registry::instance();
+        $registry = Registry::instance();
 
         $pew_config = require_once __DIR__ . DIRECTORY_SEPARATOR . 'config.php';
-        self::$config = new libs\Registry();
+        self::$config = new Registry();
         self::$config->import($pew_config);
 
         if (!isset($registry->App)) {
@@ -103,12 +105,6 @@ class Pew
             # load app/config/bootstrap.php
             if (file_exists(self::$config->app_folder . 'config' . DS . 'bootstrap.php')) {
                 require self::$config->app_folder . 'config' . DS . 'bootstrap.php';
-            }
-
-            # load app/config/database.php
-            # @todo: move this to Pew::database()
-            if (file_exists(self::$config->app_folder . 'config' . DS . 'database.php')) {
-                self::$config->database_config = include self::$config->app_folder . 'config' . DS . 'database.php';
             }
 
             $registry->App = new App($app_folder);
@@ -143,7 +139,7 @@ class Pew
      */
     public static function controller($controller_name = null, \pew\libs\Request $request)
     {   
-        $registry = libs\Registry::instance();
+        $registry = Registry::instance();
 
         # check if the class name is omitted
         if (!isset($controller_name)) {
@@ -183,7 +179,7 @@ class Pew
      */
     public static function model($class_name)
     {
-        $registry = libs\Registry::instance();
+        $registry = Registry::instance();
 
         # Make sure the suffix "Model" is added to the class name
         if (substr($class_name, -5) !== 'Model') {
@@ -236,9 +232,14 @@ class Pew
      */
     public static function database($config = null)
     {
-        $registry = libs\Registry::instance();
+        $registry = Registry::instance();
 
         if (!isset($registry->Database)) {
+            # load app/config/database.php
+            if (file_exists(self::$config->app_folder . 'config' . DS . 'database.php')) {
+                self::$config->database_config = include self::$config->app_folder . 'config' . DS . 'database.php';
+            }
+
             $use_db = self::$config->use_db;
             $db_config = self::$config->database_config;
 
@@ -265,7 +266,7 @@ class Pew
      */
     public static function request($uri_string = null)
     {
-        $registry = libs\Registry::instance();
+        $registry = Registry::instance();
 
         if (!isset($registry->Request)) {
             # instantiate the request object
@@ -287,7 +288,7 @@ class Pew
      */
     public static function router($uri_string = null)
     {
-        $registry = libs\Registry::instance();
+        $registry = Registry::instance();
 
         if (!isset($registry->Router)) {
             $routes = [];
@@ -316,7 +317,7 @@ class Pew
      */
     public static function auth()
     {
-        $registry = libs\Registry::instance();
+        $registry = Registry::instance();
 
         if (!isset($registry->Auth)) {
             $database = self::database();
@@ -337,7 +338,7 @@ class Pew
      */
     public static function log()
     {
-        $registry = libs\Registry::instance();
+        $registry = Registry::instance();
 
         if (!isset($registry->Log)) {
             $registry->Log = new PewLog(self::$config->log_level);
@@ -353,7 +354,7 @@ class Pew
      */
     public static function session()
     {
-        $registry = libs\Registry::instance();
+        $registry = Registry::instance();
 
         if (!isset($registry->Session)) {
             $registry->Session = new Session();
@@ -375,7 +376,7 @@ class Pew
      */
     public static function view($key = null)
     {
-        $registry = libs\Registry::instance();
+        $registry = Registry::instance();
 
         if (!isset($registry->View)) {
             $registry->View = new View;
