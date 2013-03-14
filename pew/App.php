@@ -111,7 +111,7 @@ class App
                 if ($defaultView->exists()) {
                     $output = $defaultView->render($data);
                 } else {
-                    throw new \Exception("View file could not be found");
+                    throw new \Exception("View file could not be found: {$view->folder()}{$view->template()}");
                 }
             } else {
                 $output = $view->render($data);

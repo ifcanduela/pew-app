@@ -262,7 +262,6 @@ class Pew
      * 
      * @param string $uri_string A list of slash-separated segments.
      * @return Request The initialised request object
-     * @throws Exception When the class does not exist.
      */
     public static function request($uri_string = null)
     {
