@@ -21,7 +21,7 @@ namespace pew;
  */
 class Asset
 {
-    protected static $_asset_types = array('css', 'less', 'js');
+    protected static $asset_types = array('css', 'less', 'js');
 
     /**
      * Holds the collected Cascading Stylesheet files.
@@ -29,7 +29,7 @@ class Asset
      * @var array
      * @access protected
      */
-    protected $_css_files = array();
+    protected $css_files = array();
     
     /**
      * Holds the collected LESS stylesheet files.
@@ -37,7 +37,7 @@ class Asset
      * @var array
      * @access protected
      */
-    protected $_less_files = array();
+    protected $less_files = array();
 
     /**
      * Holds the collected JavaScript files.
@@ -45,7 +45,7 @@ class Asset
      * @var array
      * @access protected
      */
-    protected $_js_files = array();
+    protected $js_files = array();
     
     /**
      * Location of CSS files.
@@ -53,7 +53,7 @@ class Asset
      * @var string
      * @access protected
      */
-    protected $_css_folder = '';
+    protected $css_folder = '';
 
     /**
      * Location of LESS files.
@@ -61,7 +61,7 @@ class Asset
      * @var string
      * @access protected
      */
-    protected $_less_folder;
+    protected $less_folder;
 
     /**
      * Location of JS files
@@ -69,7 +69,7 @@ class Asset
      * @var string
      * @access protected
      */
-    protected $_js_folder = '';
+    protected $js_folder = '';
 
     /**
      * Less compiler command to process LESS files.
@@ -160,8 +160,8 @@ class Asset
         $slug = str_replace($slug, '.css', '');
         
         if (file_exists(root('www' . DS . 'css' . DS . $slug . '.css', false))) {
-            if (!in_array($slug, $this->_css_files, true)) {
-                $this->_css_files[] = $slug;
+            if (!in_array($slug, $this->css_files, true)) {
+                $this->css_files[] = $slug;
             }
             return true;
         } else {
@@ -182,8 +182,8 @@ class Asset
         $slug = str_replace($slug, '.js', '');
         
         if (file_exists(root('www' . DS . 'js' . DS . $slug . '.js', false))) {
-            if (!in_array($slug, $this->_js_files, true)) {
-                $this->_js_files[] = $slug;
+            if (!in_array($slug, $this->js_files, true)) {
+                $this->js_files[] = $slug;
             }
             return true;
         } else {
@@ -202,7 +202,7 @@ class Asset
     {
         $output = '';
         
-        foreach ($this->_js_files as $key => $value) {
+        foreach ($this->js_files as $key => $value) {
             $output .= '<link rel"stylesheet" href="'
                      . url('www/css/' . $value
                      . '.css', false) . '"> ' . PHP_EOL;
@@ -226,7 +226,7 @@ class Asset
     {
         $output = '';
         
-        foreach ($this->_js_files as $key => $value) {
+        foreach ($this->js_files as $key => $value) {
             $output .= '<script type="text/javascript" src="'
                      . url('www/js/' . $value
                      . '.js', false) . '"></script> ' . PHP_EOL;

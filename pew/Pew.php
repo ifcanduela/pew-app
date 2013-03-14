@@ -247,7 +247,7 @@ class Pew
                 $use = is_string($config) ? $config : (!is_string($use_db) ? 'default' : $use_db);
                 
                 if (isset($db_config[$use])) {
-                    $registry->Database = new Database($db_config[$use]);
+                    $registry->Database = new libs\Database($db_config[$use]);
                 } else {
                     throw new RuntimeException("Database is disabled.");
                 }                

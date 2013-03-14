@@ -1,194 +1,128 @@
 <?php
 
-namespace pew;
+namespace pew\libs;
 
 /**
- * The PewDatabase class encapsulates database access.
+ * The Database class encapsulates database access.
  *
  * PewDatabase implements PHP Data Objects (PDO) to provide a homogeneous
  * interface for multiple Relational Database Management Systems. Currently
- * available are SQLite and MySQL. Configuration is defined via the
- * DatabaseConfiguration class (found in /app/config) or an array passed into
- * the constructor.
+ * available are SQLite and MySQL. Configuration is defined via a simple
+ * associative array passed into the constructor.
  *
  * The methods contained within this class are aimed to simplify basic database
  * operations, such as simple selects, inserts and updates.
  *
- * The PDO object is public to facilitate complex queries. This class can be
- * used as a singleton by setting the constructor to protected and calling the
- * instance() static method. However, that is not recommended.
+ * The PDO object is public to facilitate complex queries.
  *
  * One of the ways of using this class is the following:
  *
- *      $pdb = new PewDatabase();
+ *      $pdb = new \pew\libs\Database($config);
  *      $my_cat = $pdb->where(array('name' => 'Cuddles'))->single('cats');
+ *
+ * There are more examples at the bottom of this file.
  * 
- * @package pew
+ * @package pew\libs
  * @author ifcanduela <ifcanduela@gmail.com>
  */
-class PewDatabase
+class Database
 {
     
     const MYSQL  = 'mysql';
     const SQLITE = 'sqlite';
 
     /**
-     * PHP Data Object for database access.
-     *
-     * The PDO object is public for advanced operations, such as
-     * transactions, commints or rollbacks.
-     * 
-     * @var PDO
-     * @access public
+     * @var PDO PHP Data Object for database access.
      */
     public $pdo = null;
 
     /**
-     * Connection flag.
-     *
-     * Indicates whether the PDO object is connected to the database or not.
-     * 
-     * @var bool
-     * @access protected
+     * @var bool Connection established flag.
      */
-    protected $_is_connected = false;
+    protected $is_connected = false;
     
     /**
-     * Configuration parameters.
-     *
-     * @var array
-     * @access protected
+     * @var array Configuration parameters.
      */
-    protected $_config = array();
+    protected $config;
 
     /**
-     * Last query run
-     * 
-     * @var string
-     * @access public
+     * @var string Last query run.
      */
     public $last_query = null;
     
     /**
-     * A string containing a list of tables for SQL statements.
-     *
-     * @var string
-     * @access protected
+     * @var string List of tables for FROM clause.
      */
     protected $from = null;
     
     /**
-     * A string containing a list of fields for SELECT or INSERT statements.
-     *
-     * @var string
-     * @access protected
+     * @var string list of fields for SELECT or INSERT clauses.
      */
     protected $fields = '*';
     
     /**
-     * A string containing a SQL-formatted WHERE clause.
-     *
-     * @var array
-     * @access protected
+     * @var array SQL-formatted WHERE clause.
      */
     protected $where = null;
 
     /**
-     * A string containing a SQL-formatted LIMIT clause.
-     *
-     * @var string
-     * @access protected
+     * @var string SQL-formatted LIMIT clause.
      */
     protected $limit = null;
 
     /**
-     * A string containing a SQL-formatted GROUP BY clause.
-     *
-     * @var string
-     * @access protected
+     * @var string SQL-formatted GROUP BY clause.
      */
     protected $group_by = null;
 
     /**
-     * A string containing a SQL-formatted HAVING clause.
-     *
-     * @var array
-     * @access protected
+     * @var array SQL-formatted HAVING clause.
      */
     protected $having = null;
     
     /**
-     * A string containing a SQL-formatted ORDER BY clause.
-     *
-     * @var string
-     * @access protected
+     * @var string SQL-formatted ORDER BY clause.
      */
     protected $order_by = null;
     
     /**
-     * A string containing an SQL-formatted VALUES clause.
-     *
-     * @var array
-     * @access protected
+     * @var array SQL-formatted VALUES clause.
      */
     protected $values = null;
     
     /**
-     * A string containing an SQL-formatted SET clause.
-     *
-     * @var array
-     * @access protected
+     * @var array SQL-formatted SET clause.
      */
     protected $set = null;
     
     /**
-     * An automatically-populated array of tag/value pairs for use in prepared
-     * statements.
-     *
-     * @var array
-     * @access protected
+     * @var array Key/value pairs for prepared statements.
      */
     protected $tags = array();
     
     /**
-     * Number of tagged parameters in a prepared statement.
-     *
-     * @var int
-     * @access protected
-     * @static
+     * @var int Number of tagged parameters in a prepared statement.
      */
     protected static $tag_count = 0;
-     
     
     /**
-     * An array of tag/value pairs for use in prepared statements with WHERE.
-     * 
-     * @var array
-     * @access protected
+     * @var array Kag/value pairs for WHERE clauses in prepared statements.
      */
     protected $where_tags = array();
     
     /**
-     * An array of tag/value pairs for use in prepared statements with SET.
-     * 
-     * @var array
-     * @access protected
+     * @var array Key/value pairs for SET clauses in prepared statements.
      */
     protected $set_tags = array();
     
     /**
-     * An array of tag/value pairs for use in prepared statements with INSERT.
-     * 
-     * @var array
-     * @access protected
+     * @var array Key/value pairs for use in prepared statements with INSERT.
      */
     protected $insert_tags = array();
     
     /**
-     * An array of tag/value pairs for use in prepared statements with HAVING.
-     * 
-     * @var array
-     * @access protected
+     * @var array Key/value pairs for HAVING clauses in prepared statements.
      */
     protected $having_tags = array();
     
@@ -199,7 +133,6 @@ class PewDatabase
      * ERRMODE_EXCEPTION.
      * 
      * @param array $config Alternate configuration settings
-     * @access public
      * @throws InvalidArgumentException If the DB engine is not selected
      */
     public function __construct(array $config)
@@ -217,11 +150,10 @@ class PewDatabase
      * Connects to the configured database provider.
      *
      * @returns bool True if the connection was successful, false otherwise
-     * @access protected
      */
     protected function connect()
     {
-        if (!$this->_is_connected) {
+        if (!$this->is_connected) {
             extract($this->config);
             
             try {
@@ -242,16 +174,16 @@ class PewDatabase
                     break;
                 }
                 
-                $this->_is_connected = true;
+                $this->is_connected = true;
             } catch (PDOException $e) {
-                $this->_is_connected = false;
+                $this->is_connected = false;
                 throw new Exception('PDO connection failed: ' . $e->getMessage());
             }
          }
         
         $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        return $this->_is_connected;
+        return $this->is_connected;
     }
 
     /**
@@ -273,8 +205,7 @@ class PewDatabase
      * Sets the FROM field for subsequent queries.
      *
      * @param string $from The list of tables against which to perform the query
-     * @return PewDatabase The PewDatabase object
-     * @access public
+     * @return \pew\libs\Database The Database object
      */
     public function from($from)
     {
@@ -288,8 +219,7 @@ class PewDatabase
      * This function is an alias for PewDatabase::from()
      *
      * @param string $from The list of tables against which to perform the query
-     * @return PewDatabase The PewDatabase object
-     * @access public
+     * @return \pew\libs\Database The Database object
      */
     public function into($into)
     {
@@ -302,7 +232,6 @@ class PewDatabase
      *
      * @param string $fields A SQl-formatted field list
      * @return PewDataabse The PewDatabase object
-     * @access public
      */
     public function fields($fields)
     {
@@ -314,8 +243,7 @@ class PewDatabase
      * Sets the WHERE field and its values for prepared statements.
      *
      * @param string $from The list of tables against which to perform the query
-     * @return PewDatabase The PewDatabase object
-     * @access public
+     * @return \pew\libs\Database The Database object
      */
     public function where($conditions)
     {
@@ -330,9 +258,8 @@ class PewDatabase
      *
      * Don't add 'GROUP BY' to the $order_by parameter.
      *
-     * @param string $group_by A SQL-formatted list of grouping fields
-     * @return PewDatabase The PewDatabase object
-     * @access public
+     * @param string $group_by SQL-formatted list of grouping fields
+     * @return \pew\libs\Database The Database object
      */
     public function group_by($group_by)
     {
@@ -347,8 +274,7 @@ class PewDatabase
      * Sets the HAVING field and its values for prepared statements.
      *
      * @param string $conditions An array of field/value pairs
-     * @return PewDatabase The PewDatabase object
-     * @access public
+     * @return \pew\libs\Database The Database object
      */
     public function having($conditions)
     {
@@ -364,8 +290,7 @@ class PewDatabase
      * Don't add 'ORDER BY' to the $order_by parameter.
      *
      * @param string $order_by A SQL-formatted list of sorting fields
-     * @return PewDatabase The PewDatabase object
-     * @access public
+     * @return \pew\libs\Database The Database object
      */
     public function order_by($order_by)
     {
@@ -382,8 +307,7 @@ class PewDatabase
      * E.G.: Use "1" to return one row or "4,1" to return the fourth row.
      *
      * @param string $limit Either "row_count", or "offset, row_count"
-     * @return PewDatabase The PewDatabase object
-     * @access public
+     * @return \pew\libs\Database The Database object
      */
     public function limit($limit)
     {
@@ -398,8 +322,7 @@ class PewDatabase
      * Sets the SET field and its values for UPDATE prepared statements.
      *
      * @param string $set An array of field/value pairs
-     * @return PewDatabase The PewDatabase object
-     * @access public
+     * @return \pew\libs\Database The Database object
      */
     public function set($set)
     {
@@ -413,8 +336,7 @@ class PewDatabase
      * statement.
      *
      * @param string $values An array of field/value pairs
-     * @return PewDatabase The PewDatabase object
-     * @access public
+     * @return \pew\libs\Database The Database object
      */
     public function values($values)
     {
@@ -437,7 +359,6 @@ class PewDatabase
      * @param bool $as_array Return multiple keys as an array (default is true)
      * @return mixed A comma-separated string with the primary key fields or an
      *               array if $as_array is true
-     * @access public
      */
     public function get_pk($table, $as_array = false)
     {
@@ -488,7 +409,6 @@ class PewDatabase
      *
      * @param string $table Table name
      * @return array List of the table fields
-     * @access public
      */
     public function get_cols($table)
     {
@@ -526,7 +446,6 @@ class PewDatabase
      *
      * @param string $table Table name
      * @return boolean True if the table exists, false otherwise
-     * @access public
      */
     public function table_exists($table)
     {
@@ -561,7 +480,6 @@ class PewDatabase
      *                          if $clause is 'SET'
      * @return array An array with tag/value pairs in the index 0 and a string
      *               for use with the selected clause in the index 1
-     * @access protected
      */
     protected function build_tags($conditions, $prefix = '', $clause = 'WHERE', $separator = ' AND ')
     {
@@ -829,7 +747,6 @@ class PewDatabase
      * @param string $table A table name list that overrides that of
      *                      PewDatabase::from() and PewDatabase::into()
      * @return string The sql statement
-     * @access public
      */
     public function get_query($type, $table = null)
     {
@@ -869,7 +786,6 @@ class PewDatabase
      * Resets the data in the SQL clauses.
      *
      * @return PewDatabase Returns the PewDatabase object
-     * @access public
      */
     public function reset()
     {
@@ -889,7 +805,7 @@ class PewDatabase
 }
 
 /**
- * $pdb = PewDatabase::instance();
+ * $pdb = new \pew\libs\Database(['engine' => 'sqlite', 'file' => 'db.sqlite']);
  *
  * $pdb = new PewDatabase();
  *
@@ -904,5 +820,4 @@ class PewDatabase
  * $all_movies = $pdb->select('movies');
  *
  * $all_black_and_white_movies = $pdb->pdo->query("SELECT id, name, year FROM movies WHERE color = FALSE");
- * 
  */

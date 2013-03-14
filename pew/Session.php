@@ -24,7 +24,7 @@ class Session
      * @var boolean
      * @access protected
      */
-    protected $_session = false;
+    protected $session_id;
     
     /**
      * A static variable to hold session status.
@@ -32,77 +32,84 @@ class Session
      * @var string
      * @access protected
      */
-    protected $_session_prefix = null;
+    protected $prefix;
     
     /**
      * The constructor initializes the session prefix and opens the session.
      *
-     * @param bool $open If false, the sesion is not automatically started
-     * @access public
+     * @param bool $prefix A key to use for the session data
      */
-    public function __construct($open = true)
+    public function __construct($prefix = null)
     {
-        $this->_session_prefix = basename(getcwd());
-        
-        if ($open === true) {
-            $this->open();
+        if (!$prefix) {
+            $prefix = basename(getcwd());
         }
+
+        $this->prefix = $prefix;
+        
+        $this->open();
     }
     
     /**
      * Starts a session if none is started.
      * 
      * @return bool True if the session is started
-     * @access public
      */
     public function open()
     {
-        $this->_session = session_id();
+        $this->session_id = session_id();
         
-        if ("" === $this->_session) {
-            $this->_session = session_start();
+        if ("" === $this->session_id) {
+            session_start();
+            $this->session_id = session_id();
         }
         
-        if (!array_key_exists($this->_session_prefix, $_SESSION)) {
-            $_SESSION[$this->_session_prefix]= array();
+        if (!array_key_exists($this->prefix(), $_SESSION)) {
+            $_SESSION[$this->prefix()]= array();
         }
 
-        return $this->_session !== "";
+        return !empty($this->session_id);
     }
 
     /**
-     * Get the session prefix, if any.
-     * 
+     * Get or set the session prefix key
+     *
+     * @param string $prefix Session prefix key
      * @return string
-     * @access public
      */
-    public function get_session_prefix()
+    public function prefix($prefix = null)
     {
-        return $this->_session_prefix;
+        if ($prefix) {
+            $this->prefix = $prefix;
+        }
+
+        return $this->prefix;
     }
     
     /**
      * Checks if there is a session open.
      * 
      * @return boolean Returns true if there is a session, false otherwise
-     * @access public
      */
     public function is_open()
     {
-        return session_id() !== "" && $this->_session;
+        return (session_id() !== "") && $this->session_id;
     }
     
     /**
      * Closes the current session if there is one.
      * 
-     * @access public
+     * @return bool True if the session was open beforehand, false otherwise
      */
     public function close()
     {
         if ($this->is_open()) {
             session_destroy();
-            $this->_session = false;
+            $this->session_id = false;
+            return true;
         }
+
+        return false;
     }
     
     /**
@@ -110,7 +117,7 @@ class Session
      * 
      * @param $key string The key for the data
      * @param $value mixed The value of the data
-     * @access public
+     * @return mixed The value written
      */
     public function write($key, $value)
     {
@@ -118,7 +125,9 @@ class Session
             $this->open();
         }
         
-        $_SESSION[$this->_session_prefix][$key] = $value;
+        $_SESSION[$this->prefix()][$key] = $value;
+
+        return $value;
     }
     
     /**
@@ -128,7 +137,6 @@ class Session
      * @param $key string The key for the data
      * @param $alternate_value string Optional value to return if key is unset
      * @return mixed The value of the data
-     * @access public
      */
     public function read($key, $alternate_value = null)
     {
@@ -136,8 +144,8 @@ class Session
             $this->open();
         }
         
-        if (isset($_SESSION[$this->_session_prefix][$key])) {
-            return $_SESSION[$this->_session_prefix][$key];
+        if (isset($_SESSION[$this->prefix()][$key])) {
+            return $_SESSION[$this->prefix()][$key];
         } else {
             return $alternate_value;
         }
@@ -149,7 +157,6 @@ class Session
      * @param $key string The key to search
      * @return mixed True if the key is set and is not null
      *               Null if no session was started
-     * @access public
      */
     public function exists($key)
     {
@@ -157,7 +164,7 @@ class Session
             return null;
         }
         
-        return array_key_exists($key, $_SESSION[$this->_session_prefix]);
+        return array_key_exists($key, $_SESSION[$this->prefix()]);
     }
 
     /**
@@ -165,7 +172,6 @@ class Session
      * 
      * @param $key string The key to delete
      * @return void
-     * @access public
      */
     public function delete($key)
     {
@@ -173,7 +179,7 @@ class Session
             $this->open();
         }
         
-        unset($_SESSION[$this->_session_prefix][$key]);
+        unset($_SESSION[$this->prefix()][$key]);
     }
     
     /**

@@ -4,6 +4,10 @@ namespace pew\libs;
 
 class Router
 {
+    const HTML = 'html';
+    const XML  = 'xml';
+    const JSON = 'json';
+
     private $default_controller = '';
     private $default_action     = '';
 
@@ -107,7 +111,15 @@ class Router
      */
     public function action()
     {
-        return $this->action ? : $this->default_action;
+        if ($this->action) {
+            if (!ctype_alpha($this->action{0})) {
+                return substr($this->action, 1);
+            }
+
+            return $this->action;
+        }
+
+        return $this->default_action;
     }
 
     /**
@@ -126,6 +138,20 @@ class Router
         } else {
             return $this->parameters;
         }
+    }
+
+    public function response_type()
+    {
+        if (!ctype_alpha($this->action{0})) {
+            switch ($this->action{0}) {
+                case ':':
+                    return self::JSON;
+                case '@':
+                    return self::XML;
+            }
+        }
+
+        return self::HTML;
     }
 
     /**

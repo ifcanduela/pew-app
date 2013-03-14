@@ -20,7 +20,6 @@ abstract class Controller
      * variables for easier access inside
      *
      * @var array
-     * @access public
      */
     public $data = array();
 
@@ -31,7 +30,6 @@ abstract class Controller
      * to false.
      *
      * @var array
-     * @access protected
      */
     protected $post = array();
 
@@ -42,7 +40,6 @@ abstract class Controller
      * false.
      *
      * @var array
-     * @access protected
      */
     protected $get = array();
     
@@ -53,7 +50,6 @@ abstract class Controller
      * libraries and an associative array that holds the library instances
      * 
      * @var array
-     * @access public
      */
     public $libs = array();
     
@@ -63,7 +59,6 @@ abstract class Controller
      * Views will be found in app/views/{$controller}/{$view}.php
      *
      * @var View
-     * @access public
      */
     public $view = null;
     
@@ -74,7 +69,6 @@ abstract class Controller
      * having to create an additional view file.
      *
      * @var bool
-     * @access public
      */
     public $render = true;
     
@@ -90,7 +84,6 @@ abstract class Controller
      * Error flag for error pages.
      *
      * @var int
-     * @access protected
      */
     protected $error = '';
     
@@ -100,7 +93,6 @@ abstract class Controller
      * This way of requiring authentication will be replaced in the future.
      *
      * @var bool
-     * @access public
      */
     public $require_auth = false;
     
@@ -108,7 +100,6 @@ abstract class Controller
      * Whether to instance a database controller or not.
      *
      * @var bool
-     * @access protected
      */
     protected $use_db = true;
     
@@ -116,7 +107,6 @@ abstract class Controller
      * Database access object instance.
      *
      * @var Model
-     * @access public
      */
     public $model = null;
     
@@ -124,7 +114,6 @@ abstract class Controller
      * The request information. 
      * 
      * @var Request
-     * @access public
      */
     public $request = null;
 
@@ -139,7 +128,6 @@ abstract class Controller
      * Auth instance.
      *
      * @var Auth
-     * @access public
      */
     public $auth = null;
 
@@ -147,7 +135,6 @@ abstract class Controller
      * Session instance.
      *
      * @var Session
-     * @access public
      */
     public $session = null;
     
@@ -155,7 +142,6 @@ abstract class Controller
      * Stores the controller's parameters.
      *
      * @var array
-     * @access public
      */
     public $parameters = array();
 
@@ -163,7 +149,6 @@ abstract class Controller
      * Base file name of the class.
      *
      * @var string
-     * @access private
      */
     protected $file_name = '';
 
@@ -173,7 +158,6 @@ abstract class Controller
      * 
      * @param pew\libs\Request $request The request information
      * @return void
-     * @access public
      */
     public function __construct(\pew\libs\Request $request, $view = false)
     {
@@ -248,8 +232,6 @@ abstract class Controller
      * function of the parameters, for an example see the Pages controller.
      *
      * @return void
-     * @access protected
-     * @see Pages
      */
     public function _action($action, $parameters)
     {
