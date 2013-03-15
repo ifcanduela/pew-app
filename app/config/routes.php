@@ -20,10 +20,7 @@
  */
 return [
 
-	# this is an example route
-    ['/welcome/:name', '/welcome/index/:name', 'get post'],
-
     # this last route will use the default controller and action
-    ['/', '/'],
+    ['/', '/pages/index'],
 
 ];

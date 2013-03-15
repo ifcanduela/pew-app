@@ -84,7 +84,7 @@ $cfg['log_level'] = 0;
 /**
  * @var string Default folder names for files.
  *
- * This is used for both the Default folder and the App folder
+ * This is used for both the Pew folder and the App folder
  */
 $cfg['models_folder'] = 'models' . DS;
 $cfg['controllers_folder'] = 'controllers' . DS;

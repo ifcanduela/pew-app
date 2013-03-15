@@ -238,7 +238,7 @@ abstract class Controller
     {
         if (!method_exists($this, $this->action_prefix . $action)) {
             # If the $action method does not exist, show an error page
-            new controllers\Error(controllers\Error::ACTION_MISSING, $this, $this->action_prefix . $action);
+            new controllers\Error(Pew::request(), controllers\Error::ACTION_MISSING, $this, $this->action_prefix . $action);
         }
 
         # set default template before calling the action

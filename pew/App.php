@@ -97,11 +97,6 @@ class App
             $controller->after_action();
         }
 
-        $this->response($view, $view_data);
-    }
-
-    public function response($view, $data)
-    {
         # render the view, if not prevented
         if ($view->render) {
             if (!$view->exists()) {
@@ -109,12 +104,16 @@ class App
                 $defaultView->folder(Pew::config()->system_folder . 'views');
 
                 if ($defaultView->exists()) {
-                    $output = $defaultView->render($data);
+                    $output = $defaultView->render($view_data);
                 } else {
                     throw new \Exception("View file could not be found: {$view->folder()}{$view->template()}");
                 }
             } else {
-                $output = $view->render($data);
+                $output = $view->render($view_data);
+            }
+
+            if (method_exists($controller, 'before_render')) {
+                $output = $controller->before_render($output);
             }
 
             # render the layout
