@@ -7,6 +7,18 @@
  */
 
 /**
+ * Pew config read-only shortcut.
+ *
+ * @param string $key Key to read
+ * @return mixed The value for the key
+ */
+function pew($key)
+{
+    return \pew\Pew::config()->$key;
+}
+
+
+/**
  * A basic configuration storage.
  *
  * The cfg() function can be called with a single parameter to retrieve its 

@@ -90,7 +90,7 @@ class Pew
         self::$config->import($pew_config);
 
         if (!isset($registry->App)) {
-            # load app/config/config.php
+            # load app/config/{$config}.php
             $app_config = include getcwd() . DS . $app_folder . DS . 'config' . DS . $config_file . '.php';
 
             // merge user config with Pew config

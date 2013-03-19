@@ -120,6 +120,18 @@ class App
             $layout = clone $view;
             $layout->extension(Pew::config()->layout_ext);
             $layout->template($view->layout());
+
+            if (!$layout->exists()) {
+                $defaultLayout = clone($layout);
+                $defaultLayout->folder(Pew::config()->system_folder . 'views');
+
+                if (!$defaultLayout->exists()) {
+                     throw new \Exception("Layout file could not be found: {$layout->folder()}{$layout->template()}");
+                }
+
+                $layout = $defaultLayout;
+            }
+
             echo $layout->render(['title' => $view->title, 'output' => $output]);
         }
     }
