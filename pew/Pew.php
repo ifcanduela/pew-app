@@ -2,12 +2,15 @@
 
 namespace pew;
 
+# Assorted functions
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'functions.php';
+# Autoloader class definition
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'Autoloader.php';
+
 use \pew\libs\Registry as Registry;
 
-require_once __DIR__ . DIRECTORY_SEPARATOR . 'functions.php';
-
 /**
- * An object factory.
+ * An object store.
  * 
  * The Pew class is a hybrid registry/factory that contains singleton-like
  * instances of classes in the framework. It's implemented as a collection
@@ -74,9 +77,6 @@ class Pew
      */
     public static function app($app_folder, $config_file = 'config')
     {
-        # Include the Autoloader definition
-        require_once __DIR__ . DIRECTORY_SEPARATOR . 'Autoloader.php';
-
         $appLoader = new Autoloader($app_folder, dirname(realpath($app_folder)));
         $appLoader->register();
         

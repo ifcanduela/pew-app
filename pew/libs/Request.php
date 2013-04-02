@@ -67,7 +67,7 @@ class Request
         }
     }
 
-    private function fetch(array $array, $key, $default)
+    protected function fetch(array $array, $key, $default)
     {
         if (array_key_exists($key, $array)) {
             return $array[$key];

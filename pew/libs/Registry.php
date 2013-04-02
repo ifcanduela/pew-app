@@ -14,16 +14,14 @@ namespace pew\libs;
 class Registry
 {
     /**
-     * @var Registry Singleton instance of the regstry
-     * @access  protected
+     * @var Registry Singleton instance of the registry
      */
-    protected static $instance = null;
+    private static $instance = null;
 
     /** 
      * @var array Key/value list
-     * @access protected
      */
-    protected $items = array();
+    private $items = array();
 
     /**
      * Constructor.

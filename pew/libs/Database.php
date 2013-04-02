@@ -27,7 +27,9 @@ namespace pew\libs;
  */
 class Database
 {
-    
+    /*
+     * Database engines.
+     */
     const MYSQL  = 'mysql';
     const SQLITE = 'sqlite';
 
@@ -39,12 +41,12 @@ class Database
     /**
      * @var bool Connection established flag.
      */
-    protected $is_connected = false;
+    private $is_connected = false;
     
     /**
      * @var array Configuration parameters.
      */
-    protected $config;
+    private $config;
 
     /**
      * @var string Last query run.
@@ -54,52 +56,52 @@ class Database
     /**
      * @var string List of tables for FROM clause.
      */
-    protected $from = null;
+    private $from = null;
     
     /**
      * @var string list of fields for SELECT or INSERT clauses.
      */
-    protected $fields = '*';
+    private $fields = '*';
     
     /**
      * @var array SQL-formatted WHERE clause.
      */
-    protected $where = null;
+    private $where = null;
 
     /**
      * @var string SQL-formatted LIMIT clause.
      */
-    protected $limit = null;
+    private $limit = null;
 
     /**
      * @var string SQL-formatted GROUP BY clause.
      */
-    protected $group_by = null;
+    private $group_by = null;
 
     /**
      * @var array SQL-formatted HAVING clause.
      */
-    protected $having = null;
+    private $having = null;
     
     /**
      * @var string SQL-formatted ORDER BY clause.
      */
-    protected $order_by = null;
+    private $order_by = null;
     
     /**
      * @var array SQL-formatted VALUES clause.
      */
-    protected $values = null;
+    private $values = null;
     
     /**
      * @var array SQL-formatted SET clause.
      */
-    protected $set = null;
+    private $set = null;
     
     /**
      * @var array Key/value pairs for prepared statements.
      */
-    protected $tags = array();
+    private $tags = array();
     
     /**
      * @var int Number of tagged parameters in a prepared statement.
@@ -109,22 +111,22 @@ class Database
     /**
      * @var array Kag/value pairs for WHERE clauses in prepared statements.
      */
-    protected $where_tags = array();
+    private $where_tags = array();
     
     /**
      * @var array Key/value pairs for SET clauses in prepared statements.
      */
-    protected $set_tags = array();
+    private $set_tags = array();
     
     /**
      * @var array Key/value pairs for use in prepared statements with INSERT.
      */
-    protected $insert_tags = array();
+    private $insert_tags = array();
     
     /**
      * @var array Key/value pairs for HAVING clauses in prepared statements.
      */
-    protected $having_tags = array();
+    private $having_tags = array();
     
     /**
      * Build the connection string and connect to the selected database engine.

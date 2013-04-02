@@ -202,7 +202,7 @@ class Router
      * @param string $segments URI to match
      * @return array|bool Matches or false
      */
-    private function match_route(&$route, $segments)
+    protected function match_route(&$route, $segments)
     {
         $pattern = preg_replace('~:([^/]+)~', '(?P<$1>[^\/]+)', $route[0]);
 
@@ -229,7 +229,7 @@ class Router
      * @param array $matches Transformation values
      * @return array The transformed URI elements
      */
-    private function build_route($segments, $route = null)
+    protected function build_route($segments, $route = null)
     {
         $transformed = $route[0];
         $destination = $route[1];
