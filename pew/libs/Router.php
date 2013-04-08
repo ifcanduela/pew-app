@@ -2,6 +2,15 @@
 
 namespace pew\libs;
 
+/**
+ * Router class.
+ * 
+ * This class takes a string of segments and tries to fit it into any of a list
+ * of pre-configured route patterns.
+ *
+ * @package pew/libs
+ * @author ifernandez <ifcanduela@gmail.com>
+ */
 class Router
 {
     const HTML = 'html';

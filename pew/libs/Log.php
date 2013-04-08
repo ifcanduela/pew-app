@@ -1,13 +1,13 @@
 <?php 
 
-namespace pew;
+namespace pew\libs;
 
 /**
- * Class PewLog
+ * Log class
  * 
  * Logs activities, including timestamps and levels.
  * 
- * @package pew
+ * @package pew/libs
  * @author ifcanduela <ifcanduela@gmail.com>
 */
 class Log
@@ -26,9 +26,8 @@ class Log
      * String labels for the error level constants
      * 
      * @var array
-     * @access protected
      */
-    protected $_level_names = array(
+    private $level_names = array(
             self::DEBUG => 'DEBUG',
             self::INFO =>  'INFO',
             self::ALERT => 'ALERT',
@@ -41,41 +40,42 @@ class Log
      * String labels for the error level constants.
      * 
      * @var array
-     * @access protected
      */
-    protected $_log = array();
+    private $log = array();
     
     /**
      * String format for the date field in the lof.
      * 
      * @var string
-     * @access protected
      */
-     protected $_date_format = 'Y-m-d';
+     private $date_format = 'Y-m-d';
     
     /**
      * String format for the date field in the lof.
      * 
      * @var string
-     * @access protected
      */
-    protected $_time_format = 'H:m:s';
+    private $time_format = 'H:m:s';
+
+    /**
+     * Flag that determines if a log file is created when the object is destroyed.
+     * @var boolean
+     */
+    private $auto_dump = false;
 
     /**
      * Folder name where the log files are saved.
      * 
      * @var string
-     * @access protected
      */
-    protected $_log_folder = 'logs';
+    private $log_folder = 'logs';
     
     /**
      * File name for the log output.
      * 
      * @var string
-     * @access protected
      */
-    protected $_log_filename = null;
+    private $log_filename = null;
 
     /**
      * Class constructor.
@@ -84,28 +84,36 @@ class Log
      * @param string $date_format Date format
      * @param string $time_format Time format
      */
-    function __construct($filename = null, $date_format = null, $time_format = null)
+    function __construct($level, $filename = null)
     {
+        $this->level($level);
+
         if (!is_string($filename)) {
             $filename = date('Y-m-d') . 'log.txt';
         }
-
-        $this->log_file($filename);
-        $this->level(self::OFF);
-        $this->date_format($date_format);
-        $this->time_format($time_format);
     }
 
     function __destruct()
     {
-        $this->dump();
+        if ($this->auto_dump()) {
+            $this->dump_to_file();
+        }
+    }
+    
+    public function auto_dump($auto_dump = null)
+    {
+        if (!is_null($auto_dump)) {
+            $this->auto_dump = $auto_dump;
+        }
+
+        return $this->auto_dump;
     }
 
     protected function log($message, $level = self::INFO)
     {
         $time = time();
 
-        $this->_log[$time] = array(
+        $this->log[$time] = array(
                 'level' => $this->get_level_name($level),
                 'message' => $message,
                 'date' => date($this->date_format(), $time),
@@ -140,8 +148,8 @@ class Log
 
     public function get_level_name($level)
     {
-        if (array_key_exists($level, $this->_level_names)) {
-            return $this->_level_names[$level];
+        if (array_key_exists($level, $this->level_names)) {
+            return $this->level_names[$level];
         } else {
             return null;
         }
@@ -150,22 +158,27 @@ class Log
     public function date_format($format = null)
     {
         if (is_string($format)) {
-            $this->_date_format = $format;
+            $this->date_format = $format;
         }
         
-        return $this->_date_format;
+        return $this->date_format;
     }
 
-    public function dump($clear = true)
+    public function dump()
     {
-        if (count($this->_log) > 0) {
+        
+    }
+
+    public function dump_to_file($clear = true)
+    {
+        if (count($this->log) > 0) {
             if (!is_dir(dirname($this->log_file()))) {
                 mkdir(dirname($this->log_file()));
             }
 
             $entries = array();
 
-            foreach ($this->_log as $entry) {
+            foreach ($this->log as $entry) {
                 if ($entry['level'] > $this->level()) {
                     extract($entry);
                     $entries[] = "[{$date} {$time}] --{$level}-- {$message}" . PHP_EOL;
@@ -177,7 +190,7 @@ class Log
             }
 
             if ($clear) {
-                $this->_log = array();
+                $this->log = array();
             }
         }
     }
@@ -185,28 +198,28 @@ class Log
     public function level($level = null)
     {
         if (is_numeric($level)) {
-            $this->_log_level = $level;
+            $this->log_level = $level;
         }
 
-        return $this->_log_level;
+        return $this->log_level;
     }
 
     public function log_file($filename = null)
     {
         if (is_string($filename)) {
-            $this->_log_folder = dirname($filename);
-            $this->_log_filename = basename($filename);
+            $this->log_folder = dirname($filename);
+            $this->log_filename = basename($filename);
         }
         
-        return $this->_log_folder . DIRECTORY_SEPARATOR . $this->_log_filename;
+        return $this->log_folder . DIRECTORY_SEPARATOR . $this->log_filename;
     }
 
     public function time_format($format = null)
     {
         if (is_string($format)) {
-            $this->_time_format = $format;
+            $this->time_format = $format;
         }
 
-        return $this->_time_format;
+        return $this->time_format;
     }
 }

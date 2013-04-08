@@ -8,7 +8,7 @@ namespace pew\libs;
  * Can be instantiated with the new keyword or as s singleton through
  * the instance() method.
  *
- * @package pew
+ * @package pew/libs
  * @author ifcanduela <ifcanduela@gmail.com>
  */
 class Registry

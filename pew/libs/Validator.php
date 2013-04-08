@@ -18,7 +18,7 @@ namespace pew\libs;
  * - is_email:value
  * - is_in_array:value:val1:val3:...:valN
  *
- * @package pew\libs
+ * @package pew/libs
  * @author ifcanduela <ifcanduela@gmail.com>
  */
 class PewValidator

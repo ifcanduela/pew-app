@@ -9,7 +9,7 @@ namespace pew\libs;
  * provide a reusable repository of general information about the current task
  * of the application.
  *
- * @package pew\libs
+ * @package pew/libs
  * @author ifernandez <ifcanduela@gmail.com>
  */
 class Request

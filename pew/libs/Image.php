@@ -182,13 +182,6 @@ class Image
 
     public function upload(array $uploaded_file)
     {
-        // $uploaded_file = array (
-        //      'name' => string 'image.jpg' (length=8)
-        //      'type' => string 'image/jpeg' (length=10)
-        //      'tmp_name' => string '/tmp/phpq9HvfR' (length=14)
-        //      'error' => int 0
-        //      'size' => int 1390764
-        
         # Load image resource
         if (!$this->load_image_resource($uploaded_file['tmp_name'], $uploaded_file['type'])) {
             $this->set_error(self::UNSUPPORTED_FORMAT, 'The image file could not be loaded');
@@ -300,9 +293,8 @@ class Image
      *
      * @param string $new_name The file name, without extension
      * @return mixed Returns The Img object instance ($this)
-     * @access public
      */
-    public function set_destination_name($new_name)
+    protected function set_destination_name($new_name)
     {
         if (!$this->loaded) {
             $this->set_error(self::NO_IMAGE_LOADED, 'No image was loaded');
@@ -328,9 +320,8 @@ class Image
      *               copy the loaded image. Leave empty to copy to Current
      *               Working Directory.
      * @return string The full path and filename of the destination image
-     * @access public
      */    
-    public function get_destination_name($folder = null)
+    protected function get_destination_name($folder = null)
     {
         # Clean the destination folder
         if (empty($folder)) {
@@ -340,6 +331,15 @@ class Image
         $folder = rtrim($folder, '/') . '/';
         
         return $folder . $this->dst_file_name . '.' . $this->extension;
+    }
+
+    public function destination_name($name = null)
+    {
+        if (!is_null($name)) {
+            $this->set_destination_name($name);
+        }
+
+        return $this->get_destination_name();
     }
 
     /**

@@ -13,7 +13,7 @@ namespace pew\libs;
  * Copyright (c) 2004-2006 John Gruber
  * <http://daringfireball.net/projects/markdown/>
  *
- * @package pew/default/libs
+ * @package pew/libs
  * @author ifcanduela <ifcanduela@gmail.com>
  */
 
