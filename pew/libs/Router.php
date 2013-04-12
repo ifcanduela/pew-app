@@ -186,10 +186,12 @@ class Router
 
         $request_method = strtoupper($request_method);
 
-        foreach ($this->routes[$request_method] as $route) {
-            if ($matches = $this->match_route($route, $uri)) {
-                $built_route = $this->build_route($uri, $route);
-                break;
+        if (array_key_exists($request_method, $this->routes)) {
+            foreach ($this->routes[$request_method] as $route) {
+                if ($matches = $this->match_route($route, $uri)) {
+                    $built_route = $this->build_route($uri, $route);
+                    break;
+                }
             }
         }
 
