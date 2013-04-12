@@ -195,7 +195,7 @@ abstract class Controller
                 $lib = Pew::library($library_class_name);
                 
                 if ($lib === false) {
-                    throw new RuntimeException("Library $library_class_name cound not be found.");
+                    throw new \RuntimeException("Library $library_class_name cound not be found.");
                 }
 
                 $this->libs[$library_class_name] = $lib;
@@ -265,8 +265,8 @@ abstract class Controller
     {
         if ($property === 'model') {
             # Initialize the model
-            if (USEDB && $this->use_db) {
-                $this->model = Pew::get_model(get_class($this), true);
+            if ($this->use_db) {
+                $this->model = Pew::model(get_class($this), true);
 
                 if ($this->model === false) {
                     Log::in(get_class($this), 'Model not found for this controller, using default');

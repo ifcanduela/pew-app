@@ -17,7 +17,15 @@ function pew($key)
     return \pew\Pew::config()->$key;
 }
 
-
+/**
+ * 
+ */
+function class_base_name($class_name)
+{
+    $class_name_parts = explode('\\', $class_name);
+    $class_base_name = end($class_name_parts);
+    return $class_base_name;
+}
 /**
  * A basic configuration storage.
  *

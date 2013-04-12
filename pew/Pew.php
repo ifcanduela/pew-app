@@ -58,7 +58,7 @@ class Pew
                 $reflection_class = new ReflectionClass($index);
                 $registry->$index = $reflection_class->newInstanceArgs($arguments);
             } else {
-                throw new Exception("Class $index could not be found.");
+                throw new \Exception("Class $index could not be found.");
             }
         }
         
@@ -77,24 +77,28 @@ class Pew
      */
     public static function app($app_folder, $config_file = 'config')
     {
-        $appLoader = new Autoloader($app_folder, dirname(realpath($app_folder)));
-        $appLoader->register();
-        
-        $pewLoader = new Autoloader('pew', dirname(__DIR__));
-        $pewLoader->register();
-        
-        $registry = Registry::instance();
-
-        $pew_config = require_once __DIR__ . DIRECTORY_SEPARATOR . 'config.php';
-        self::$config = new Registry();
-        self::$config->import($pew_config);
-
         if (!isset($registry->App)) {
+            $appLoader = new Autoloader($app_folder, dirname(realpath($app_folder)));
+            $appLoader->register();
+            
+            $pewLoader = new Autoloader('pew', dirname(__DIR__));
+            $pewLoader->register();
+            
+            $registry = Registry::instance();
+
+            $pew_config = require_once __DIR__ . DIRECTORY_SEPARATOR . 'config.php';
+            self::$config = new Registry();
+            self::$config->import($pew_config);
+
             # load app/config/{$config}.php
             $app_config = include getcwd() . DS . $app_folder . DS . 'config' . DS . $config_file . '.php';
 
             // merge user config with Pew config
             self::$config->import($app_config);
+
+            if (!self::$config->env) {
+                self::$config->env = 'development';
+            }
 
             # add application namespace and path
             $app_folder_name = trim(basename($app_folder));
@@ -148,7 +152,7 @@ class Pew
                 return $registry->CurrentRequestController;
             } else {
                 # if not, throw an exception
-                throw new InvalidArgumentException("No current controller could be retrieved");
+                throw new \InvalidArgumentException("No current controller could be retrieved");
             }
         } else {
             $class_name = file_name_to_class_name($controller_name);
@@ -188,14 +192,15 @@ class Pew
 
         # Check that the model has not been previously instantiated
         if (!isset($registry->$class_name)) {
+            $table_name = strtolower(str_replace('_model', '', class_name_to_file_name(class_base_name($class_name))));
+
             # Instantiate Model if the derived class is not available
             if (!class_exists($class_name)) {
-                $class_name = 'Model';
+                $class_name = '\pew\Model';
             }
         
             # Dependencies
             $database = self::database();
-            $table_name = class_name_to_file_name(substr($class_name, 0, -5));
 
             # Instantiation and storage
             $registry->$class_name = new $class_name($database, $table_name);
@@ -236,20 +241,21 @@ class Pew
 
         if (!isset($registry->Database)) {
             # load app/config/database.php
-            if (file_exists(self::$config->app_folder . 'config' . DS . 'database.php')) {
-                self::$config->database_config = include self::$config->app_folder . 'config' . DS . 'database.php';
+            if (file_exists(self::$config->app_folder . DS . 'config' . DS . 'database.php')) {
+                self::$config->database_config = include self::$config->app_folder . DS . 'config' . DS . 'database.php';
             }
 
-            $use_db = self::$config->use_db;
             $db_config = self::$config->database_config;
+            $use_db = $db_config['use'];
 
             if ($use_db !== false) {
                 $use = is_string($config) ? $config : (!is_string($use_db) ? 'default' : $use_db);
                 
+
                 if (isset($db_config[$use])) {
                     $registry->Database = new libs\Database($db_config[$use]);
                 } else {
-                    throw new RuntimeException("Database is disabled.");
+                    throw new \RuntimeException("Database is disabled.");
                 }                
             }
         }

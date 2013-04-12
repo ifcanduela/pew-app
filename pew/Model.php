@@ -182,7 +182,7 @@ class Model
         # get the Database class instance
         $this->db = $db;
 
-        if (get_class($this) === 'Model') {
+        if (class_base_name(get_class($this)) === 'Model') {
             # if this is an instance of the Model class, get the
             # table from the $table parameter
             if (!is_string($table)) {

@@ -140,7 +140,7 @@ class Database
     public function __construct(array $config)
     {
         if (!isset($config['engine'])) {
-            throw new InvalidArgumentException('Database engine was not selected');
+            throw new \InvalidArgumentException('Database engine was not selected');
         }
 
         $this->config = $config;
@@ -161,7 +161,7 @@ class Database
             try {
                 switch ($engine) {
                     case self::SQLITE:
-                        $this->pdo = new PDO($engine . ':' . $file);
+                        $this->pdo = new \PDO($engine . ':' . $file);
                         if ($file !== ':memory:' && filesize($file) == 0 && function_exists('sqlite_init')) {
                             sqlite_init($this->pdo);
                         }
@@ -169,9 +169,9 @@ class Database
                     
                     case self::MYSQL:
                     default:
-                        $this->pdo = new PDO(
+                        $this->pdo = new \PDO(
                             $engine . ':dbname=' . $name . ';host=' . $host,
-                            $user, $pass, array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'UTF8'")
+                            $user, $pass, array(\PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'UTF8'")
                         );
                     break;
                 }
@@ -179,11 +179,11 @@ class Database
                 $this->is_connected = true;
             } catch (PDOException $e) {
                 $this->is_connected = false;
-                throw new Exception('PDO connection failed: ' . $e->getMessage());
+                throw new \Exception('PDO connection failed: ' . $e->getMessage());
             }
          }
         
-        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
         return $this->is_connected;
     }
@@ -194,7 +194,7 @@ class Database
      * @param PDO $pdo Set a PDO instance for the wrapper.
      * @return PDO The PDO instance
      */
-    public function pdo(PDO $pdo = null)
+    public function pdo(\PDO $pdo = null)
     {
         if ($pdo) {
             $this->pdo = $pdo;
@@ -365,7 +365,7 @@ class Database
     public function get_pk($table, $as_array = false)
     {
         if (!$this->connect()) {
-            throw new PDOException;
+            throw new \PDOException;
         }
         
         $pk = array();
@@ -415,7 +415,7 @@ class Database
     public function get_cols($table)
     {
         if (!$this->connect()) {
-            throw new PDOException;
+            throw new \PDOException;
         }
         
         $cols = array();
@@ -547,17 +547,17 @@ class Database
     protected function run_query($query)
     {
         if (!$this->connect()) {
-            throw new PDOException;
+            throw new \PDOException;
         }
 
         # Try to prepare the statement
         if (!$stm = $this->pdo->prepare($query)) {
-            throw new PDOException("Query could not be prepared: $query");
+            throw new \PDOException("Query could not be prepared: $query");
         }
         
         # Execute the prepared statement
         if (!$stm->execute($this->tags) || $stm->errorCode() !== '00000') {
-            throw new PDOException("Query could not be executed: $query");
+            throw new \PDOException("Query could not be executed: $query");
         }
         
         # Everything's OK, return the complete statement
@@ -578,7 +578,7 @@ class Database
             $this->from = $table;
         } else {
             if (!isset($this->from)) {
-                throw new InvalidArgumentException("No table provided for method PewDatabase::cell()");
+                throw new \InvalidArgumentException("No table provided for method PewDatabase::cell()");
             }
         }
         
@@ -612,7 +612,7 @@ class Database
             $this->from = $table;
         } else {
             if (!isset($this->from)) {
-                throw new InvalidArgumentException("No table provided for method PewDatabase::single()");
+                throw new \InvalidArgumentException("No table provided for method PewDatabase::single()");
             }
         }
         
@@ -629,7 +629,7 @@ class Database
         $stm = $this->run_query($query);
         
         $this->reset();
-        return $stm->fetch(PDO::FETCH_ASSOC);
+        return $stm->fetch(\PDO::FETCH_ASSOC);
     }
 
     /**
@@ -646,7 +646,7 @@ class Database
             $this->from = $table;
         } else {
             if (!isset($this->from)) {
-                throw new InvalidArgumentException("No table provided for method PewDatabase::select()");
+                throw new \InvalidArgumentException("No table provided for method PewDatabase::select()");
             }
         }
         
@@ -659,7 +659,7 @@ class Database
         $stm = $this->run_query($query);
         
         $this->reset();
-        return $stm->fetchAll(PDO::FETCH_ASSOC);
+        return $stm->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     /**
@@ -677,7 +677,7 @@ class Database
             $this->from = $table;
         } else {
             if (!isset($this->from)) {
-                throw new InvalidArgumentException("No table provided for method PewDatabase::insert()");
+                throw new \InvalidArgumentException("No table provided for method PewDatabase::insert()");
             }
         }
         
@@ -704,7 +704,7 @@ class Database
             $this->from = $table;
         } else {
             if (!isset($this->from)) {
-                throw new InvalidArgumentException("No table provided for method PewDatabase::update()");
+                throw new \InvalidArgumentException("No table provided for method PewDatabase::update()");
             }
         }
         
@@ -729,7 +729,7 @@ class Database
             $this->from = $table;
         } else {
             if (!isset($this->from)) {
-                throw new InvalidArgumentException("No table provided for method PewDatabase::delete()");
+                throw new \InvalidArgumentException("No table provided for method PewDatabase::delete()");
             }
         }
         
