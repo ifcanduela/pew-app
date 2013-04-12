@@ -194,7 +194,7 @@ class Router
         }
 
         if (!isSet($built_route)) {
-            throw new \Exception("No route found");
+            $built_route = $this->build_route($uri, array());
         }
 
         $this->controller   = $built_route['controller'];
@@ -215,7 +215,7 @@ class Router
     {
         $pattern = preg_replace('~:([^/]+)~', '(?P<$1>[^\/]+)', $route[0]);
 
-        if (preg_match("~$pattern~", $segments, $matches)) {
+        if (preg_match("~\$$pattern~", $segments, $matches)) {
             $route['pattern'] = "~$pattern~";
             foreach ($matches as $k => $v) {
                 if (is_numeric($k)) {
@@ -240,15 +240,18 @@ class Router
      */
     protected function build_route($segments, $route = null)
     {
-        $transformed = $route[0];
-        $destination = $route[1];
+        if ($route) {
+            $transformed = $route[0];
+            $destination = $route[1];
 
-        foreach ($route['matches'] as $placeholder => $match) {
-            $destination = str_replace(":$placeholder", $match, $destination);
-            $transformed = str_replace(":$placeholder", $match, $transformed);
+            foreach ($route['matches'] as $placeholder => $match) {
+                $destination = str_replace(":$placeholder", $match, $destination);
+                $transformed = str_replace(":$placeholder", $match, $transformed);
+            }
+
+            $segments = str_replace($transformed, $destination, $segments);
         }
-
-        $segments = str_replace($transformed, $destination, $segments);
+    
         $segments = array_values(array_filter(explode('/', $segments)));
 
         $controller = isSet($segments[0]) ? $segments[0] : $this->default_controller;
