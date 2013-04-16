@@ -548,7 +548,7 @@ function c2n($class_name)
 function redirect($url)
 {
     $url = ltrim($url, '/');
-    header('Location: ' . URL . $url);
+    header('Location: ' . \pew\Pew::config()->app_url . $url);
     exit(302);
 }
 

@@ -172,6 +172,8 @@ abstract class Controller
         
         # Make sure $model is read through the __get magic method the first time
         unset($this->model);
+        unset($this->auth);
+        unset($this->session);
         
         # Controller file name in the /views/ folder.
         $this->file_name = class_name_to_file_name(
@@ -243,12 +245,13 @@ abstract class Controller
 
         # set default template before calling the action
         $this->view->template($this->file_name . '/' . $action);
+        $this->view->title = $action;
 
         # everything's clear pink
         $view_data = call_user_func_array(array($this, $this->action_prefix . $action), $parameters);
 
         if (!is_array($view_data)) {
-            $view_data = [$view_data];
+            $view_data = compact('view_data');
         }
 
         return $view_data;
@@ -278,8 +281,15 @@ abstract class Controller
             }
             
             return $this->model;
-        } elseif (isset($this->libs[$property])) {
-            return $this->libs[$property];
+        } elseif ($property === 'session') {
+            $this->session = \pew\Pew::session();
+            return $this->session;
+        } elseif ($property === 'auth') {
+            $this->auth = \pew\Pew::auth();
+            return $this->auth;
+        } elseif ($property === '') {
+            $this->request = \pew\Pew::request();
+            return $this->request;
         }
         
         return null;

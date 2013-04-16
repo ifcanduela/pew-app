@@ -3,7 +3,7 @@
 namespace pew;
 
 /**
- * Inplementation of the PSR-0 autoloader.
+ * Implementation of the PSR-0 autoloader.
  * 
  * Simplified from Jonathan H. Wage's Gist at https://gist.github.com/jwage/221634
  */
@@ -75,4 +75,3 @@ class Autoloader
         }
     }
 }
-

@@ -37,13 +37,16 @@ class Request
             $this->method = 'CLI';
         } else {
             $this->method   = isSet($_POST['_method']) ? $_POST['_method'] : $_SERVER['REQUEST_METHOD'];
-            $this->headers  = getAllHeaders();
             $this->scheme   = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
             $this->host     = $_SERVER['SERVER_NAME'];
             $this->port     = $_SERVER['SERVER_PORT'];
             $this->path     = str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']);
             $this->script   = basename($_SERVER['SCRIPT_NAME']);
 
+            if (function_exists('getAllHeaders')) {
+                $this->headers  = getAllHeaders();
+            }
+            
             if (isSet($_SERVER['PATH_INFO'])) {
                 $this->segments = $_SERVER['PATH_INFO'];
             } else {
