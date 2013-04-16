@@ -55,6 +55,11 @@ $cfg['app_folder'] = getcwd() . DS . 'app' . DS;
 $cfg['www_folder'] = getcwd() . DS . 'www' . DS;
 
 /**
+ * @var string Full path to the public assets folder (url).
+ */
+$cfg['www_url'] = 'www/';
+
+/**
  * @var string Framework version numbers.
  */
 $cfg['version_major'] = '0';
