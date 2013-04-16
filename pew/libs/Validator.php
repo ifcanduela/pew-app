@@ -21,7 +21,7 @@ namespace pew\libs;
  * @package pew/libs
  * @author ifcanduela <ifcanduela@gmail.com>
  */
-class PewValidator
+class Validator
 {
     /**
      * @var array

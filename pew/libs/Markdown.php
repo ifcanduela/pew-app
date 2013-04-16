@@ -64,6 +64,8 @@ function Markdown($text)
  */
 class Markdown_Parser
 {
+    const VERSION = "1.0.1o"; # Sun 8 Jan 2012
+
     # Regex to match balanced [brackets].
     # Needed to insert a maximum bracked depth while converting to PHP.
     protected $nested_brackets_depth = 6;
@@ -1589,6 +1591,8 @@ class Markdown_Parser
  */
 class Markdown extends Markdown_Parser
 {
+    const VERSION = "1.2.5"; # Sun 8 Jan 2012
+    
     # Prefix for footnote ids.
     protected $fn_id_prefix = "";
 

@@ -189,6 +189,23 @@ class FileCache
         return unserialize($serialized_data);
     }
 
+    /**
+     * Deletes the data associated to a cache key.
+     * 
+     * @param string $key Cache key to delete
+     * @return bool False on failure, true otherwise
+     */
+    public function delete($key)
+    {
+        $file = $this->filename($key);
+        
+        if (!file_exists($file)) {
+            return true;
+        }
+
+        return unlink($file);
+    }
+
     public function __set($key, $value)
     {
         $this->save($key, $value);
@@ -206,5 +223,10 @@ class FileCache
     public function __isset($key)
     {
         return $this->cached($key);
+    }
+
+    public function __unset($key)
+    {
+        return $this->delete($key);
     }
 }
