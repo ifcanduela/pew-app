@@ -109,6 +109,12 @@ code, pre {
   padding: 2px;
 }
 
+pre > code {
+  background-color: transparent;
+  font-size: 100%;
+  padding: 0;
+}
+
 .pewpewpew {
   color: #596;
   awesomesauce: activated!;

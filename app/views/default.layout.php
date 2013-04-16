@@ -20,10 +20,11 @@
     </div>
 
     <footer>
-        <p>2011-2013 ifcanduela | Powered by <a href="https://github.com/ifcanduela/Pew-Pew-Pew">Pew-Pew-Pew</a></p>
+        <p>2011-2013 ifcanduela | Powered by <a href="https://github.com/ifcanduela/Pew-Pew-Pew">Pew-Pew-Pew</a> <?= pew('version_string') ?></p>
     </footer>
     
     <script type="text/javascript" src="http://code.jquery.com/jquery.min.js"></script>
     <script type="text/javascript" src="www/js/app.js"></script>
+    
 </body>
 </html>

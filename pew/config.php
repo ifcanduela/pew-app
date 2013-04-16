@@ -57,14 +57,16 @@ $cfg['www_folder'] = getcwd() . DS . 'www' . DS;
 /**
  * @var string Full path to the public assets folder (url).
  */
-$cfg['www_url'] = 'www/';
+$cfg['www_url'] = $cfg['app_url'] . 'www/';
 
 /**
  * @var string Framework version numbers.
  */
 $cfg['version_major'] = '0';
-$cfg['version_minor'] = '83';
-$cfg['version_date'] = '2012-12-06';
+$cfg['version_minor'] = '2';
+$cfg['version_patch'] = '1';
+$cfg['version_date'] = '2013-04-16';
+$cfg['version_string'] = "{$cfg['version_major']}.{$cfg['version_minor']}.{$cfg['version_patch']} ({$cfg['version_date']})";
 
 /**
  * @var boolean Whether the App is running on the localhost space.
