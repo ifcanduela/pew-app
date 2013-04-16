@@ -9,9 +9,9 @@ namespace pew\controllers;
  * extended by the user.
  *
  * @author ifcanduela <ifcanduela@gmail.com>
- * @package pew
+ * @package pew/controllers
  */
-class Error extends Pages
+class Error extends Controller
 {
     const NO_ERROR = 0;
     const VIEW_MISSING = 1;

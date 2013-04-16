@@ -3,12 +3,13 @@
 namespace pew\controllers;
 
 /**
- * The Pew controller is a base controller for user controllers to extend.
+ * The BaseController controller makes it easier to add stuff to several 
+ * controllers.
  * 
- * @package pew/default/controllers
+ * @package pew/controllers
  * @author ifcanduela <ifcanduela@gmail.com>
  */
-class PewController extends Controller
+class BaseController extends Controller
 {
 
 }
