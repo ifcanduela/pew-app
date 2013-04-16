@@ -217,13 +217,15 @@ class Router
     {
         $pattern = preg_replace('~:([^/]+)~', '(?P<$1>[^\/]+)', $route[0]);
 
-        if (preg_match("~\$$pattern~", $segments, $matches)) {
+        if (preg_match("~^$pattern~", $segments, $matches)) {
             $route['pattern'] = "~$pattern~";
+
             foreach ($matches as $k => $v) {
                 if (is_numeric($k)) {
                     unset($matches[$k]);
                 }
             }
+
             $route['matches'] = $matches;
 
             return $route;

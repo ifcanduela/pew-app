@@ -20,6 +20,9 @@
  */
 return [
 
+    # this route redirects anything beginning with /welcome to /welcome/index
+    ['/welcome', '/welcome/index/'],
+
     # this last route will use the default controller and action
     ['/', '/pages/index'],
 
