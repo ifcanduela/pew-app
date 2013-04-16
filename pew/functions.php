@@ -1,7 +1,7 @@
 <?php 
 
 /**
- * Assorted functions and shortcuts.
+ * Assorted functions, helpers and shortcuts.
  * 
  * @package pew
  */
@@ -39,8 +39,6 @@ function class_base_name($class_name)
  * @param int|string $key Key to set
  * @param mixed $value Value to set
  * @return mixed
- * @version 0.1 04-jan-2012
- * @author ifcanduela <ifcanduela@gmail.com>
  */
 function cfg($key, $value = null, $default = null)
 {
@@ -108,8 +106,6 @@ function make_path()
  * @param number $from Lower boundary
  * @param number $to Upper boundary
  * @return float A floating point number between 0.0 and 1.0
- * @version 0.1 04-jul-2012
- * @author ifcanduela <ifcanduela@gmail.com>
  */
 function frand($from = null, $to = null)
 {
@@ -144,8 +140,6 @@ function frand($from = null, $to = null)
  * @param mixed $data The data to be printed
  * @param string $title Optional title of the printed data
  * @return void
- * @version 0.3 24-oct-2011
- * @author ifcanduela <ifcanduela@gmail.com>
  */
 function pr($data, $title = null)
 {
@@ -176,8 +170,6 @@ function pr($data, $title = null)
  * @param string $message A descriptive error message
  * @param int $level Error level, E_USER_ERROR by default
  * @return void
- * @version 0.1 28-jul-2011
- * @author ifcanduela <ifcanduela@gmail.com>
  * @see http://php.net/debug_backtrace
  */
 function pew_exit($message, $level = E_USER_ERROR)
@@ -197,8 +189,6 @@ function pew_exit($message, $level = E_USER_ERROR)
  * @param bool $partial If true, the value returned is the time passed since the
  *                      last call to the function
  * @return float Seconds elapsed since the first or last call to the function
- * @author ifcanduela <ifcanduela@gmail.com>
- * @version 0.1 25-jun-2011
  * @see http://php.net/manual/en/function.microtime.php
  */
 function get_execution_time($partial = false)
@@ -233,8 +223,6 @@ function get_execution_time($partial = false)
  *
  * @param string $string The string to sanitize
  * @return string The sanitized string
- * @author ifcanduela <ifcanduela@gmail.com>
- * @version 0.1 24-oct-2011
  * @see http://php.net/manual/en/function.filter-var.php
  */
 function sanitize($string)
@@ -251,8 +239,6 @@ function sanitize($string)
  * 
  * @param array $post The data from the $_POST array
  * @return array The properly-escaped data
- * @version 0.1 27-mar-2011
- * @author ifcanduela <ifcanduela@gmail.com>
  * @see http://php.net/manual/en/function.stripslashes.php
  */
 function clean_array_data($post)
@@ -269,8 +255,6 @@ function clean_array_data($post)
  * 
  * @param string $evil_string A string to clean up
  * @return string The resulting string
- * @version 0.1 27-oct-2011
- * @author ifcanduela <ifcanduela@gmail.com> 
  * @see http://php.net/manual/en/function.strip_tags.php
  * @see http://php.net/manual/en/function.stripslashes.php
  * @see http://php.net/manual/en/function.htmlentities.php
@@ -303,8 +287,6 @@ function pew_clean_string($evil_string)
  * @param bool $strict Whether or not to throw an InvalidArgumenException
  *                     if the index does not exist
  * @throws InvalidArgumentException When $index is not found and $strict is true
- * @author ifcanduela <ifcanduela@gmail.com>
- * @version 0.1 24-oct-2011
  */
 function deref(array $array, $index, $strict = false)
 {
@@ -338,8 +320,6 @@ function deref(array $array, $index, $strict = false)
  * @param array $data The array to be filtered
  * @param mixed $filter A string or array with the filtering atoms
  * @return array The array with the matching elements
- * @author ifcanduela <ifcanduela@gmail.com>
- * @version 0.4 22-jul-2011
  */
 function array_reap($data, $filter)
 {
@@ -418,8 +398,6 @@ function array_reap($data, $filter)
  *
  * @param array $data The array to be flattened
  * @return array The array with the scalar values
- * @author ifcanduela <ifcanduela@gmail.com>
- * @version 0.2 22-jul-2011
  */
 function array_flatten($data)
 {
@@ -472,8 +450,6 @@ function array_to_xml(array $data, &$xml, $root_name = 'root')
  * 
  * @param string $file_name The file name, without extension
  * @return string The properly-cased class name
- * @author ifcanduela <ifcanduela@gmail.com>
- * @version 0.2 9-mar-2011
  */
 function file_name_to_class_name($file_name)
 {
@@ -497,8 +473,6 @@ function file_name_to_class_name($file_name)
  * 
  * @param string $file_name The file name, without extension
  * @return string The properly-cased class name
- * @author ifcanduela <ifcanduela@gmail.com>
- * @version 0.1 28-apr-2012
  */
 function f2c($file_name)
 {
@@ -510,8 +484,6 @@ function f2c($file_name)
  * 
  * @param string $class_name The came-case class name
  * @return string The lower-case and underscore-separated file name
- * @author ifcanduela <ifcanduela@gmail.com>
- * @version 0.1 10-mar-2011
  */
 function class_name_to_file_name($class_name)
 {
@@ -526,8 +498,6 @@ function class_name_to_file_name($class_name)
  * 
  * @param string $class_name The came-case class name
  * @return string The lower-case and underscore-separated file name
- * @author ifcanduela <ifcanduela@gmail.com>
- * @version 0.1 28-apr-2012
  */
 function c2n($class_name)
 {
@@ -542,8 +512,6 @@ function c2n($class_name)
  *
  * @param string $url The target address, in the form of controller/action/params
  * @return void
- * @author ifcanduela <ifcanduela@gmail.com>
- * @version 0.3 10-nov-2011
  */
 function redirect($url)
 {
@@ -560,8 +528,6 @@ function redirect($url)
  *
  * @param string $path A single or multi-folder path
  * @return bool Returns false on error, true otherwise
- * @author ifcanduela <ifcanduela@gmail.com>
- * @version 0.2 15-jun-2011
  */
 function check_dirs($path)
 {
@@ -607,8 +573,6 @@ function check_dirs($path)
  *
  * @param string $str The string to slugify
  * @return string The slug
- * @author ifcanduela <ifcanduela@gmail.com>
- * @version 0.2 9-mar-2011
  */
 function slugify($str)
 {
@@ -626,15 +590,25 @@ function slugify($str)
 
 /**
  * Utility function to convert dashes and spaces to underscores.
+ *
+ * By default, replaces ' ' (space) and '-' (minus sign) with '_' (underscore).
  * 
- * @param string $str The string to trasnform
+ * @param string $str The string to transform
+ * @param array|string $chars Array of characters to remove
+ * @param array|string $chars Array of characters to put
  * @return string The modified string
- * @author ifcanduela <ifcanduela@gmail.com>
- * @version 0.1 18-mar-2011
  */
-function to_underscores($str)
+function to_underscores($str, $chars = [' ', '-'], $replacements = ['_'])
 {
-    return str_replace([' ', '-'], '_', $str);
+    if (!is_array($chars)) {
+        $chars = array($chars);
+    }
+    
+    if (!is_array($replacements)) {
+        $chars = array($replacements);
+    }
+
+    return str_replace($chars, $replacements, $str);
 }
 
 /**
@@ -648,13 +622,16 @@ function to_underscores($str)
  * @param string $path A path to include in the output
  * @param bool $print Whether to print the path or not - default is true
  * @return string The resulting path
- * @author ifcanduela <ifcanduela@gmail.com>
- * @version 0.4 22-jul-2011
  */
-function root($path = '', $print = true)
+function root($path = '', $print = false)
 {
-    if ($print) echo ROOT . str_replace('/', DIRECTORY_SEPARATOR, $path);
-    return ROOT . str_replace('/', DIRECTORY_SEPARATOR, $path);
+    $root_path = \pew\Pew::config()->root_folder . ltrim(str_replace('/', DIRECTORY_SEPARATOR, $path), ' \\/');
+    
+    if ($print) {
+        echo $root_path;
+    }
+
+    return $root_path;
 }
 
 /**
@@ -668,13 +645,16 @@ function root($path = '', $print = true)
  * @param string $url A string to print after the server and path
  * @param bool $print Whether to print the url or not - default is true
  * @return string The resulting url
- * @author ifcanduela <ifcanduela@gmail.com>
- * @version 0.3 19-mar-2011
  */
-function url($url = '', $print = true)
+function url($path = '', $print = false)
 {
-    if ($print) echo URL . $url;
-    return URL . $url;
+    $url = \pew\Pew::config()->app_url . $path;
+    
+    if ($print) {
+        echo $url;
+    }
+
+    return $url;
 }
 
 /**
@@ -691,21 +671,22 @@ function url($url = '', $print = true)
  * @param string $url A string to print after the server, path and www location.
  * @param bool $print Whether to print the url or not - default is true
  * @return string The resulting url
- * @author ifcanduela <ifcanduela@gmail.com>
- * @version 0.1 06-oct-2011
  */
-function www($url = '', $print = true)
+function www($path = '', $print = false)
 {
-    if ($print) echo WWW . $url;
-    return WWW . $url;
+    $www_url = \pew\Pew::config()->www_url . $path;
+    
+    if ($print) {
+        echo $www_url;
+    }
+
+    return $www_url;
 }
 
 /**
  * Prints some useful framework configuration information.
  * 
  * @return void
- * @author ifcanduela <ifcanduela@gmail.com>
- * @version 0.2 05-oct-2011
  */
 function print_config()
 {
@@ -722,8 +703,6 @@ function print_config()
  *
  * @return stdClass|boolean An object with the user info if there's a user 
  *                          logged in, boolean false otherwise.
- * @author ifcanduela <ifcanduela@gmail.com>
- * @version 0.1 04-nov-2011
  */
 function user()
 {
@@ -733,7 +712,7 @@ function user()
         $return = false;
         
         if (class_exists('Pew') && USEAUTH) {
-            $user = Pew::Get('Auth')->user();
+            $user = \pew\Pew::auth()->user();
             if (is_array($user)) {
                 $return = (object) $user;
             }
