@@ -612,88 +612,72 @@ function to_underscores($str, $chars = [' ', '-'], $replacements = ['_'])
 }
 
 /**
- * A quick way to print the filesystem root directory or any file below it.
+ * A quick way to get the filesystem root directory or any file below it.
  * 
  * If the framework files reside in C:\htdocs\pewexample, this call
- *     root('app\libs\my_lib.php');
+ *     echo root('app\libs\my_lib.php');
  * will print
  *     C:\htdocs\pewexample\app\libs\my_lib.php
  * 
  * @param string $path A path to include in the output
- * @param bool $print Whether to print the path or not - default is true
  * @return string The resulting path
  */
-function root($path = '', $print = false)
+function root($path = '')
 {
-    $root_path = \pew\Pew::config()->root_folder . ltrim(str_replace('/', DIRECTORY_SEPARATOR, $path), ' \\/');
+    $path = ltrim(str_replace('/', DIRECTORY_SEPARATOR, $path), ' \\/');
+    $root_path = \pew\Pew::config()->root_folder . $path;
     
-    if ($print) {
-        echo $root_path;
-    }
-
     return $root_path;
 }
 
 /**
- * Prints an absolute URL, having the location of the site as base URL.
+ * Gets an absolute URL, having the location of the site as base URL.
  *
  * If the site is hosted at http://www.example.com/pewexample, the call
- *     url('www/css/styles.css');
+ *     echo url('www/css/styles.css');
  * will print
  *     http://www.example.com/pewexample/www/css/styles.css.
  * 
  * @param string $url A string to print after the server and path
- * @param bool $print Whether to print the url or not - default is true
  * @return string The resulting url
  */
-function url($path = '', $print = false)
+function url($path = '')
 {
-    $url = \pew\Pew::config()->app_url . $path;
+    $url = \pew\Pew::config()->app_url . ltrim($path, '/');
     
-    if ($print) {
-        echo $url;
-    }
-
     return $url;
 }
 
 /**
- * Prints an absolute URL, having the location of the assets folder as base URL.
+ * Get the current URI.
  *
- * If the site is hosted at http://www.example.com/pewexample, the call
- *     www('css/styles.css');
- * will print
- *     http://www.example.com/pewexample/www/css/styles.css.
- *
- * This function is necessary if the location of the assets folder (www) is
- * different from the default.
- * 
- * @param string $url A string to print after the server, path and www location.
- * @param bool $print Whether to print the url or not - default is true
- * @return string The resulting url
+ * @return string
  */
-function www($path = '', $print = false)
+function here()
 {
-    $www_url = \pew\Pew::config()->www_url . $path;
-    
-    if ($print) {
-        echo $www_url;
-    }
+    $uri = \pew\Pew::Router()->uri();
 
-    return $www_url;
+    return $uri;
 }
 
 /**
- * Prints some useful framework configuration information.
+ * Gets an absolute URL, having the location of the assets folder as base URL.
+ *
+ * If the site is hosted at http://www.example.com/pewexample and the 
+ * "www_url" app config setting is url('www'), the call
+ *     echo www('css/styles.css');
+ * will print
+ *     http://www.example.com/pewexample/www/css/styles.css.
  * 
- * @return void
+ * @param string $url A string to print after the server, path and www location.
+ * @return string The resulting url
  */
-function print_config()
+function www($path = '')
 {
-    echo "ROOT   = " . ROOT . PHP_EOL;
-    echo "SYSTEM = " . SYSTEM . PHP_EOL;
-    echo "APP    = " . APP. PHP_EOL;
-    echo "URL    = " . URL. PHP_EOL;
+    $path = ltrim($path, '/');
+    $www_url = rtrim(\pew\Pew::config()->www_url, '/') . '/' . $path;
+
+    return $www_url;
 }
 
 /**

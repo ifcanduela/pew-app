@@ -261,25 +261,12 @@ abstract class Controller
      * Initialize the model and library objects when first accessed.
      *
      * @param string $property Controller property to read
-     * @return Model The model object
-     * @todo Make libraries load lazily instead of in the controller
+     * @return object An object of the appropriate class
      */
     public function __get($property)
     {
         if ($property === 'model') {
-            # Initialize the model
-            if ($this->use_db) {
-                $this->model = Pew::model(get_class($this), true);
-
-                if ($this->model === false) {
-                    Log::in(get_class($this), 'Model not found for this controller, using default');
-                    $this->model = new Model($this->file_name);
-                }
-            } else {
-                Log::in(get_class($this), 'Database is disabled for this controller');
-                $this->model = null;
-            }
-            
+            $this->model = Pew::model(get_class($this));
             return $this->model;
         } elseif ($property === 'session') {
             $this->session = \pew\Pew::session();
@@ -292,6 +279,6 @@ abstract class Controller
             return $this->request;
         }
         
-        return null;
+        throw new \RuntimeException("Property Controller::\$$property does not exist");
     }
 }
