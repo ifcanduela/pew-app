@@ -5,13 +5,13 @@ namespace pew\libs;
 /**
  * Simple registry class to store key/value pairs.
  *
- * Can be instantiated with the new keyword or as s singleton through
+ * Can be instantiated with the new keyword or as a singleton through
  * the instance() method.
  *
  * @package pew/libs
  * @author ifcanduela <ifcanduela@gmail.com>
  */
-class Registry
+class Registry implements \Countable, \ArrayAccess
 {
     /**
      * @var Registry Singleton instance of the registry
@@ -66,6 +66,66 @@ class Registry
     }
 
     /**
+     * Counts the number of stored items.
+     *
+     * Countable implementation.
+     * 
+     * @return int Number of stored items
+     */
+    public function count()
+    {
+        return count($this->items);
+    }
+
+    /**
+     * Checks if an offset exists.
+     *
+     * ArrayAccess implementation.
+     * 
+     * @return boolean True if the offset exists, false otherwise
+     */
+    public function offsetExists($offset)
+    {
+        return $this->__isset($offset);
+    }
+
+    /**
+     * Gets the value at an offset.
+     *
+     * ArrayAccess implementation.
+     * 
+     * @return mixed The value at the offset.
+     */
+    public function offsetGet($offset)
+    {
+        return $this->__get($offset);
+    }
+
+    /**
+     * Set the value for an offset.
+     *
+     * ArrayAccess implementation.
+     * 
+     * @return void
+     */
+    public function offsetSet($offset, $value)
+    {
+        return $this->__set($offset, $value);
+    }
+
+    /**
+     * Removes an offset.
+     *
+     * ArrayAccess implementation.
+     * 
+     * @return boolean True if the offset is removed, false otherwise
+     */
+    public function offsetUnset($offset)
+    {
+        return $this->__unset($offset);
+    }
+
+    /**
      * Sets a value in the registry.
      * 
      * @param mixed $key Key for the value
@@ -100,5 +160,21 @@ class Registry
     public function __isset($key)
     {
         return array_key_exists($key, $this->items);
+    }
+
+    /**
+     * Removes a stored value from the registry.
+     * 
+     * @param mixed $key Key to delete
+     * @return boolean True on success, true on failure
+     */
+    public function __unset($key)
+    {
+        if (array_key_exists($key, $this->items)) {
+            unset($this->items[$key]);
+            return true;
+        }
+
+        return true;
     }
 }
