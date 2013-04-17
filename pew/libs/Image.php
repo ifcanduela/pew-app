@@ -357,15 +357,15 @@ class Image
      */
     public function thumb_size($width = null, $height = null)
     {
-        if (is_null($width)) {
-            return array($this->thumb_width, $this->thumb_height);
-        }
-
         if (!$this->loaded) {
             $this->set_error(self::NO_IMAGE_LOADED, 'No image was loaded (thumb_size)');
             return false;
         }
-        
+
+        if (is_null($width)) {
+            return array($this->thumb_width, $this->thumb_height);
+        }
+
         # Ensure the parameter is valid
         if (!is_numeric($width)) {
             $this->set_error(self::INVALID_SIZE, 'Specified thumbnail width is invalid (thumb_size)');
@@ -397,7 +397,35 @@ class Image
         
         return $this;
     }
-  
+
+    public function width()
+    {
+        if (!$this->loaded) {
+            $this->set_error(self::NO_IMAGE_LOADED, 'No image was loaded (width)');
+            return false;
+        }
+
+        if (!$this->width) {
+            $this->width = imagesx($this->resource);
+        }
+
+        return $this->width;
+    }
+
+    public function height()
+    {
+        if (!$this->loaded) {
+            $this->set_error(self::NO_IMAGE_LOADED, 'No image was loaded (height)');
+            return false;
+        }
+
+        if (!$this->height) {
+            $this->height = imagesy($this->resource);
+        }
+
+        return $this->height;
+    }
+
     /**
      * Creates a resized and cropped copy of the loaded image.
      *
