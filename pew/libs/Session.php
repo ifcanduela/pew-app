@@ -43,7 +43,7 @@ class Session
      *
      * @param string $group
      */
-    public function __construct($group)
+    public function __construct($group = null)
     {
         if (!$group) {
             $group = basename(getcwd());
