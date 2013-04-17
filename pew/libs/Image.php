@@ -112,9 +112,11 @@ class Image
     {
         $this->error_message = null;
         $this->error_code = null;
-        $this->loaded = false;
         $this->thumb_width  = 100;
         $this->thumb_height = 100;
+        $this->loaded = false;
+
+        $this->set_error(0);
 
         # Make sure the parameter is somewhat valid
         if (is_string($file)) {
@@ -140,7 +142,6 @@ class Image
     public function load($file)
     {
         $this->loaded = false;
-        $this->set_error(0);
         
         # Check if the image file exists
         if (file_exists($file)) {
@@ -188,6 +189,8 @@ class Image
             $this->loaded = false;
             return false;
         }
+
+        $this->loaded = true;
 
         # Set destination name
         $this->set_destination_name($uploaded_file['name']);
@@ -262,7 +265,7 @@ class Image
     public function save_to($folder = '')
     {   
         if (!$this->loaded) {
-            $this->set_error(self::NO_IMAGE_LOADED, 'No image was loaded');
+            $this->set_error(self::NO_IMAGE_LOADED, 'No image was loaded (save_to)');
             return false;
         }
         
@@ -297,7 +300,7 @@ class Image
     protected function set_destination_name($new_name)
     {
         if (!$this->loaded) {
-            $this->set_error(self::NO_IMAGE_LOADED, 'No image was loaded');
+            $this->set_error(self::NO_IMAGE_LOADED, 'No image was loaded (set_destination_name)');
             return false;
         }
         
@@ -359,13 +362,13 @@ class Image
         }
 
         if (!$this->loaded) {
-            $this->set_error(self::NO_IMAGE_LOADED, 'No image was loaded');
+            $this->set_error(self::NO_IMAGE_LOADED, 'No image was loaded (thumb_size)');
             return false;
         }
         
         # Ensure the parameter is valid
         if (!is_numeric($width)) {
-            $this->set_error(self::INVALID_SIZE, 'Specified thumbnail width is invalid');
+            $this->set_error(self::INVALID_SIZE, 'Specified thumbnail width is invalid (thumb_size)');
             return false;
         } else {
             # If no valid height is provided, make it equal to the width
@@ -418,12 +421,12 @@ class Image
     public function save_thumb_to($folder = '')
     {
         if (!$this->loaded) {
-            $this->set_error(self::NO_IMAGE_LOADED, 'No image was loaded');
+            $this->set_error(self::NO_IMAGE_LOADED, 'No image was loaded (save_thumb_to)');
             return false;
         }
         
         if (!is_resource($this->image_resource)) {
-            $this->set_error(self::NO_IMAGE_LOADED, 'Image resource is not loaded');
+            $this->set_error(self::NO_IMAGE_LOADED, 'Image resource is not loaded (save_thumb_to)');
             return false;
         }
         
