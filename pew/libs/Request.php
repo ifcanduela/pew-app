@@ -97,6 +97,15 @@ class Request
         }
     }
 
+    public function files($key = null, $default = null)
+    {
+        if (is_null($key)) {
+            return $this->files;
+        } else {
+            return $this->fetch($this->files, $key, $default);
+        }
+    }
+
     /**
      * Get the value of a specified property.
      * 
