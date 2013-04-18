@@ -705,3 +705,32 @@ function user()
     
     return $return;
 }
+
+/**
+ * Helper for session values.
+ *
+ * Accepts a period-delimited string of sub-indices.
+ * 
+ * @param string $path Keys to access
+ * @param mixed $default Value to return in case the keys don't exist
+ * @return mixed Value of the key
+ */
+function session($path, $default = null)
+{
+    $indexes = explode('.', $path);
+    $first_index = array_shift($indexes);
+
+    $value = \pew\Pew::session()->$first_index;
+
+    while (!empty($indexes)) {
+        $index = array_shift($indexes);
+        
+        if (!isSet($value[$index])) {
+            return $default;
+        }
+
+        $value = $value[$index];
+    }
+
+    return $value;
+}
