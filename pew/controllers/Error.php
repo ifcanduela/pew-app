@@ -67,7 +67,7 @@ class Error extends Controller
      */
     public function __construct($request)
     {
-        parent::__Construct($request);
+        parent::__construct($request);
 
         # If the script is not running on DEBUG, execution is definitely stopped
         if (!\pew\Pew::config()->debug) {

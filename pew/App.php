@@ -45,15 +45,12 @@ class App
         $router  = Pew::router();
 
         $router->route($request->segments(), $request->method());
-
         $controller_name = $router->controller();
         # Instantiate the main view
         $view = Pew::view();
-
         $view->folder(Pew::config()->app_folder . DIRECTORY_SEPARATOR . 'views');
         $view->template($router->controller() . '/' . $router->action());
         $view->layout(Pew::config()->default_layout);
-
         # instantiate the controller
         $controller = Pew::controller($controller_name, $request);
         
@@ -73,7 +70,6 @@ class App
         if (method_exists($controller, 'before_action')) {
             $controller->before_action();
         }
-
         # call the action method and let the controller decide what to do
         if (isSet($skip_action) && $skip_action) {
             $view_data = array();

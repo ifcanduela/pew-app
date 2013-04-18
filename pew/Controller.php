@@ -146,11 +146,11 @@ abstract class Controller
     public $parameters = array();
 
     /**
-     * Base file name of the class.
+     * Base name of the class, slugified.
      *
      * @var string
      */
-    protected $file_name = '';
+    protected $url_slug = '';
 
     /**
      * The constructor instantiates the database and populates the instance
@@ -176,14 +176,14 @@ abstract class Controller
         unset($this->session);
         
         # Controller file name in the /views/ folder.
-        $this->file_name = class_name_to_file_name(
-                join('', 
-                    array_slice(
-                        explode('\\', get_class($this)), 
-                        -1
-                    )
+        $this->url_slug = to_underscores(slugify(
+            join('', 
+                array_slice(
+                    explode('\\', get_class($this)), 
+                    -1
                 )
-        );
+            )
+        ));
 
         # Global action prefix override
         if (!$this->action_prefix && Pew::config()->action_prefix) {
@@ -240,11 +240,11 @@ abstract class Controller
     {
         if (!method_exists($this, $this->action_prefix . $action)) {
             # If the $action method does not exist, show an error page
-            new controllers\Error(Pew::request(), controllers\Error::ACTION_MISSING, $this, $this->action_prefix . $action);
+            $error = new \pew\controllers\Error(Pew::request(), \pew\controllers\Error::ACTION_MISSING);
         }
 
         # set default template before calling the action
-        $this->view->template($this->file_name . '/' . $action);
+        $this->view->template($this->url_slug . '/' . $action);
         $this->view->title = $action;
 
         # everything's clear pink
@@ -266,7 +266,7 @@ abstract class Controller
     public function __get($property)
     {
         if ($property === 'model') {
-            $this->model = Pew::model(get_class($this));
+            $this->model = Pew::model($this->url_slug);
             return $this->model;
         } elseif ($property === 'session') {
             $this->session = \pew\Pew::session();

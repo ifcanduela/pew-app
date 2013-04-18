@@ -159,7 +159,7 @@ class Pew
 
             $app_class_name = self::$config->app_namespace . '\\controllers\\' . $class_name;
             $pew_class_name = '\\pew\\controllers\\' . $class_name;
-
+            
             if (class_exists($app_class_name)) {
                 return new $app_class_name($request);
             } elseif (class_exists($pew_class_name)) {
@@ -176,27 +176,22 @@ class Pew
      * This function returns a generic model if the specific model class is not
      * defined.
      *
-     * @param string $theClassname Name of the model class, with or without
-     *        the 'Model' suffix
+     * @param string $table_name Name of the table
      * @return Object An instance of the required Model
      * @static
      */
-    public static function model($class_name)
+    public static function model($table_name)
     {
         $registry = Registry::instance();
 
-        # Make sure the suffix "Model" is added to the class name
-        if (substr($class_name, -5) !== 'Model') {
-            $class_name .= 'Model';
-        }
+        $class_name = self::$config->app_namespace . '\\models\\' . file_name_to_class_name($table_name) . 'Model';
+        $class_base_name = class_base_name($class_name);
 
         # Check that the model has not been previously instantiated
         if (!isset($registry->$class_name)) {
-            $table_name = strtolower(str_replace('_model', '', class_name_to_file_name(class_base_name($class_name))));
-
             # Instantiate Model if the derived class is not available
             if (!class_exists($class_name)) {
-                $class_name = '\pew\Model';
+                $class_name = '\\pew\\Model';
             }
         
             # Dependencies
@@ -359,7 +354,7 @@ class Pew
         $registry = Registry::instance();
 
         if (!isset($registry->Session)) {
-            $registry->Session = new Session();
+            $registry->Session = new \pew\libs\Session();
         }
 
         return $registry->Session;

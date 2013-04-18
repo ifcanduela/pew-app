@@ -14,7 +14,6 @@ class Model
      * Database abstraction instance.
      *
      * @var PewDatabase
-     * @access public
      */
     public $db = null;
 
@@ -22,7 +21,6 @@ class Model
      * Database table for the subject of the model.
      *
      * @var string
-     * @access protected
      */
     protected $table = null;
 
@@ -30,7 +28,6 @@ class Model
      * Name of the primary key fields of the table the Model manages.
      *
      * @var string
-     * @access protected
      */
     protected $primary_key = null;
 
@@ -41,7 +38,6 @@ class Model
      * name (either 'name' or 'title') and values.
      *
      * @var array
-     * @access protected
      */
     protected $_table_data = array();
 
@@ -52,7 +48,6 @@ class Model
      * magic methods.
      *
      * @var array
-     * @access protected
      */
     protected $_row_data = array();
 
@@ -62,7 +57,6 @@ class Model
      * Holds an index for each related child model (has-many relationship).
      *
      * @var array
-     * @access protected
      */
     protected $_related_children = array();
 
@@ -72,7 +66,6 @@ class Model
      * Holds an index for each related parent model (belongs-to relationship).
      *
      * @var array
-     * @access protected
      */
     protected $_related_parents = array();
 
@@ -80,7 +73,6 @@ class Model
      * Whether to query the related tables or not.
      *
      * @var boolean
-     * @access protected
      */
     protected $_find_related = false;
 
@@ -96,7 +88,6 @@ class Model
      *     <code>public $has_many = array('user_comments' => array('comments' => 'user_id'));</code>
      *
      * @var array
-     * @access protected
      */
     protected $has_many = array();
 
@@ -112,7 +103,6 @@ class Model
      *     <code>public $belongs_to = array('owner' => array('users' => 'user_id'));</code>
      *
      * @var array
-     * @access protected
      */
     protected $belongs_to = array();
 
@@ -125,7 +115,6 @@ class Model
      * Fields to retrieve in SELECT statements.
      *
      * @var string
-     * @access protected
      */
     protected $_fields = '*';
 
@@ -133,7 +122,6 @@ class Model
      * Conditions for the queries.
      *
      * @var string
-     * @access protected
      */
     protected $_where = array();
 
@@ -141,7 +129,6 @@ class Model
      * Sorting order for the query results.
      *
      * @var string
-     * @access protected
      */
     protected $_order_by = null;
 
@@ -149,7 +136,6 @@ class Model
      * Sorting order for the query results.
      *
      * @var string
-     * @access protected
      */
     protected $_limit = null;
 
@@ -157,7 +143,6 @@ class Model
      * Grouping of fields for the query results.
      *
      * @var string
-     * @access protected
      */
     protected $_group_by = null;
 
@@ -165,7 +150,6 @@ class Model
      * Conditions for the query result groups.
      *
      * @var string
-     * @access protected
      */
     protected $_having = array();
 
@@ -174,21 +158,18 @@ class Model
      *
      * @param string $table Name of the table
      * @return array An indexed array with all fetched rows, in associative arrays
-     * @access public
-     * @todo Test trigger_error and pew_exit
      */
     public function __construct($db, $table = null)
     {
         # get the Database class instance
         $this->db = $db;
 
-        if (class_base_name(get_class($this)) === 'Model') {
+        if (!is_null($table)) {
+            $this->table = $table;
+        } elseif (class_base_name(get_class($this)) === 'Model') {
             # if this is an instance of the Model class, get the
             # table from the $table parameter
-            if (!is_string($table)) {
-                throw new Exception('Model constructor error: Models must be assigned to a table.');
-            }
-            $this->table = $table;
+            throw new Exception('Model constructor error: Models must be assigned to a table.');
         } elseif (!$this->table) {
             # else, if $table is not set in the Model class file,
             # guess the table name
@@ -205,11 +186,11 @@ class Model
         }
 
         foreach ($this->belongs_to as $alias => $fk) {
-            $this->_add_related_model('parent', $alias, $fk);
+            $this->add_related_model('parent', $alias, $fk);
         }
 
         foreach ($this->has_many as $alias => $fk) {
-            $this->_add_related_model('child', $alias, $fk);
+            $this->add_related_model('child', $alias, $fk);
         }
     }
 
@@ -221,9 +202,8 @@ class Model
      * @param string|array $fk The name of the FK or a array with [table_name, FK_name]
      * @param string $table_name Table of the related model
      * @return boolean false if the table does not exist, true otherwise
-     * @access protected
      */
-    protected function _add_related_model($relationship_type, $alias, $fk)
+    protected function add_related_model($relationship_type, $alias, $fk)
     {
         $table = $alias;
 
@@ -263,7 +243,7 @@ class Model
      */
     public function add_child($table, $foreign_key)
     {
-        $this->_add_related_model('child', $table, $foreign_key);
+        $this->add_related_model('child', $table, $foreign_key);
 
         return $this;
     }
@@ -278,7 +258,7 @@ class Model
      */
     public function add_parent($table, $foreign_key)
     {
-        $this->_add_related_model('parent', $table, $foreign_key);
+        $this->add_related_model('parent', $table, $foreign_key);
 
         return $this;
     }
@@ -318,7 +298,6 @@ class Model
      *
      * @param string $field Field name to retrieve
      * @return mixed Field value if field exists, false otherwise
-     * @access public
      */
     public function __get($related_model_alias)
     {
@@ -334,8 +313,7 @@ class Model
 
         if ($model_info) {
             if (is_null($model_info['model'])) {
-                $model_name = file_name_to_class_name($model_info['table']);
-                $model_info['model'] = Pew::get_model($model_name);
+                $model_info['model'] = Pew::model($model_info['table']);
             }
             
             return $model_info['model'];
@@ -377,7 +355,6 @@ class Model
      *
      * @param string $query The query to run
      * @return mixed The result from the query, either an array or an integer
-     * @access public
      */
     public function query($query)
     {
@@ -403,7 +380,6 @@ class Model
      * @param int $id Value to match to the primary key of the model table, or
      *                an associative array with field name/ field value pairs.
      * @return array An associative array with the row fields, or false
-     * @access public
      */
     public function find($id)
     {
@@ -423,7 +399,7 @@ class Model
                         ->order_by($this->order_by())
                         ->single($this->table, $this->_fields);
 
-        $this->_reset();
+        $this->reset();
 
         if ($result) {
             $id = $result[$this->_table_data['primary_key']];
@@ -463,7 +439,6 @@ class Model
      *
      * @param array $where An associative array with WHERE conditions.
      * @return array An array with the resulting records
-     * @access public
      */
     public function find_all($where = null)
     {
@@ -481,7 +456,7 @@ class Model
                     ->order_by($this->order_by())
                     ->select($this->table, $this->_fields);
 
-        $this->_reset();
+        $this->reset();
 
         if ($result) {
             if ($this->_find_related) {
@@ -519,7 +494,6 @@ class Model
      * @param array $where An associative array with field name/field value
      *                   pairs for the WHERE clause.
      * @return int
-     * @access public
      */
     public function count($where = null)
     {
@@ -548,7 +522,6 @@ class Model
      *
      * @param array $data An associative array with database fields and values
      * @return mixed The saved item on success, false otherwise
-     * @access public
      */
     public function save($data)
     {
@@ -584,7 +557,6 @@ class Model
      *                  use the model's $where conditions, or boolean true to
      *                  delete every record in the table
      * @return bool True on success, false other wise
-     * @access public
      */
     public function delete($id = null)
     {
@@ -611,7 +583,6 @@ class Model
      *
      * @param bool $status Status
      * @return bool The status of the functionality
-     * @access public
      */
     public function find_related($status = null)
     {
@@ -626,7 +597,6 @@ class Model
      * Returns the primary key value created in the last INSERT statement.
      *
      * @return mixed The primaary key value of the last inserted row
-     * @access public
      */
     public function last_insert_id()
     {
@@ -638,7 +608,6 @@ class Model
      *
      * @param string $fields A comma-separated list of table columns
      * @return Model a reference to the same object, for method chaining
-     * @access public
      */
     public function select($fields)
     {
@@ -653,7 +622,6 @@ class Model
      *
      * @param array $conditions Field and value pairs
      * @return Model a reference to the same object, for method chaining
-     * @access public
      */
     public function where($conditions = null)
     {
@@ -678,7 +646,6 @@ class Model
      * @param int $count Number of items to return
      * @param int $start First item to return
      * @return Model a reference to the same object, for method chaining
-     * @access public
      */
     public function limit($count = null, $start = 0)
     {
@@ -705,7 +672,6 @@ class Model
      *
      * @param mixed $order_by Order-by SQL clauses[multiple]
      * @return Model a reference to the same object, for method chaining
-     * @access public
      */
     public function order_by($order_by = null)
     {
@@ -727,7 +693,6 @@ class Model
      *
      * @param string $groups Grouping column names
      * @return Model a reference to the same object, for method chaining
-     * @access public
      * @todo: Make this work
      */
     public function group_by($group_by = null)
@@ -750,7 +715,6 @@ class Model
      *
      * @param string $conditions SQL conditions for the groups
      * @return Model a reference to the same object, for method chaining
-     * @access public
      * @todo: Make this work
      */
     public function having($having = null)
@@ -767,7 +731,7 @@ class Model
         }
     }
 
-    protected function _reset()
+    protected function reset()
     {
         $this->_order_by = null;
         $this->_group_by = null;
