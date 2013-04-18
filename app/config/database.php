@@ -2,7 +2,7 @@
 
 return [
 
-	'default' => 'sqlite',
+	'use' => 'sqlite',
 
     'sqlite' => [
         'engine' => 'sqlite',
