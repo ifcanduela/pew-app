@@ -28,22 +28,27 @@ class Image
     const INVALID_SIZE = 7;
 
     /**
-     * @var stream The image bitstream data.
+     * @var resource The image bitstream data.
      */
-    private $image_resource;
+    private $image_resource = null;
     
     /**
-     * @var string Fully-qualified path.
+     * @var string Fully-qualified path of original resource.
      */
     private $path;
-    
+
+    /**
+     * @var string Destination folder.
+     */
+    private $folder = '';
+
     /**
      * @var string Image file name, without extension.
      */
     private $file_name;
-    
+
     /**
-     * @var string File name with extension.
+     * @var string File name with extension of original resource.
      */
     private $base_name;
     
@@ -58,11 +63,6 @@ class Image
     private $mime_type;
     
     /**
-     * @var string Destination file name, without extension.
-     */
-    private $dst_file_name;
-
-    /**
      * @var int Image resource width, in pixels.
      */
     private $width;
@@ -75,27 +75,27 @@ class Image
     /**
      * @var int Thumbnail width, in pixels.
      */
-    private $thumb_width;
+    private $thumb_width = 100;
     
     /**
      * @var int Thumbnail height, in pixels.
      */
-    private $thumb_height;
+    private $thumb_height = 100;
     
     /**
      * @var bool Flag that tells if an image was previously loaded
      */
-    private $loaded;
+    private $loaded = false;
     
     /**
      * @var string Last error message.
      */
-    private $error_message;
+    private $error_message = null;
     
     /**
      * @var int Last error code.
      */
-    private $error_code;
+    private $error_code = 0;
 
     /**
      * @var int Color from the GIF palette that makes pixels transparent.
@@ -106,17 +106,11 @@ class Image
      * Creates an instance of the Img class and optionally loads an image.
      *
      * @param string $file Optional file name of image to process
-     * @access public
      */
     public function __construct($file = null)
     {
-        $this->error_message = null;
-        $this->error_code = null;
-        $this->thumb_width  = 100;
-        $this->thumb_height = 100;
-        $this->loaded = false;
-
         $this->set_error(0);
+        $this->folder(getcwd());
 
         # Make sure the parameter is somewhat valid
         if (is_string($file)) {
@@ -137,10 +131,10 @@ class Image
      *
      * @param string $file The image file name
      * @return mixed Returns true if the image was loaded, false otherwise
-     * @access public
      */
     public function load($file)
     {
+        $this->set_error(0);
         $this->loaded = false;
         
         # Check if the image file exists
@@ -154,7 +148,7 @@ class Image
             }
             
             # Get image info
-            $img_info = GetImageSize($file);
+            $img_info = getImageSize($file);
             
             # Create a binary image stream according to the image type
             if (!$this->load_image_resource($file, $img_info['mime'])) {
@@ -162,14 +156,13 @@ class Image
                 return false;
             }
             
-            $this->path          = $path_info['dirname'];
-            $this->file_name     =
-            $this->dst_file_name = $path_info['filename'];
-            $this->base_name     = $path_info['basename'];
-            $this->extension     = $path_info['extension'];
-            $this->width         = $img_info[0];
-            $this->height        = $img_info[1];
-            $this->error         = '';
+            $this->path      = $path_info['dirname'];
+            $this->file_name = $path_info['basename'];
+            $this->base_name = $path_info['filename'];
+            $this->extension = $path_info['extension'];
+            $this->width     = $img_info[0];
+            $this->height    = $img_info[1];
+            $this->error     = '';
             
             $this->loaded = true;
             
@@ -183,6 +176,9 @@ class Image
 
     public function upload(array $uploaded_file)
     {
+        $this->loaded = false;
+        $this->set_error(0);
+
         # Load image resource
         if (!$this->load_image_resource($uploaded_file['tmp_name'], $uploaded_file['type'])) {
             $this->set_error(self::UNSUPPORTED_FORMAT, 'The image file could not be loaded');
@@ -192,21 +188,17 @@ class Image
 
         $this->loaded = true;
 
-        # Set destination name
-        $this->set_destination_name($uploaded_file['name']);
-
         $path_info = pathinfo($uploaded_file['name']);
-        $img_info = GetImageSize($uploaded_file['tmp_name']);
-            
+        $img_info = getImageSize($uploaded_file['tmp_name']);
+        
         # set the path to the temporary uploads directory
-        $this->path          = dirname($uploaded_file['tmp_name']);
-        $this->file_name     =
-        $this->dst_file_name = $path_info['filename'];
-        $this->base_name     = $path_info['basename'];
-        $this->extension     = $path_info['extension'];
-        $this->width         = $img_info[0];
-        $this->height        = $img_info[1];
-        $this->error         = '';
+        $this->path      = dirname($uploaded_file['tmp_name']);
+        $this->file_name = basename($uploaded_file['tmp_name']);
+        $this->base_name = $path_info['filename'];
+        $this->extension = $path_info['extension'];
+        $this->width     = $img_info[0];
+        $this->height    = $img_info[1];
+        $this->error     = '';
         
         return $this->loaded = true;
     }
@@ -260,7 +252,6 @@ class Image
      *               Working Directory.
      * @return mixed Returns false if the image could not be copied, or the 
      *               created image path and file name
-     * @access public
      */
     public function save_to($folder = '')
     {   
@@ -271,8 +262,9 @@ class Image
         
         # Clean the output folder name
         if (empty($folder)) {
-            $folder = getcwd();
+            $folder = $this->folder();
         }
+
         $folder = rtrim($folder, '/') . '/';
         
         # Create folders if necessary
@@ -283,8 +275,11 @@ class Image
         # Copy the source file to destination
         # Potential enhancement: allow the user to specify an output format,
         # and use the image_resource to save the copy.
-        if (copy($this->path . DIRECTORY_SEPARATOR . $this->base_name, $folder . $this->dst_file_name . '.' . $this->extension)) {
-            return $folder . $this->dst_file_name . '.' . $this->extension;
+        $src_file_name = $this->path . DIRECTORY_SEPARATOR . $this->file_name;
+        $dst_file_name = $folder . $this->file_name() . '.' . $this->extension;
+        
+        if (copy($src_file_name, $dst_file_name)) {
+            return $dst_file_name;
         } else {
             $this->set_error(self::IMAGE_WRITE_ERROR, 'Image file could not be copied');
             return false;
@@ -292,57 +287,47 @@ class Image
     }
 
     /**
-     * Updates the name assigned to saved images.
+     * Gets and sets the name assigned to the image.
      *
-     * @param string $new_name The file name, without extension
-     * @return mixed Returns The Img object instance ($this)
+     * @param string $file_name The file name, without extension
+     * @param string $with_extension Whether to use file extension
+     * @return Image|string The file name if no argument is provided, the Image object otherwise
      */
-    protected function set_destination_name($new_name)
+    public function file_name($file_name = null, $with_extension = false)
     {
-        if (!$this->loaded) {
-            $this->set_error(self::NO_IMAGE_LOADED, 'No image was loaded (set_destination_name)');
-            return false;
+        if (is_string($file_name)) {
+            // handle $with_extension here
+            $this->base_name = preg_replace('/\-+/', '-', preg_replace('/([^A-Za-z0-9-_])/', '-', $file_name));
+            return $this;
         }
-        
-        # Check that a valid parameter was received
-        if (is_string($new_name)) {
-            $this->dst_file_name = $new_name;
-        } else {
-            $this->set_error(self::INVALID_FILE_NAME, 'Invalid destination file name');
-            return false;
+
+        return $this->base_name . ($with_extension ? '.' . $this->extension : '');
+    }
+
+    /**
+     * Gets and set the folder for the image.
+     *
+     * @param string $folder The folder
+     * @return Image|string The folder if no argument is provided, the Image object otherwise
+     */
+    public function folder($folder = null)
+    {
+        if (!is_null($folder)) {
+            $this->folder = str_replace("\\/", DIRECTORY_SEPARATOR, rtrim($folder, '/') . '/');
+            return $this;
         }
-        
-        
-        return $this;
+
+        return $this->folder;
     }
     
     /**
-     * Gets the current destination name.
+     * Gets the current, full image file name.
      *
-     * @param string $folder The absolute or relative filesystem location to
-     *               copy the loaded image. Leave empty to copy to Current
-     *               Working Directory.
      * @return string The full path and filename of the destination image
-     */    
-    protected function get_destination_name($folder = null)
+     */
+    public function folder_and_file_name()
     {
-        # Clean the destination folder
-        if (empty($folder)) {
-            $folder = getcwd();
-        }
-        
-        $folder = rtrim($folder, '/') . '/';
-        
-        return $folder . $this->dst_file_name . '.' . $this->extension;
-    }
-
-    public function destination_name($name = null)
-    {
-        if (!is_null($name)) {
-            $this->set_destination_name($name);
-        }
-
-        return $this->get_destination_name();
+        return $this->folder() . $this->base_name . '.' . $this->extension;
     }
 
     /**
@@ -353,7 +338,6 @@ class Image
      *                    width
      * @return mixed Returns The Img object instance ($this) or false if $width
      *               is invalid
-     * @access public
      */
     public function thumb_size($width = null, $height = null)
     {
@@ -388,7 +372,6 @@ class Image
      * Resets the thumbnail size to the default.
      *
      * @return object The Img object instance ($this)
-     * @access public
      */
     public function reset_thumb_size()
     {
@@ -444,7 +427,6 @@ class Image
      *               Working Directory.
      * @return mixed Returns The Img object instance ($this) or the created
      *               image path and file name
-     * @access public
      */
     public function save_thumb_to($folder = '')
     {
@@ -521,7 +503,7 @@ class Image
         }
         
         # Create final image, with 80% of compression quality
-        if (!ImageJPEG($cropped, $folder . $this->dst_file_name . '.' . $this->extension, 80)) {
+        if (!ImageJPEG($cropped, $folder . $this->base_name . '.' . $this->extension, 80)) {
             $this->set_error(self::IMAGE_WRITE_ERROR, 'Image could not be written to destination');
             return false;
         }
@@ -529,7 +511,7 @@ class Image
         # We don't need this anymore
         ImageDestroy($cropped);
         
-        return $folder . $this->dst_file_name . '.' . $this->extension;
+        return $folder . $this->base_name . '.' . $this->extension;
     }
 
     /**
