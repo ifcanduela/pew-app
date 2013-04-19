@@ -431,6 +431,10 @@ class Model
             $result = false;
         }
 
+        if (method_exists($this, 'after_find')) {
+            $result = current($this->after_find(array($result)));
+        }
+
         return $result;
     }
 
@@ -483,6 +487,10 @@ class Model
         } else {
             # return empty array if there was no result
             $result = array();
+        }
+
+        if (method_exists($this, 'after_find')) {
+            $result = $this->after_find($result);
         }
 
         return $result;
