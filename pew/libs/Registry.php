@@ -66,6 +66,16 @@ class Registry implements \Countable, \ArrayAccess
     }
 
     /**
+     * Checks whether the registry is empty.
+     * 
+     * @return boolean True if the registry is empty, false otherwise
+     */
+    public function is_empty()
+    {
+        return count($this->items) === 0;
+    }
+
+    /**
      * Counts the number of stored items.
      *
      * Countable implementation.
