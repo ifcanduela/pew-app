@@ -9,7 +9,7 @@ namespace pew\controllers;
  * @package pew/controllers
  * @author ifcanduela <ifcanduela@gmail.com>
  */
-class BaseController extends Controller
+class BaseController extends \pew\Controller
 {
 
 }

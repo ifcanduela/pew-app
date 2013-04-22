@@ -9,7 +9,7 @@ namespace pew\controllers;
  * @package pew/default/controllers
  * @author ifcanduela <ifcanduela@gmail.com>
  */
-class Users extends Controller
+class Users extends \pew\Controller
 {
     /**
      * The login action displays a login form and validates its input

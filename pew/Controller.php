@@ -14,14 +14,13 @@ use pew\libs;
 abstract class Controller
 {
     /**
-     * Data created by the action and used by the view.
+     * Data created by the action and available in the view.
      *
-     * $data is an associative array. Its indices will be converted to
-     * variables for easier access inside
+     * $data is a \pew]libs\Registry object that will be copied to the view.
      *
-     * @var array
+     * @var Registry
      */
-    public $data = array();
+    public $data = null;
 
     /**
      * Data submitted by the browser agent via POST method.
@@ -163,6 +162,7 @@ abstract class Controller
     {
         # Assign Request and View objects
         $this->request = $request;
+        $this->data = new \pew\libs\Registry;
 
         if ($view) {
             $this->view = $view;
