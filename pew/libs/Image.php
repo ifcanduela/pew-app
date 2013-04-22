@@ -341,11 +341,6 @@ class Image
      */
     public function thumb_size($width = null, $height = null)
     {
-        if (!$this->loaded) {
-            $this->set_error(self::NO_IMAGE_LOADED, 'No image was loaded (thumb_size)');
-            return false;
-        }
-
         if (is_null($width)) {
             return array($this->thumb_width, $this->thumb_height);
         }
@@ -367,7 +362,57 @@ class Image
             return $this;
         }
     }
-        
+    
+    /**
+     * Set and get the thumb width.
+     *
+     * This function will set the height to null, so thumbnails are
+     * generated with a fixed width and proportional height.
+     *
+     * If null is passed as argument the function will just return the
+     * current thumbnail width.
+     *
+     * Use thumb_size() to set both sizes.
+     * 
+     * @param int $width Widt hin pixels
+     * @return int Width in pixels
+     */
+    public function thumb_width($width = null)
+    {
+        if (!is_null($width)) {
+            $this->thumb_width = (int) $width;
+            $this->thumb_height = null;
+            return $this;
+        }
+
+        return $this->thumb_width;
+    }
+
+    /**
+     * Set and get the thumb height.
+     *
+     * This function will set the width to null, so thumbnails are
+     * generated with a fixed height and proportional width.
+     *
+     * If null is passed as argument the function will just return the
+     * current thumbnail height.
+     *
+     * Use thumb_size() to set both sizes.
+     * 
+     * @param int $height Height in pixels
+     * @return int Height in pixels
+     */
+    public function thumb_height($height = null)
+    {
+        if (!is_null($height)) {
+            $this->thumb_height = (int) $height;
+            $this->thumb_width = null;
+            return $this;
+        }
+
+        return $this->thumb_width;
+    }
+
     /**
      * Resets the thumbnail size to the default.
      *
@@ -375,12 +420,16 @@ class Image
      */
     public function reset_thumb_size()
     {
-        $this->thumb_width  = 100;
-        $this->thumb_height = 100;
+        $this->thumb_size(100, 100);
         
         return $this;
     }
 
+    /**
+     * Get the current image width.
+     * 
+     * @return int Image width in pixels
+     */
     public function width()
     {
         if (!$this->loaded) {
@@ -395,6 +444,11 @@ class Image
         return $this->width;
     }
 
+    /**
+     * Get the current image height.
+     * 
+     * @return int Image height in pixels
+     */
     public function height()
     {
         if (!$this->loaded) {
@@ -441,10 +495,10 @@ class Image
         }
         
         # Get image size properties
-        $s_w = $this->width;
-        $s_h = $this->height;
-        $d_w = $this->thumb_width;
-        $d_h = $this->thumb_height;
+        $s_w = $this->width();
+        $s_h = $this->height();
+        $d_w = $this->thumb_width();
+        $d_h = $this->thumb_height();
         $s_ratio = $s_w / $s_h;
         $d_ratio = $d_w / $d_h;
         
