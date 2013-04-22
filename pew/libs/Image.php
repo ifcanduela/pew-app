@@ -410,7 +410,7 @@ class Image
             return $this;
         }
 
-        return $this->thumb_width;
+        return $this->thumb_height;
     }
 
     /**
@@ -495,11 +495,21 @@ class Image
         }
         
         # Get image size properties
-        $s_w = $this->width();
-        $s_h = $this->height();
-        $d_w = $this->thumb_width();
-        $d_h = $this->thumb_height();
+        $s_w = $this->width;
+        $s_h = $this->height;
+        $d_w = $this->thumb_width;
+        $d_h = $this->thumb_height;
+
+        # calculate source image ratio
         $s_ratio = $s_w / $s_h;
+
+        # check and calculate thumbnail dimensions
+        if (is_null($d_w)) {
+            $d_w = $d_h * $s_ratio;
+        }
+        if (is_null($d_h)) {
+            $d_h = $d_w * $s_ratio;
+        }
         $d_ratio = $d_w / $d_h;
         
         # Check whether to crop vertically or horizontally
