@@ -35,7 +35,7 @@ class Pages extends \pew\Controller
     public function _action($action, array $parameters = [])
     {
     	$this->view->title(ucwords(str_replace('_', ' ', $action)));
-        $this->view->template($this->file_name . '/' . $action);
+        $this->view->template($this->url_slug . '/' . $action);
 
         return [];
     }
