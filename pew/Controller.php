@@ -193,14 +193,14 @@ abstract class Controller
         # Function libraries
         # @todo Move this to the __get function
         if (is_array($this->libs)) {
-            foreach ($this->libs as $library_class_name) {
+            foreach ($this->libs as $p => $library_class_name) {
                 $lib = Pew::library($library_class_name);
                 
                 if ($lib === false) {
                     throw new \RuntimeException("Library $library_class_name cound not be found.");
                 }
 
-                $this->libs[$library_class_name] = $lib;
+                $this->libs[$p] = $lib;
             }
         }
         
@@ -277,6 +277,8 @@ abstract class Controller
         } elseif ($property === '') {
             $this->request = \pew\Pew::request();
             return $this->request;
+        } elseif (array_key_exists($property, $this->libs)) {
+            return $this->libs[$property];
         }
         
         throw new \RuntimeException("Property Controller::\$$property does not exist");

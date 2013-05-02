@@ -117,6 +117,7 @@ class Model
      * @var string
      */
     protected $_fields = '*';
+    protected $fields = '*';
 
     /**
      * Conditions for the queries.
@@ -124,6 +125,7 @@ class Model
      * @var string
      */
     protected $_where = array();
+    protected $where = array();
 
     /**
      * Sorting order for the query results.
@@ -131,6 +133,7 @@ class Model
      * @var string
      */
     protected $_order_by = null;
+    protected $order_by = null;
 
     /**
      * Sorting order for the query results.
@@ -138,6 +141,7 @@ class Model
      * @var string
      */
     protected $_limit = null;
+    protected $limit = null;
 
     /**
      * Grouping of fields for the query results.
@@ -145,6 +149,7 @@ class Model
      * @var string
      */
     protected $_group_by = null;
+    protected $group_by = null;
 
     /**
      * Conditions for the query result groups.
@@ -152,6 +157,7 @@ class Model
      * @var string
      */
     protected $_having = array();
+    protected $having = array();
 
     /**
      * The constructor builds the model!.
@@ -424,6 +430,9 @@ class Model
                     # use the associated model to find related items
                     $result[$alias] = $this->$alias->find($result[$parent['foreign_key']]);
                 }
+                
+                # re-enable the find_related behavior for later calls
+                $this->_find_related = true;
             }
         } else {
             # if there was no result, return false
@@ -483,6 +492,9 @@ class Model
                         $result[$key][$parent['alias']] = $this->$alias->find($value[$parent['foreign_key']]);
                     }
                 }
+
+                # re-enable the find_related behavior for later calls
+                $this->_find_related = true;
             }
         } else {
             # return empty array if there was no result

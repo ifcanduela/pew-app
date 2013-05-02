@@ -26,7 +26,6 @@ class Pew
      * Framework and application configuration settings.
      * 
      * @var \pew\libs\Registry
-     * @static
      */
     protected static $config = null;
 
@@ -48,14 +47,13 @@ class Pew
      * @param string $index Index in the storage
      * @param mixed $arguments A single argument or an array of arguments
      * @return Object An instance of the required class
-     * @static
      */
     public static function get($index, $arguments = [])
     {
         $registry = Registry::instance();
         if (!isset($registry->$index)) {
             if (class_exists($index)) {
-                $reflection_class = new ReflectionClass($index);
+                $reflection_class = new \ReflectionClass($index);
                 $registry->$index = $reflection_class->newInstanceArgs($arguments);
             } else {
                 throw new \Exception("Class $index could not be found.");
@@ -73,7 +71,6 @@ class Pew
      *
      * @param $app_folder Folder name that holds the application folders and files
      * @return App Instance of the application
-     * @static
      */
     public static function app($app_folder, $config_file = 'config')
     {
@@ -138,7 +135,6 @@ class Pew
      * @param string $controller_name Name of the controller class
      * @param Request $request a Request object
      * @return Object An instance of the required Controller
-     * @static
      * @throws InvalidArgumentException When no current controller exists and no class name is provided
      */
     public static function controller($controller_name = null, \pew\libs\Request $request)
@@ -178,7 +174,6 @@ class Pew
      *
      * @param string $table_name Name of the table
      * @return Object An instance of the required Model
-     * @static
      */
     public static function model($table_name)
     {
@@ -210,11 +205,20 @@ class Pew
      * @param string $class_name Name of the library class
      * @param mixed $arguments One or more arguments for the constructor of the library
      * @return Object An instance of the required Library
-     * @static
      */
     public static function library($class_name, $arguments = null)
     {
-        return self::get($class_name, $arguments);
+        $library = null;
+
+        try {
+            $library = self::get(self::$config->app_namespace . '\\libs\\' . $class_name);
+        } catch (\Exception $e) {
+            if (!$library) {
+                $library = self::get(__NAMESPACE__ . '\\libs\\' . $class_name);
+            }
+        }
+
+        return $library;
     }
 
     /**
@@ -227,7 +231,6 @@ class Pew
      *
      * @param string $config The configuration name
      * @return Object An instance of the database access object
-     * @static
      * @throws RuntimeException If database use is disabled
      */
     public static function database($config = null)

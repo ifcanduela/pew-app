@@ -95,7 +95,10 @@ class App
 
         # render the view, if not prevented
         if ($view->render) {
-            if (!$view->exists()) {
+            // add json branch
+            // ...
+            
+            if (!$view->exists() && $router->response_type() !== 'json') {
                 $defaultView = clone $view;
                 $defaultView->folder(Pew::config()->system_folder . 'views');
 
@@ -112,23 +115,29 @@ class App
                 $output = $controller->before_render($output);
             }
 
-            # render the layout
-            $layout = clone $view;
-            $layout->extension(Pew::config()->layout_ext);
-            $layout->template($view->layout());
+            if ($router->response_type() === 'json') {
+                $page = $output;
+            } else {
+                # render the layout
+                $layout = clone $view;
+                $layout->extension(Pew::config()->layout_ext);
+                $layout->template($view->layout());
 
-            if (!$layout->exists()) {
-                $defaultLayout = clone($layout);
-                $defaultLayout->folder(Pew::config()->system_folder . 'views');
+                if (!$layout->exists()) {
+                    $defaultLayout = clone($layout);
+                    $defaultLayout->folder(Pew::config()->system_folder . 'views');
 
-                if (!$defaultLayout->exists()) {
-                     throw new \Exception("Layout file could not be found: {$layout->folder()}{$layout->template()}");
+                    if (!$defaultLayout->exists()) {
+                         throw new \Exception("Layout file could not be found: {$layout->folder()}{$layout->template()}");
+                    }
+
+                    $layout = $defaultLayout;
                 }
 
-                $layout = $defaultLayout;
+                $page = $layout->render(['title' => $view->title, 'output' => $output]);
             }
-
-            echo $layout->render(['title' => $view->title, 'output' => $output]);
+            
+            echo $page;
         }
     }
 }

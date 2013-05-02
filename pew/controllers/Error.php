@@ -240,7 +240,7 @@ ERROR_TEXT;
     public function show_404()
     {
         header("HTTP/1.0 404 Not Found");
-        include(\pew\Pew::config()->system_folder . DS . 'views' . DS . $this->file_name . DS . '404.php');
+        include(\pew\Pew::config()->system_folder . DS . 'views' . DS . $this->url_slug . DS . '404.php');
         exit(404);
     }
 }

@@ -94,8 +94,15 @@ class View
 
         # Get the view file
         $template_file = $this->folder() . $template . $this->extension();
-     
-        $output = $this->render_html($template_file, $data);
+        
+        switch (\pew\Pew::router()->response_type()) {
+            case 'html': 
+                $output = $this->render_html($template_file, $data);
+                break;
+            case 'json': 
+                $output = $this->render_json($template_file, $data);
+                break;
+        }
         
         return $output;
     }
@@ -120,9 +127,9 @@ class View
         return $template_output;
     }
     
-    public function render_json()
+    public function render_json($template, $data)
     {
-        return json_encode($this->data);
+        return json_encode($data);
     }
     
     public function render_xml()
