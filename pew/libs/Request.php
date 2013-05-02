@@ -93,7 +93,7 @@ class Request
         if (is_null($key)) {
             return $this->post;
         } else {
-            return $this->fetch($this->get, $key, $default);
+            return $this->fetch($this->post, $key, $default);
         }
     }
 
