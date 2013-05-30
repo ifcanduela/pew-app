@@ -547,6 +547,10 @@ class Model
     {
         $record = array();
 
+        if (method_exists($this, 'before_save')) {
+            $data = $this->before_save($data);
+        }
+
         foreach ($data as $key => $value) {
             if (in_array($key, $this->_table_data['columns'])) {
                 $record[$key] = $value;
@@ -561,6 +565,10 @@ class Model
             # if $id is not set, perform an INSERT
             $result = $this->db->values($record)->insert($this->table);
             $result = $this->db->where(array($this->primary_key => $result))->single($this->table);
+        }
+
+        if (method_exists($this, 'after_save')) {
+            $result = $this->after_save($result);
         }
 
         return $result;
