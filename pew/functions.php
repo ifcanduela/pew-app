@@ -734,3 +734,29 @@ function session($path, $default = null)
 
     return $value;
 }
+
+/**
+ * Helper for flash data.
+ * 
+ * @param string $key Flash data key to read
+ * @param mixed $default Value to return in case the keys don't exist
+ * @return mixed Value of the key
+ */
+function flash($key = null, $default = null)
+{
+    static $flash_data;
+
+    if (!$flash_data) {
+        $flash_data = \pew\Pew::session()->flash_data();
+    }
+
+    if (!is_null($key)) {
+        if (array_key_exists($key, $flash_data)) {
+            return $flash_data[$key];
+        } else {
+            return $default;
+        }
+    } else {
+        return $flash_data;
+    }
+}
