@@ -301,6 +301,52 @@ function deref(array $array, $index, $strict = false)
     return $array[$index];
 }
 
+
+/**
+ * Builds a key/value array using a value from an array as index.
+ *
+ * The result is an array with keys corresponding to values from the 
+ * source array's elements. If the $value_index parameter is null the whole
+ * element is assigned to the key, but if a key is provided only the value
+ * of that key is assigned to the $key_index.
+ * 
+ * @param array $array An array with array/object elements
+ * @param int|string $key_name Element key to use as key
+ * @param int|string $value_name Element key to use as value
+ * @return array
+ */
+function array_reindex(array $array, $key_name, $value_name = null)
+{
+    $result = array();
+
+    foreach ($array as $key => $value) {
+        if (is_object($value)) {
+            # normalize to array
+            $value = (array) $value;
+        }
+
+        if (is_array($value) && array_key_exists($key_name, $value)) {
+            $key_name_value = $value[$key_name];
+            
+            if (is_null($value_name)) {
+                # if $value_name is null the while element is used
+                $value_name_value = $value;
+            } elseif (array_key_exists($value_name, $value)) {
+                # if $value_name corresponds to an existing key its value is used
+                $value_name_value =  $value[$value_name];
+            } else {
+                # the value is null in case no value can be used
+                $value_name_value =  null;
+            }
+
+            $result[$key_name_value] = $value_name_value;
+        }
+    }
+
+    return $result;
+}
+
+
 /**
  * Isolate values from an array according to a pattern.
  *
@@ -323,29 +369,31 @@ function deref(array $array, $index, $strict = false)
  */
 function array_reap($data, $filter)
 {
-    # if $filter is a string, divide and acquire filter atoms
     if (is_string($filter)) {
+        # if $filter is a string, divide and acquire filter atoms
         $filters = explode(':', trim($filter, ':'));
-    # if $filter was already an array, go ahead
     } elseif (is_array($filter)) {
+        # if $filter was already an array, go ahead
         $filters = $filter;
-    # any other possibility is an error
     } else {
+        # any other possibility is an error
         return null;
     }
     
     # if there are no remaining filters, $data complies with the rules
-    if (count($filters) == 0)
+    if (count($filters) == 0) {
         return $data;
-    
+    }
+
     # if $data is an object, get its properties
     if (is_object($data)) {
         $data = get_object_vars($data);
     }
     
     # by this point, $data must be an array
-    if (!is_array($data))
+    if (!is_array($data)) {
         return null;
+    }
     
     # get the current filter
     $f = array_shift($filters);
