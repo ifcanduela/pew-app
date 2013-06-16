@@ -301,7 +301,6 @@ function deref(array $array, $index, $strict = false)
     return $array[$index];
 }
 
-
 /**
  * Builds a key/value array using a value from an array as index.
  *
@@ -345,7 +344,6 @@ function array_reindex(array $array, $key_name, $value_name = null)
 
     return $result;
 }
-
 
 /**
  * Isolate values from an array according to a pattern.

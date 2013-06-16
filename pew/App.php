@@ -94,7 +94,7 @@ class App
         }
 
         # render the view, if not prevented
-        if ($view->render) {
+        if ($view_data !== false && $view->render) {
             // add json branch
             // ...
             
