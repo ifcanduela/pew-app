@@ -60,7 +60,6 @@ class Request
                 $this->segments = '/' . trim($segments, '/');    
             }
             
-
             $this->get      = $_GET;
             $this->post     = $_POST;
             $this->files    = $_FILES;
@@ -103,6 +102,21 @@ class Request
             return $this->files;
         } else {
             return $this->fetch($this->files, $key, $default);
+        }
+    }
+
+    /**
+     * Gets the segment string or one of the segments.
+     * 
+     * @param  int $segment
+     * @return string|null
+     */
+    public function segments($segment = null)
+    {
+        if (is_numeric($segment)) {
+            return deref(explode('/', trim($this->segments, '/')), $segment);
+        } else {
+            return $this->segments;
         }
     }
 

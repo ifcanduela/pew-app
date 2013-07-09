@@ -250,7 +250,9 @@ abstract class Controller
         # everything's clear pink
         $view_data = call_user_func_array(array($this, $this->action_prefix . $action), $parameters);
 
-        if (!is_array($view_data)) {
+        if ($view_data === false) {
+            $this->view->render = false;
+        } elseif (!is_array($view_data)) {
             $view_data = compact('view_data');
         }
 

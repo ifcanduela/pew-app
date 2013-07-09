@@ -141,8 +141,6 @@ class Router
         if (is_numeric($n)) {
             if (array_key_exists($n, $this->parameters)) {
                 return $this->parameters[$n];
-            } else {
-                throw new \RuntimeException("Route parameter not found: $n");
             }
         } else {
             return $this->parameters;

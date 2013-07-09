@@ -94,10 +94,8 @@ class App
         }
 
         # render the view, if not prevented
-        if ($view_data !== false && $view->render) {
-            // add json branch
-            // ...
-            
+        if ($view->render) {
+
             if (!$view->exists() && $router->response_type() !== 'json') {
                 $defaultView = clone $view;
                 $defaultView->folder(Pew::config()->system_folder . 'views');

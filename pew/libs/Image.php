@@ -101,6 +101,11 @@ class Image
      * @var int Color from the GIF palette that makes pixels transparent.
      */
     private $gif_transparent_color;
+
+    /**
+     * @var int JPEG quality.
+     */
+    private $jpeg_quality = 75;
     
     /**
      * Creates an instance of the Img class and optionally loads an image.
@@ -464,6 +469,20 @@ class Image
     }
 
     /**
+     * Get or set the JPEG compression quality.
+     * 
+     * @return int JPEG compression quality
+     */
+    public function jpeg_quality($jpeg_quality = null)
+    {
+        if ($jpeg_quality) {
+            $this->jpeg_quality = max(min($jpeg_quality, 100), 0);
+        }
+
+        return $this->jpeg_quality;
+    }
+
+    /**
      * Creates a resized and cropped copy of the loaded image.
      *
      * This function will create an image based on the loaded image. The result
@@ -567,7 +586,7 @@ class Image
         }
         
         # Create final image, with 80% of compression quality
-        if (!ImageJPEG($cropped, $folder . $this->base_name . '.' . $this->extension, 80)) {
+        if (!ImageJPEG($cropped, $folder . $this->base_name . '.' . $this->extension, $this->jpeg_quality)) {
             $this->set_error(self::IMAGE_WRITE_ERROR, 'Image could not be written to destination');
             return false;
         }

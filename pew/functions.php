@@ -215,6 +215,87 @@ function get_execution_time($partial = false)
 }
 
 /**
+ * Organizes the $_FILES array when multiple uploads are enabled.
+ *
+ * This function will copy the contents of the $_FILES array, changing the format from this:
+ *
+ * [
+ *   'input_1' => [
+ *     'name' => [
+ *       0 => 'file1.jpg',
+ *       1 => 'file2.jpg',
+ *       2 => 'file2.jpg',
+ *     ],
+ *     'type' => [
+ *       0 => 'image/jpeg',
+ *       1 => 'image/jpeg',
+ *       2 => 'image/jpeg',
+ *     ]
+ *     'tmp_name' => [
+ *       0 => '/tmp/phpO2WKrJ'
+ *       1 => '/tmp/php2hLO6x'
+ *       2 => '/tmp/php)7HjN2'
+ *     ]
+ *     'error' => [
+ *       0 => 0
+ *       1 => 0
+ *       2 => 0
+ *     ]
+ *     'size' => [
+ *       0 => 12345
+ *       1 => 24680
+ *       2 => 112358
+ *     ]
+ *   ]
+ * ]
+ *
+ *  Into this:
+ *
+ * [
+ *   'input_1' => [
+ *     0 => [
+ *       'name' => 'file1.jpg',
+ *       'type' => 'image/jpeg',
+ *       'tmp_name' => '/tmp/phpO2WKrJ'
+ *       'error' => 0
+ *       'size' => 12345
+ *     ],
+ *     1 => [
+ *       'name' => 'file2.jpg',
+ *       'type' => 'image/jpeg',
+ *       'tmp_name' => '/tmp/php2hLO6x'
+ *       'error' => 0
+ *       'size' => 24680
+ *     ]
+ *     '2 => [
+ *       'name' => 'file2.jpg',
+ *       'type' => 'image/jpeg',
+ *       'tmp_name' => '/tmp/php)7HjN2'
+ *       'error' => 0
+ *       'size' => 112358
+ *     ]
+ *   ]
+ * ]
+ * 
+ * @param array $files_array The list of uploaded files
+ * @return array
+ */
+function organize_files_array($files_array)
+{
+    $organized = [];
+
+    foreach($files_array as $input_name => $input_value) {
+       foreach($input_value as $field_name => $file_values) {
+            foreach ($file_values as $file_number => $field_value) {
+                $organized[$input_name][$file_number][$field_name] = $field_value;
+            }
+       }
+    }
+
+    return $organized;
+}
+
+/**
  * Applies a text sanitization filter to a string.
  *
  * This function calls filter_var with FILTER_SANITIZE_MAGIC_QUOTES if the

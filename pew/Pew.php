@@ -72,7 +72,7 @@ class Pew
      * @param $app_folder Folder name that holds the application folders and files
      * @return App Instance of the application
      */
-    public static function app($app_folder, $config_file = 'config')
+    public static function app($app_folder = 'app', $config_file = 'config')
     {
         if (!isset($registry->App)) {
             $appLoader = new Autoloader($app_folder, dirname(realpath($app_folder)));
@@ -104,8 +104,8 @@ class Pew
             self::$config->app_config = $config_file;
 
             # load app/config/bootstrap.php
-            if (file_exists(self::$config->app_folder . 'config' . DS . 'bootstrap.php')) {
-                require self::$config->app_folder . 'config' . DS . 'bootstrap.php';
+            if (file_exists(self::$config->app_folder . '/config' . DS . 'bootstrap.php')) {
+                require self::$config->app_folder . '/config' . DS . 'bootstrap.php';
             }
 
             $registry->App = new App($app_folder);
