@@ -368,7 +368,7 @@ class Model
 
         if (strtoupper(substr($query, 0, 7)) == 'SELECT ') {
             # query is a SELECT, so try to return an array
-            $ret = $this->db->pdo->query($query)->fechAll() or die($this->db->pdo->errorInfo());
+            $ret = $this->db->pdo->query($query)->fetchAll() or die($this->db->pdo->errorInfo());
         } else {
             # just run the query
             $ret = $this->db->pdo->exec($query);
