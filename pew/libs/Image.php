@@ -386,7 +386,7 @@ class Image
     {
         if (!is_null($width)) {
             $this->thumb_width = (int) $width;
-            $this->thumb_height = null;
+            $this->thumb_height = round($width * $this->height() / $this->width());
             return $this;
         }
 
@@ -411,7 +411,7 @@ class Image
     {
         if (!is_null($height)) {
             $this->thumb_height = (int) $height;
-            $this->thumb_width = null;
+            $this->thumb_width = round($height * $this->width() / $this->height());
             return $this;
         }
 
