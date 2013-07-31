@@ -20,9 +20,17 @@ class Router
     private $default_controller = '';
     private $default_action     = '';
 
+    private $response_types = [
+        ':'=> self::JSON,
+        '@'=> self::XML,
+    ];
+
     private $controller;
     private $action;
     private $parameters = [];
+
+    private $token_prefix = '!';
+    private $sequence_prefix = '*';
 
     private $routes = [];
 
@@ -31,7 +39,7 @@ class Router
     public function __construct(array $routes = [])
     {
         foreach ($routes as $key => $route) {
-            $this->add_route($route);
+            $this->add($route);
         }
     }
 
@@ -40,7 +48,7 @@ class Router
      * 
      * @param array $route Array with methods, origin and destination
      */
-    public function add_route(array $route)
+    public function add(array $route)
     {
         if (count($route) < 2) {
             throw new \Exception("Malformed route found.");
@@ -102,6 +110,35 @@ class Router
         return $this->default_action;
     }
 
+    /**
+     * Set or get the named token prefix.
+     *
+     * @param  string $prefix
+     * @return string The current prefix
+     */
+    public function token_prefix($prefix = null)
+    {
+        if (!is_null($prefix)) {
+            $this->token_prefix = $prefix;
+        }
+
+        return $this->token_prefix;
+    }
+
+    /**
+     * Set or get the seuqential token prefix.
+     *
+     * @param  string $prefix
+     * @return string The current prefix
+     */
+    public function sequence_prefix($prefix = null)
+    {
+        if (!is_null($prefix)) {
+            $this->sequence_prefix = $prefix;
+        }
+
+        return $this->sequence_prefix;
+    }
 
     /**
      * Get the controller.
@@ -147,6 +184,11 @@ class Router
         }
     }
 
+    /**
+     * Returns a response type based on the action prefix.
+     * 
+     * @return string One of the configured response types.
+     */
     public function response_type()
     {
         if (!ctype_alpha($this->action{0})) {
@@ -155,6 +197,8 @@ class Router
                     return self::JSON;
                 case '@':
                     return self::XML;
+                default:
+                    return $this->response_types[$this->action{0}];
             }
         }
 
@@ -186,15 +230,15 @@ class Router
 
         if (array_key_exists($request_method, $this->routes)) {
             foreach ($this->routes[$request_method] as $route) {
-                if ($matches = $this->match_route($route, $uri)) {
-                    $built_route = $this->build_route($uri, $route);
+                if ($matches = $this->match($route, $uri)) {
+                    $built_route = $this->build($uri, $route);
                     break;
                 }
             }
         }
 
         if (!isSet($built_route)) {
-            $built_route = $this->build_route($uri, array());
+            $built_route = $this->build($uri, array());
         }
 
         $this->controller   = $built_route['controller'];
@@ -211,12 +255,13 @@ class Router
      * @param string $segments URI to match
      * @return array|bool Matches or false
      */
-    protected function match_route(&$route, $segments)
+    protected function match(&$route, $segments)
     {
-        $pattern = preg_replace('~:([^/]+)~', '(?P<$1>[^\/]+)', $route[0]);
+        $pattern = $this->regex($route[0]);
 
-        if (preg_match("~^$pattern~", $segments, $matches)) {
-            $route['pattern'] = "~$pattern~";
+        if (preg_match("~^$pattern\$~", $segments, $matches)) {
+            // i am here
+            $route['pattern'] = "~^$pattern$~";
 
             foreach ($matches as $k => $v) {
                 if (is_numeric($k)) {
@@ -232,6 +277,38 @@ class Router
         return false;
     }
 
+    public function regex($pattern)
+    {
+        $pattern = trim($pattern, '/');
+        $pattern_segments = explode('/', $pattern);
+
+        foreach ($pattern_segments as $position => $placeholder) {
+            $token = $placeholder;
+
+            if ($placeholder) {
+                switch ($placeholder{0}) {
+                    case '*':
+                        $token = str_replace('*', '(?P<sequential>.*)', $placeholder);
+                        break;
+                    case '#':
+                        $token = preg_replace('~#([^/]+)~', '(?P<$1>\d+)', $placeholder);
+                        break;
+                    case ':':
+                        $token = preg_replace('~:([^/]+)~', '(?P<$1>[^\/]+)', $placeholder);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            $pattern_segments[$position] = $token;
+        }
+
+        $regex = join('/', $pattern_segments);
+
+        return '/'.  $regex;
+    }
+
     /**
      * Builds a path with controller/action/parameters elements
      * 
@@ -240,25 +317,45 @@ class Router
      * @param array $matches Transformation values
      * @return array The transformed URI elements
      */
-    protected function build_route($segments, $route = null)
+    protected function build($segments, $route = null)
     {
         if ($route) {
-            $transformed = $route[0];
-            $destination = $route[1];
+            $segments = trim($route[1], '/');
+            $matches = $route['matches'];
 
-            foreach ($route['matches'] as $placeholder => $match) {
-                $destination = str_replace(":$placeholder", $match, $destination);
-                $transformed = str_replace(":$placeholder", $match, $transformed);
+            if (isSet($matches['sequential'])) {
+                $matches['*'] = explode('/', $matches['sequential']);
+                array_unshift($matches['*'], join('/', $matches['*']));
+                $matches['*'][''] = $matches['*'][0];
             }
 
-            $segments = str_replace($transformed, $destination, $segments);
+            $destination_segments = explode('/', $segments);
+
+            foreach ($destination_segments as $key => $value) {
+                
+                switch ($value{0}) {
+                    case $this->token_prefix:
+                        $name = substr($value, 1);
+                        if (isSet($matches[$name]) || $name) {
+                            $destination_segments[$key] = $matches[$name];
+                        }
+                        break;
+                    case $this->sequence_prefix:
+                        $destination_segments[$key] = $matches['*'][substr($value, 1)];
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            $segments = join('/', $destination_segments);
         }
     
         $segments = array_values(array_filter(explode('/', $segments)));
 
         $controller = isSet($segments[0]) ? $segments[0] : $this->default_controller;
         $action     = isSet($segments[1]) ? $segments[1] : $this->default_action;
-        $parameters = isSet($segments[2]) ? array_slice($segments, 2) : array();
+        $parameters = (count($segments) > 2) ? array_slice($segments, 2) : array();
 
         return compact('controller', 'action', 'parameters');
     }
