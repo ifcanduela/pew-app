@@ -113,8 +113,12 @@ class Request
      */
     public function segments($segment = null)
     {
+        static $segments;
         if (is_numeric($segment)) {
-            return deref(explode('/', trim($this->segments, '/')), $segment);
+            if (!$segments) {
+                $segments = explode('/', trim($this->segments, '/'));
+            }
+            return array_key_exists($segment, $segments) ? $segments[$segment] : null;
         } else {
             return $this->segments;
         }
