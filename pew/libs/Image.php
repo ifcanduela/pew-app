@@ -294,19 +294,23 @@ class Image
     /**
      * Gets and sets the name assigned to the image.
      *
-     * @param string $file_name The file name, without extension
-     * @param string $with_extension Whether to use file extension
+     * If the $file_name argument is boolean true the function will return
+     * the file name with extension instead of without it.
+     *
+     * @param string|bool $file_name The file name, without extension or a boolean value
      * @return Image|string The file name if no argument is provided, the Image object otherwise
      */
-    public function file_name($file_name = null, $with_extension = false)
+    public function file_name($file_name = null)
     {
         if (is_string($file_name)) {
             // handle $with_extension here
             $this->base_name = preg_replace('/\-+/', '-', preg_replace('/([^A-Za-z0-9-_])/', '-', $file_name));
             return $this;
+        } elseif (is_bool($file_name) && true === $file_name) {
+            return $this->base_name . '.' . $this->extension;
         }
 
-        return $this->base_name . ($with_extension ? '.' . $this->extension : '');
+        return $this->base_name;
     }
 
     /**
