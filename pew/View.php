@@ -14,7 +14,6 @@ class View
      * View helpers, accessed through __get and __set.
      * 
      * @var array
-     * @access protected
      */
     protected $helpers = array(
         'session' => null,
@@ -34,7 +33,6 @@ class View
      * Base templates directory.
      * 
      * @var string
-     * @access public
      */
     protected $folder = 'app/views';
 
@@ -42,7 +40,6 @@ class View
      * Template name.
      * 
      * @var string
-     * @access public
      */
     protected $template = 'index';
     
@@ -50,7 +47,6 @@ class View
      * Layout name.
      * 
      * @var string
-     * @access public
      */
     protected $layout= 'index';
 
@@ -58,7 +54,6 @@ class View
      * Templates file extension.
      * 
      * @var string
-     * @access public
      */
     protected $extension = '.php';
 
@@ -66,12 +61,17 @@ class View
      * Default window title to use in the view.
      *
      * @var string
-     * @access public
      */
     public $title = '';
+
+    /**
+     * Data items for the template.
+     * 
+     * @var array
+     */
+    protected $data = [];
     
     /**
-     * @access public
      */
     public function __construct(array $helpers = array())
     {
@@ -92,15 +92,17 @@ class View
             $template = $this->template;
         }
 
+        $this->data = array_merge($this->data, $data);
+
         # Get the view file
         $template_file = $this->folder() . $template . $this->extension();
         
         switch (\pew\Pew::router()->response_type()) {
             case 'html': 
-                $output = $this->render_html($template_file, $data);
+                $output = $this->render_html($template_file, $this->data);
                 break;
             case 'json': 
-                $output = $this->render_json($template_file, $data);
+                $output = $this->render_json($template_file, $this->data);
                 break;
         }
         
@@ -111,7 +113,6 @@ class View
      * Renders a standard PHP template.
      * 
      * @return string The output from the rendered view file
-     * @access protected
      */
     public function render_html($template_file, $template_data = [])
     {
@@ -226,6 +227,17 @@ class View
 
         return $this->title;
     }
+
+    public function data($key, $value = null)
+    {
+        if (!is_null($value)) {
+            $this->data[$key] = $value;
+        } elseif (array_key_exists($key, $this->data)) {
+            return $this->data[$key];
+        }
+
+        return null;
+    }
     
     /**
      * Load and outputs a snippet into the current view.
@@ -233,7 +245,6 @@ class View
      * @param string $element The snippet to be loaded, relative to the templates folder
      * @param array $element_data Additional variables for use in the element
      * @return void
-     * @access public
      */
     public function element($element, $element_data = null)
     {
