@@ -704,7 +704,7 @@ function check_dirs($path)
 function slugify($str)
 {
     # strip the string from URL-unfriendly characters
-    $str = preg_replace('/[^a-zA-Z0-9 -]/', '', $str);
+    $str = preg_replace('/[^a-zA-Z0-9 -_]/', '', $str);
     
     # transform spaces into dashes and convert to lowercase
     $str = strtolower(str_replace(' ', '-', trim($str)));
