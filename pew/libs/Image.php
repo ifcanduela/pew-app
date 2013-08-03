@@ -270,7 +270,7 @@ class Image
             $folder = $this->folder();
         }
 
-        $folder = rtrim($folder, '/') . '/';
+        $folder = rtrim($folder, '/\\') . PHP_EOL;
         
         # Create folders if necessary
         if (!is_dir($folder)) {
@@ -322,7 +322,7 @@ class Image
     public function folder($folder = null)
     {
         if (!is_null($folder)) {
-            $this->folder = str_replace("\\/", DIRECTORY_SEPARATOR, rtrim($folder, '/') . '/');
+            $this->folder = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, rtrim($folder, '/\\') . DIRECTORY_SEPARATOR);
             return $this;
         }
 
