@@ -15,8 +15,8 @@
 function pew($key)
 {
     return \pew\Pew::config()->$key;
-}
 
+}
 /**
  * 
  */
@@ -76,7 +76,7 @@ function cfg($key, $value = null, $default = null)
 /**
  * Builds a path out of several segments.
  *
- * The first argument can be asingle-character separator.              
+ * The first argument can be a single-character separator.              
  *
  * @param string Path segments to join
  * @return string The full path
@@ -440,7 +440,7 @@ function array_reindex(array $array, $key_name, $value_name = null)
  * * # or #i: matches any integer index
  * * $ or #s: matches any string index
  * * any other atom is taken as a literal value and will match indexes that
- *   equal the atom; this matching is not strict: index 1 will match atom '1'.
+ *   equal the atom; this matching is not strict: atom '1' will match index 1.
  *
  * @param array $data The array to be filtered
  * @param mixed $filter A string or array with the filtering atoms
@@ -626,7 +626,7 @@ function class_name_to_file_name($class_name)
  * @param string $class_name The came-case class name
  * @return string The lower-case and underscore-separated file name
  */
-function c2n($class_name)
+function c2f($class_name)
 {
     return class_name_to_file_name($class_name);
 }
@@ -704,10 +704,10 @@ function check_dirs($path)
 function slugify($str)
 {
     # strip the string from URL-unfriendly characters
-    $str = preg_replace('/[^a-zA-Z0-9 -_]/', '', $str);
+    $str = preg_replace('/[^\w\d +*._\-]/', '', $str);
     
     # transform spaces into dashes and convert to lowercase
-    $str = strtolower(str_replace(' ', '-', trim($str)));
+    $str = strtolower(str_replace([' ', '+', '*', '.'], '-', trim($str)));
     
     # reduce consecutive dashes to a single dash
     $str = preg_replace('/-+/', '-', $str);
@@ -715,26 +715,52 @@ function slugify($str)
     return $str;
 }
 
+function transliterate($str)
+{
+    $substitutions = [
+        'á' => 'a', 'Á' => 'A', 'à' => 'a', 'À' => 'A', 'ă' => 'a', 'Ă' => 'A', 'â' => 'a', 'Â' => 'A', 'å' => 'a', 'Å' => 'A', 'ã' => 'a', 'Ã' => 'A', 'ą' => 'a', 'Ą' => 'A', 'ā' => 'a', 'Ā' => 'A', 'ä' => 'ae', 'Ä' => 'AE', 'æ' => 'ae', 'Æ' => 'AE', 
+        'ḃ' => 'b', 'Ḃ' => 'B', 
+        'ć' => 'c', 'Ć' => 'C', 'ĉ' => 'c', 'Ĉ' => 'C', 'č' => 'c', 'Č' => 'C', 'ċ' => 'c', 'Ċ' => 'C', 'ç' => 'c', 'Ç' => 'C', 
+        'ď' => 'd', 'Ď' => 'D', 'ḋ' => 'd', 'Ḋ' => 'D', 'đ' => 'd', 'Đ' => 'D', 'ð' => 'dh', 'Ð' => 'Dh', 
+        'é' => 'e', 'É' => 'E', 'è' => 'e', 'È' => 'E', 'ĕ' => 'e', 'Ĕ' => 'E', 'ê' => 'e', 'Ê' => 'E', 'ě' => 'e', 'Ě' => 'E', 'ë' => 'e', 'Ë' => 'E', 'ė' => 'e', 'Ė' => 'E', 'ę' => 'e', 'Ę' => 'E', 'ē' => 'e', 'Ē' => 'E', 
+        'ḟ' => 'f', 'Ḟ' => 'F', 'ƒ' => 'f', 'Ƒ' => 'F', 
+        'ğ' => 'g', 'Ğ' => 'G', 'ĝ' => 'g', 'Ĝ' => 'G', 'ġ' => 'g', 'Ġ' => 'G', 'ģ' => 'g', 'Ģ' => 'G', 
+        'ĥ' => 'h', 'Ĥ' => 'H', 'ħ' => 'h', 'Ħ' => 'H', 
+        'í' => 'i', 'Í' => 'I', 'ì' => 'i', 'Ì' => 'I', 'î' => 'i', 'Î' => 'I', 'ï' => 'i', 'Ï' => 'I', 'ĩ' => 'i', 'Ĩ' => 'I', 'į' => 'i', 'Į' => 'I', 'ī' => 'i', 'Ī' => 'I', 
+        'ĵ' => 'j', 'Ĵ' => 'J', 
+        'ķ' => 'k', 'Ķ' => 'K', 
+        'ĺ' => 'l', 'Ĺ' => 'L', 'ľ' => 'l', 'Ľ' => 'L', 'ļ' => 'l', 'Ļ' => 'L', 'ł' => 'l', 'Ł' => 'L', 
+        'ṁ' => 'm', 'Ṁ' => 'M', 
+        'ń' => 'n', 'Ń' => 'N', 'ň' => 'n', 'Ň' => 'N', 'ñ' => 'n', 'Ñ' => 'N', 'ņ' => 'n', 'Ņ' => 'N', 
+        'ó' => 'o', 'Ó' => 'O', 'ò' => 'o', 'Ò' => 'O', 'ô' => 'o', 'Ô' => 'O', 'ő' => 'o', 'Ő' => 'O', 'õ' => 'o', 'Õ' => 'O', 'ø' => 'oe', 'Ø' => 'OE', 'ō' => 'o', 'Ō' => 'O', 'ơ' => 'o', 'Ơ' => 'O', 'ö' => 'oe', 'Ö' => 'OE', 
+        'ṗ' => 'p', 'Ṗ' => 'P', 
+        'ŕ' => 'r', 'Ŕ' => 'R', 'ř' => 'r', 'Ř' => 'R', 'ŗ' => 'r', 'Ŗ' => 'R', 
+        'ś' => 's', 'Ś' => 'S', 'ŝ' => 's', 'Ŝ' => 'S', 'š' => 's', 'Š' => 'S', 'ṡ' => 's', 'Ṡ' => 'S', 'ş' => 's', 'Ş' => 'S', 'ș' => 's', 'Ș' => 'S', 'ß' => 'SS', 
+        'ť' => 't', 'Ť' => 'T', 'ṫ' => 't', 'Ṫ' => 'T', 'ţ' => 't', 'Ţ' => 'T', 'ț' => 't', 'Ț' => 'T', 'ŧ' => 't', 'Ŧ' => 'T', 
+        'ú' => 'u', 'Ú' => 'U', 'ù' => 'u', 'Ù' => 'U', 'ŭ' => 'u', 'Ŭ' => 'U', 'û' => 'u', 'Û' => 'U', 'ů' => 'u', 'Ů' => 'U', 'ű' => 'u', 'Ű' => 'U', 'ũ' => 'u', 'Ũ' => 'U', 'ų' => 'u', 'Ų' => 'U', 'ū' => 'u', 'Ū' => 'U', 'ư' => 'u', 'Ư' => 'U', 'ü' => 'ue', 'Ü' => 'UE', 
+        'ẃ' => 'w', 'Ẃ' => 'W', 'ẁ' => 'w', 'Ẁ' => 'W', 'ŵ' => 'w', 'Ŵ' => 'W', 'ẅ' => 'w', 'Ẅ' => 'W', 
+        'ý' => 'y', 'Ý' => 'Y', 'ỳ' => 'y', 'Ỳ' => 'Y', 'ŷ' => 'y', 'Ŷ' => 'Y', 'ÿ' => 'y', 'Ÿ' => 'Y', 
+        'ź' => 'z', 'Ź' => 'Z', 'ž' => 'z', 'Ž' => 'Z', 'ż' => 'z', 'Ż' => 'Z', 'þ' => 'th', 'Þ' => 'Th', 'µ' => 'u', 'а' => 'a', 'А' => 'a', 'б' => 'b', 'Б' => 'b', 'в' => 'v', 'В' => 'v', 'г' => 'g', 'Г' => 'g', 'д' => 'd', 'Д' => 'd', 'е' => 'e', 'Е' => 'e', 'ё' => 'e', 'Ё' => 'e', 'ж' => 'zh', 'Ж' => 'zh', 'з' => 'z', 'З' => 'z', 'и' => 'i', 'И' => 'i', 'й' => 'j', 'Й' => 'j', 'к' => 'k', 'К' => 'k', 'л' => 'l', 'Л' => 'l', 'м' => 'm', 'М' => 'm', 'н' => 'n', 'Н' => 'n', 'о' => 'o', 'О' => 'o', 'п' => 'p', 'П' => 'p', 'р' => 'r', 'Р' => 'r', 'с' => 's', 'С' => 's', 'т' => 't', 'Т' => 't', 'у' => 'u', 'У' => 'u', 'ф' => 'f', 'Ф' => 'f', 'х' => 'h', 'Х' => 'h', 'ц' => 'c', 'Ц' => 'c', 'ч' => 'ch', 'Ч' => 'ch', 'ш' => 'sh', 'Ш' => 'sh', 'щ' => 'sch', 'Щ' => 'sch', 'ъ' => '', 'Ъ' => '', 'ы' => 'y', 'Ы' => 'y', 'ь' => '', 'Ь' => '', 'э' => 'e', 'Э' => 'e', 'ю' => 'ju', 'Ю' => 'ju', 'я' => 'ja', 'Я' => 'ja'
+    ];
+
+    $str = str_replace(array_keys($substitutions), array_values($substitutions), $str);
+
+    return $str;
+}
+
 /**
  * Utility function to convert dashes and spaces to underscores.
  *
- * By default, replaces ' ' (space) and '-' (minus sign) with '_' (underscore).
+ * Behaves in the same way as str_replace. By default, replaces ' ' (space) 
+ * and '-' (minus sign) with '_' (underscore).
  * 
  * @param string $str The string to transform
- * @param array|string $chars Array of characters to remove
- * @param array|string $chars Array of characters to put
+ * @param array|string $chars Array of substrings to remove
+ * @param array|string $chars Array of substrings to insert
  * @return string The modified string
  */
-function to_underscores($str, $chars = [' ', '-'], $replacements = ['_'])
+function to_underscores($str, $chars = [' ', '-'], $replacements = '_')
 {
-    if (!is_array($chars)) {
-        $chars = array($chars);
-    }
-    
-    if (!is_array($replacements)) {
-        $chars = array($replacements);
-    }
-
     return str_replace($chars, $replacements, $str);
 }
 

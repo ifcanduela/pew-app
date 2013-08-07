@@ -245,7 +245,7 @@ abstract class Controller
 
         # set default template before calling the action
         $this->view->template($this->url_slug . '/' . $action);
-        $this->view->title = $action;
+        $this->view->title(ucwords(str_replace('_', ' ', $action)));
 
         # everything's clear pink
         $view_data = call_user_func_array(array($this, $this->action_prefix . $action), $parameters);

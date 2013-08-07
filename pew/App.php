@@ -95,47 +95,59 @@ class App
 
         # render the view, if not prevented
         if ($view->render) {
-
-            if (!$view->exists() && $router->response_type() !== 'json') {
-                $defaultView = clone $view;
-                $defaultView->folder(Pew::config()->system_folder . 'views');
-
-                if ($defaultView->exists()) {
-                    $output = $defaultView->render($view_data);
-                } else {
-                    throw new \Exception("View file could not be found: {$view->folder()}{$view->template()}");
-                }
-            } else {
-                $output = $view->render($view_data);
+            switch ($router->response_type()) {
+                case 'json':
+                    $data = array_merge($view->data(), $view_data);
+                    $page = json_encode($data);
+                    break;
+                case 'xml':
+                    throw new \Exception('XML rendering is not yet implemented.');
+                    break;
+                default:
+                    $page = $this->render($controller, $view, $view_data);
+                    break;
             }
 
-            if (method_exists($controller, 'before_render')) {
-                $output = $controller->before_render($output);
-            }
-
-            if ($router->response_type() === 'json') {
-                $page = $output;
-            } else {
-                # render the layout
-                $layout = clone $view;
-                $layout->extension(Pew::config()->layout_ext);
-                $layout->template($view->layout());
-
-                if (!$layout->exists()) {
-                    $defaultLayout = clone($layout);
-                    $defaultLayout->folder(Pew::config()->system_folder . 'views');
-
-                    if (!$defaultLayout->exists()) {
-                         throw new \Exception("Layout file could not be found: {$layout->folder()}{$layout->template()}");
-                    }
-
-                    $layout = $defaultLayout;
-                }
-
-                $page = $layout->render(['title' => $view->title, 'output' => $output]);
-            }
-            
             echo $page;
         }
+    }
+
+    public function render($controller, $view, $view_data)
+    {
+        if (!$view->exists()) {
+            $defaultView = clone $view;
+            $defaultView->folder(Pew::config()->system_folder . 'views');
+
+            if ($defaultView->exists()) {
+                $output = $defaultView->render(null, $view_data);
+            } else {
+                throw new \Exception("View file could not be found: {$view->folder()}{$view->template()}");
+            }
+        } else {
+            $output = $view->render(null, $view_data);
+        }
+
+        if (method_exists($controller, 'before_render')) {
+            $output = $controller->before_render($output);
+        }
+
+        $layout = clone $view;
+        $layout->extension(Pew::config()->layout_ext);
+        $layout->template($view->layout());
+
+        if (!$layout->exists()) {
+            $defaultLayout = clone($layout);
+            $defaultLayout->folder(Pew::config()->system_folder . 'views');
+
+            if (!$defaultLayout->exists()) {
+                 throw new \Exception("Layout file could not be found: {$layout->folder()}{$layout->template()}");
+            }
+
+            $layout = $defaultLayout;
+        }
+
+        $output = $layout->render(null, ['title' => $view->title, 'output' => $output]);
+
+        return $output;
     }
 }

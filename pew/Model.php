@@ -201,6 +201,21 @@ class Model
     }
 
     /**
+     * Get or set the table name for the model.
+     * 
+     * @param string $table Table name
+     * @return string Table name
+     */
+    public function table($table = null)
+    {
+        if (!is_null($table)) {
+            $this->table = $table;
+        }
+
+        return $this->table;
+    }
+
+    /**
      * Configures related models.
      *
      * @param string $relationship_type Either 'child' or 'parent'
@@ -760,6 +775,21 @@ class Model
                 $this->having;
             }
         }
+    }
+
+    public function begin()
+    {
+        return $this->db->pdo->beginTransaction();
+    }
+
+    public function commit()
+    {
+        return $this->db->pdo->commit();
+    }
+
+    public function rollback()
+    {
+        return $this->db->pdo->rollback();
     }
 
     protected function reset()

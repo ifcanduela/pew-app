@@ -374,14 +374,16 @@ class Pew
      *
      * @return View A view object
      */
-    public static function view($key = null)
+    public static function view($key = '')
     {
         $registry = Registry::instance();
 
-        if (!isset($registry->View)) {
-            $registry->View = new View;
+        $view_key = "View_$key";
+
+        if (!isset($registry->{$view_key})) {
+            $registry->{$view_key} = new View(self::$config->app_folder . DIRECTORY_SEPARATOR . 'views');
         }
 
-        return $registry->View;
+        return $registry->{$view_key};
     }
 }

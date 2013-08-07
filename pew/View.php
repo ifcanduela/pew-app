@@ -11,18 +11,6 @@ namespace pew;
 class View
 {
     /**
-     * View helpers, accessed through __get and __set.
-     * 
-     * @var array
-     */
-    protected $helpers = array(
-        'session' => null,
-        'auth' => null,
-        'log' => null,
-        'request' => null,
-    );
-    
-    /**
      * Render the view or not.
      * 
      * @var boolean
@@ -34,7 +22,7 @@ class View
      * 
      * @var string
      */
-    protected $folder = 'app/views';
+    protected $folder = '';
 
     /**
      * Template name.
@@ -73,11 +61,13 @@ class View
     
     /**
      */
-    public function __construct(array $helpers = array())
+    public function __construct($templates_folder = null)
     {
-        foreach ($helpers as $key => $value) {
-            $this->helpers[$key] = $value;
+        if (is_null($templates_folder)) {
+            $templates_folder = getcwd();
         }
+
+        $this->folder($templates_folder);
     }
 
     /**
@@ -86,7 +76,7 @@ class View
      * @param type $data Template data
      * @param type $view View to render
      */
-    public function render($data, $template = null)
+    public function render($template = null, $data = array())
     {
         if (!$template) {
             $template = $this->template;
@@ -96,28 +86,8 @@ class View
 
         # Get the view file
         $template_file = $this->folder() . $template . $this->extension();
-        
-        switch (\pew\Pew::router()->response_type()) {
-            case 'html': 
-                $output = $this->render_html($template_file, $this->data);
-                break;
-            case 'json': 
-                $output = $this->render_json($template_file, $this->data);
-                break;
-        }
-        
-        return $output;
-    }
-    
-    /**
-     * Renders a standard PHP template.
-     * 
-     * @return string The output from the rendered view file
-     */
-    public function render_html($template_file, $template_data = [])
-    {
-        # Make the variables directly accessible in the template.
-        extract($template_data);
+
+        extract($this->data);
 
         # Output the view and save it into a buffer.
         ob_start();
@@ -128,16 +98,11 @@ class View
         return $template_output;
     }
     
-    public function render_json($template, $data)
-    {
-        return json_encode($data);
-    }
-    
-    public function render_xml()
-    {
-        return array_to_xml($this->data, $this->request->controller);
-    }
-    
+    /**
+     * Check if a template file exists in the templates folder.
+     * @param string $template Base file name (without extension)
+     * @return bool True if the file can be read, false otherwise
+     */
     public function exists($template = null)
     {
         if (is_null($template)) {
@@ -228,9 +193,18 @@ class View
         return $this->title;
     }
 
-    public function data($key, $value = null)
+    /**
+     * Set or get view data.
+     * 
+     * @param string $key Data item key.
+     * @param  mixed $value Data item value
+     * @return mixed Data item value
+     */
+    public function data($key = null, $value = null)
     {
-        if (!is_null($value)) {
+        if (is_null($key)) {
+            return $this->data;
+        } elseif (!is_null($value)) {
             $this->data[$key] = $value;
         } elseif (array_key_exists($key, $this->data)) {
             return $this->data[$key];
@@ -240,7 +214,7 @@ class View
     }
     
     /**
-     * Load and outputs a snippet into the current view.
+     * Load and output a snippet into the current view.
      * 
      * @param string $element The snippet to be loaded, relative to the templates folder
      * @param array $element_data Additional variables for use in the element
@@ -265,20 +239,5 @@ class View
         
         # Render the element.
         require $element_file;
-    }
-    
-    public function __get($key)
-    {
-        if (!array_key_exists($key, $this->helpers)) {
-            debug_print_backtrace();
-            throw new \InvalidArgumentException("$key index not found in helpers array.");
-        }
-        
-        return $this->helpers[$key];
-    }
-    
-    public function __set($key, $value)
-    {
-        $this->helpers[$key] = $value;
     }
 }
