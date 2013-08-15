@@ -23,16 +23,21 @@ class Request
     private $script;
     
     private $segments;
+    private $segments_array;
 
     private $get;
     private $post;
     private $files;
     private $cookie;
 
+    private $query_string_var;
+
     private $local;
 
-    public function __construct()
+    public function __construct($query_string_var = null)
     {
+        $this->query_string_var = $query_string_var;
+
         if (PHP_SAPI === 'cli') {
             $this->method = 'CLI';
         } else {
@@ -46,19 +51,19 @@ class Request
             if (function_exists('getAllHeaders')) {
                 $this->headers  = getAllHeaders();
             }
-            
-            if (isSet($_SERVER['PATH_INFO'])) {
-                $this->segments = $_SERVER['PATH_INFO'];
+
+            if ($this->query_string_var && isSet($_GET[$this->query_string_var])) {
+                $segments = '/' . ltrim($_GET[$this->query_string_var], '/');
             } else {
-                if (false !== $question_mark_position = strpos($_SERVER['REQUEST_URI'], '?')) {
-                    $request_script_name = substr($_SERVER['REQUEST_URI'], 0, $question_mark_position);
-                } else {
-                    $request_script_name = $_SERVER['REQUEST_URI'];
+                $segments = $this->get_segments_from_path_info();
+
+                if (false === $segments) {
+                    $request_script_name = $this->get_script_name();
+                    $segments = $this->extract_segments_from_script_name($request_script_name);
                 }
-                $script_relative = str_replace(dirname($_SERVER['SCRIPT_NAME']), '', $request_script_name);
-                $segments = str_replace(basename($_SERVER['SCRIPT_NAME']), '', $script_relative);
-                $this->segments = '/' . trim($segments, '/');    
             }
+
+            $this->segments = $segments;
             
             $this->get      = $_GET;
             $this->post     = $_POST;
@@ -69,6 +74,57 @@ class Request
         }
     }
 
+    /**
+     * Checks if the PATH_INFO server variable is available.
+     * 
+     * @return string A segment string like /segment1/segment2/segment3, or false
+     */
+    public function get_segments_from_path_info()
+    {
+        if (isSet($_SERVER['PATH_INFO'])) {
+            return $_SERVER['PATH_INFO'];
+        }
+
+        return false;
+    }
+
+    /**
+     * Gets the current script name, discarding the query string.
+     * 
+     * @return string URL to the script name, as provided by the server.
+     */
+    public function get_script_name()
+    {
+        $question_mark_position = strpos($_SERVER['REQUEST_URI'], '?');
+
+        if (false !== $question_mark_position) {
+            return substr($_SERVER['REQUEST_URI'], 0, $question_mark_position);
+        }
+
+        return $_SERVER['REQUEST_URI'];
+    }
+
+    /**
+     * Get the segments information form the script name.
+     * 
+     * @param string $request_script_name URL to the current script
+     * @return string A segments string like /segment1/segment2/segment3
+     */
+    public function extract_segments_from_script_name($request_script_name)
+    {
+        $script_relative = str_replace(dirname($_SERVER['SCRIPT_NAME']), '', $request_script_name);
+        $segments = str_replace(basename($_SERVER['SCRIPT_NAME']), '', $script_relative);
+        return '/' . trim($segments, '/');    
+    }
+
+    /**
+     * Helper function to get an element from an array.
+     * 
+     * @param array $array Source array
+     * @param mixed $key A key from the array
+     * @param mixed $default Value to return if the key does not exist
+     * @return mixed
+     */
     protected function fetch(array $array, $key, $default)
     {
         if (array_key_exists($key, $array)) {
@@ -78,6 +134,13 @@ class Request
         return $default;
     }
 
+    /**
+     * Get a value from the $_GET array.
+     * 
+     * @param string $key A key from the array
+     * @param mixed $default Value to return if the key does not exist
+     * @return mixed
+     */
     public function get($key = null, $default = null)
     {
         if (is_null($key)) {
@@ -87,6 +150,13 @@ class Request
         }
     }
 
+    /**
+     * Get a value from the $_POST array.
+     * 
+     * @param string $key A key from the array
+     * @param mixed $default Value to return if the key does not exist
+     * @return mixed
+     */
     public function post($key = null, $default = null)
     {
         if (is_null($key)) {
@@ -96,6 +166,13 @@ class Request
         }
     }
 
+    /**
+     * Get the $_FILES array.
+     * 
+     * @param string $key A key from the array
+     * @param mixed $default Value to return if the key does not exist
+     * @return mixed
+     */
     public function files($key = null, $default = null)
     {
         if (is_null($key)) {
@@ -113,12 +190,12 @@ class Request
      */
     public function segments($segment = null)
     {
-        static $segments;
+        if (!isSet($this->segments_array)) {
+            $this->segments_array = array_filter(explode('/', trim($this->segments, '/')));
+        }
+
         if (is_numeric($segment)) {
-            if (!$segments) {
-                $segments = explode('/', trim($this->segments, '/'));
-            }
-            return array_key_exists($segment, $segments) ? $segments[$segment] : null;
+            return array_key_exists($segment, $this->segments_array) ? $this->segments_array[$segment] : null;
         } else {
             return $this->segments;
         }
@@ -133,7 +210,7 @@ class Request
      */
     public function __call($property, array $args = [])
     {
-        if (isSet($this->$property)) {
+        if (isSet($this->$property) && in_array($property, ['method', 'headers', 'scheme', 'host', 'port', 'path', 'script'])) {
             return $this->$property;
         }
 
