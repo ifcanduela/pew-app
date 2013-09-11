@@ -188,6 +188,24 @@ class Session
     }
 
     /**
+     * Get or set a flash value.
+     * 
+     * @param string $key Flash key
+     * @param mixed $value Flash value
+     * @return mixed Flash value
+     */
+    public function flash($key, $value = null)
+    {
+        if (!is_null($value)) {
+            $this->set_flash($key, $value);
+        } elseif ($this->has_flash($key)) {
+            return $this->get_flash($key);
+        }
+
+        return null;
+    }
+
+    /**
      * Set a key in the session array.
      * 
      * @param string|int $key Key to set
