@@ -3,16 +3,22 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>404 @ <?php echo APPLICATION_TITLE; ?></title>
+    <title>404 @ <?= pew('app_title') ?></title>
     <style type="text/css">
         body {
-            background: #b7d478 url(<?php url('www/img/pew-bg-cut.png') ?>) no-repeat bottom left;
-            background-attachment: fixed;
+            background: #b7d478;
             border-top: 25px solid #333;
             color: #343;
             margin: 0;
             padding: 0;
             font: normal 16px/165% 'trebuchet ms', helvetica, sans-serif;
+        }
+        body::after {
+            content: '';
+            background: url(<?= www('img/pew-bg.png') ?>);
+            background-position: 110% left;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
         }
         div {
             margin-left: 50%;
@@ -37,7 +43,7 @@
         <p>Sorry, the page you were looking for does not exist. Try one of the following:</p>
         
         <ul>
-            <li><a href="<?= $_SERVER['REQUEST_URI'] ?>">Try again</a>: If you think it might help.</li>
+            <li><a href="<?= url(here())  ?>">Try again</a>: If you think it might help.</li>
             <li><a href="<?= APP_URL ?>">Go home</a>: And start from the beginning.</li>
         </ul>
         
