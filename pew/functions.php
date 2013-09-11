@@ -868,8 +868,12 @@ function user()
  * @param mixed $default Value to return in case the keys don't exist
  * @return mixed Value of the key
  */
-function session($path, $default = null)
+function session($path = null, $default = null)
 {
+    if (is_null($path)) {
+        return \pew\Pew::session()->get();
+    }
+
     $indexes = explode('.', $path);
     $first_index = array_shift($indexes);
 
