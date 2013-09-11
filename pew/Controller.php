@@ -2,7 +2,10 @@
 
 namespace pew;
 
-use pew\libs;
+use pew\Pew;
+use pew\libs\Request;
+use pew\libs\Router;
+use pew\libs\Session;
 
 /**
  * The basic controller class, with some common methods and fields.
@@ -13,15 +16,6 @@ use pew\libs;
  */
 abstract class Controller
 {
-    /**
-     * Data created by the action and available in the view.
-     *
-     * $data is a \pew]libs\Registry object that will be copied to the view.
-     *
-     * @var Registry
-     */
-    public $data = null;
-
     /**
      * Data submitted by the browser agent via POST method.
      *
@@ -117,6 +111,13 @@ abstract class Controller
     public $request = null;
 
     /**
+     * The route information. 
+     * 
+     * @var Router
+     */
+    public $route = null;
+
+    /**
      * String prefixed to action names in this controller.
      * 
      * @var string
@@ -158,11 +159,11 @@ abstract class Controller
      * @param pew\libs\Request $request The request information
      * @return void
      */
-    public function __construct(\pew\libs\Request $request, $view = false)
+    public function __construct(Request $request = null, $view = false)
     {
-        # Assign Request and View objects
-        $this->request = $request;
-        $this->data = new \pew\libs\Registry;
+        # Assign Request, Route and View objects
+        $this->request = $request ?: Pew::request();
+        $this->route = Pew::router();
 
         if ($view) {
             $this->view = $view;
@@ -228,13 +229,16 @@ abstract class Controller
     }
     
     /**
-     * Action is the main decision-maker of the hierarchy, calling the
-     * appropriate method of the controller.
+     * Main decision-maker of the framework, calling the appropriate method 
+     * of the controller.
      * 
      * This function can be overwritten to modify the behavior or the 
-     * function of the parameters, for an example see the Pages controller.
+     * function of the parameters, for an example see the example Pages 
+     * controller.
      *
-     * @return void
+     * @param string $action The unprefixed action name
+     * @param array $parameters Arguments for the action method
+     * @return array An associative array to pass to the view
      */
     public function _action($action, $parameters)
     {
@@ -243,11 +247,11 @@ abstract class Controller
             $error = new \pew\controllers\Error(Pew::request(), \pew\controllers\Error::ACTION_MISSING);
         }
 
-        # set default template before calling the action
+        # Set default template before calling the action
         $this->view->template($this->url_slug . '/' . $action);
         $this->view->title(ucwords(str_replace('_', ' ', $action)));
 
-        # everything's clear pink
+        # Everything's clear pink
         $view_data = call_user_func_array(array($this, $this->action_prefix . $action), $parameters);
 
         if ($view_data === false) {
@@ -276,7 +280,7 @@ abstract class Controller
         } elseif ($property === 'auth') {
             $this->auth = \pew\Pew::auth();
             return $this->auth;
-        } elseif ($property === '') {
+        } elseif ($property === 'request') {
             $this->request = \pew\Pew::request();
             return $this->request;
         } elseif (array_key_exists($property, $this->libs)) {
