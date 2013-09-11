@@ -41,7 +41,7 @@ class Request
         if (PHP_SAPI === 'cli') {
             $this->method = 'CLI';
         } else {
-            $this->method   = isSet($_POST['_method']) ? $_POST['_method'] : $_SERVER['REQUEST_METHOD'];
+            $this->method   = isSet($_POST['_method']) ? strtoupper($_POST['_method']) : strtoupper($_SERVER['REQUEST_METHOD']);
             $this->scheme   = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
             $this->host     = $_SERVER['SERVER_NAME'];
             $this->port     = $_SERVER['SERVER_PORT'];
