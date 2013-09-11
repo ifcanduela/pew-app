@@ -224,6 +224,7 @@ class Router
      */
     public function route($uri, $request_method = 'GET')
     {
+        $uri = '/' . trim($uri, '/');
         $this->uri = $uri;
 
         $request_method = strtoupper($request_method);
@@ -260,7 +261,6 @@ class Router
         $pattern = $this->regex($route[0]);
 
         if (preg_match("~^$pattern\$~", $segments, $matches)) {
-            // i am here
             $route['pattern'] = "~^$pattern$~";
 
             foreach ($matches as $k => $v) {
@@ -279,17 +279,23 @@ class Router
 
     public function regex($pattern)
     {
+        $suffix = '';
         $pattern = trim($pattern, '/');
         $pattern_segments = explode('/', $pattern);
+
+        # check if last pattern is '/*'
+        if ($pattern_segments[count($pattern_segments) - 1] === '*') {
+            # remove it
+            array_pop($pattern_segments);
+            // @todo Check if the pattern can be improved
+            $suffix = '/?(?P<sequential>.*)';
+        }
 
         foreach ($pattern_segments as $position => $placeholder) {
             $token = $placeholder;
 
             if ($placeholder) {
                 switch ($placeholder{0}) {
-                    case '*':
-                        $token = str_replace('*', '(?P<sequential>.*)', $placeholder);
-                        break;
                     case '#':
                         $token = preg_replace('~#([^/]+)~', '(?P<$1>\d+)', $placeholder);
                         break;
@@ -306,7 +312,7 @@ class Router
 
         $regex = join('/', $pattern_segments);
 
-        return '/'.  $regex;
+        return '/'.  $regex . $suffix;
     }
 
     /**
