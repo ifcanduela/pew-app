@@ -46,13 +46,6 @@ class View
     protected $extension = '.php';
 
     /**
-     * Default window title to use in the view.
-     *
-     * @var string
-     */
-    public $title = '';
-
-    /**
      * Data items for the template.
      * 
      * @var array
@@ -60,6 +53,9 @@ class View
     protected $data = [];
     
     /**
+     * Creates a View object based on a folder.
+     *
+     * If no folder is provided, the current working directory is used.
      */
     public function __construct($templates_folder = null)
     {
@@ -100,6 +96,7 @@ class View
     
     /**
      * Check if a template file exists in the templates folder.
+     * 
      * @param string $template Base file name (without extension)
      * @return bool True if the file can be read, false otherwise
      */
@@ -115,7 +112,7 @@ class View
     /**
      * Set and get the templates folder.
      *
-     *  Always includes a trailing slash (OS-dependent)
+     * Always includes a trailing slash (OS-dependent)
      * 
      * @param string $folder Folder where templates should be located
      * @return string Folder where templates should be located
@@ -195,9 +192,13 @@ class View
 
     /**
      * Set or get view data.
+     *
+     * This function return all current view items if no arguments are passed.
+     *
+     * When creating or updating a data item, the View object is returned for chaining.
      * 
      * @param string $key Data item key.
-     * @param  mixed $value Data item value
+     * @param mixed $value Data item value
      * @return mixed Data item value
      */
     public function data($key = null, $value = null)
@@ -206,6 +207,7 @@ class View
             return $this->data;
         } elseif (!is_null($value)) {
             $this->data[$key] = $value;
+            return $this;
         } elseif (array_key_exists($key, $this->data)) {
             return $this->data[$key];
         }
@@ -226,7 +228,7 @@ class View
         
         # If the element .php file cannot be found, show an error page.
         if (!file_exists($element_file)) {
-            throw new \Exception("The element file $element_file ould not be found.");
+            throw new \Exception("The element file $element_file could not be found.");
         }
 
         # If there are variables, make them easily available to the template.
@@ -239,5 +241,54 @@ class View
         
         # Render the element.
         require $element_file;
+    }
+
+    /**
+     * Set view data directly.
+     * 
+     * @param string $key Data item key
+     * @param mixed $value Data item value
+     */
+    public function __set($key, $value)
+    {
+        $this->data[$key] = $value;
+    }
+
+    /**
+     * Get view data item value.
+     * 
+     * @param string $key Data item key
+     * @return mixed Data item value
+     */
+    public function __get($key)
+    {
+        if (array_key_exists($key, $this->data)) {
+            return $this->data[$key];
+        }
+
+        return null;
+    }
+
+    /**
+     * Check if a data item has been created.
+     * 
+     * @param string $key Data item key
+     * @return boolean
+     */
+    public function __isset($key)
+    {
+        return array_key_exists($key, $this->data);
+    }
+
+    /**
+     * Remove a data item.
+     * 
+     * @param string $key Data item key
+     */
+    public function __unset($key)
+    {
+        if (array_key_exists($key, $this->data)) {
+            unset($this->data[$key]);
+        }
     }
 }
