@@ -4,7 +4,9 @@ namespace pew\controllers;
 
 /**
  * An example Users controller, to demonstrate common login and logout
- * procedures.The basic controller class, with some common methods and fields.
+ * procedures.
+ *
+ * This assumes a users table with username and password fields.
  * 
  * @package pew/default/controllers
  * @author ifcanduela <ifcanduela@gmail.com>
@@ -19,14 +21,53 @@ class Users extends \pew\Controller
     public function login()
     {
         # check if a login form was submitted
-        if ($this->post) {
-            # request authentication
-            if ($this->auth->authenticate($this->post)) {
-                # if the referrer was set, redirect there, if not load the default controller and action
-                redirect($this->session->read('referrer', ''));
+        if ($post = $this->request->post()) {
+            # check if the user exists
+            if ($user = $this->model->find_by_username($post['username'])) {
+                # check if passwords match
+                if ($user['password'] === crypt($post['password'], $user['password'])) {
+                    redirect('');
+                }
+            }
+
+            # wrong username or password
+            $this->session->flash('login error', 'Invalid username or password');
+            redirect('users/login');
+        }
+        
+        # the login view will be displayed if execution reaches this point
+    }
+
+    /**
+     * The signup action displays a form for user to create an account.
+     */
+    public function signup()
+    {
+        # check if a login form was submitted
+        if ($post = $this->request->post()) {
+            # check that the username is available
+            if (!$this->model->find_by_username($post['username'])) {
+                # check password length if passwords match
+                if (strlen($post['password']) >= 6) {
+                    if ($post['password'] === $post['password_confirm']) {
+                        $post['password'] = crypt($post['password']);
+                        $post['created'] - time();
+                        $this->model->save($post);
+                        redirect('users/login');
+                    } else {
+                        # password and password_confirm fields do not match
+                        $this->session->flash('login error', 'Passwords do not match');
+                        redirect('users/signup');
+                    }
+                } else {
+                    # the password is too short
+                    $this->session->flash('login error', 'Password must be at least 6 characters long');
+                    redirect('users/signup');
+                }
             } else {
-                # login failed, so try again
-                $this->session->set_flash('Login failed, please try again');
+                # wrong username or password
+                $this->session->flash('login error', 'Invalid username');
+                redirect('users/signup');
             }
         }
         
@@ -35,13 +76,12 @@ class Users extends \pew\Controller
     
     /**
      * The logout action resets the authentication for the current session.
-     *
-     * @access public
      */
     public function logout()
     {
         # clear authentication status
-        $this->auth->revoke();
+        unset($this->session->user);
+
         # and display the default controller/action
         redirect('');
     }
