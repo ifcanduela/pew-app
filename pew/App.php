@@ -99,6 +99,7 @@ class App
                 case 'json':
                     $data = array_merge($view->data(), $view_data);
                     $page = json_encode($data);
+                    header('Content-type: application/json');
                     break;
                 case 'xml':
                     throw new \Exception('XML rendering is not yet implemented.');
