@@ -162,7 +162,7 @@ abstract class Controller
     public function __construct(Request $request = null, $view = false)
     {
         # Assign Request, Route and View objects
-        $this->request = $request ?: Pew::request();
+        $this->request = is_null($request) ? Pew::request() : $request;
         $this->route = Pew::router();
 
         if ($view) {
@@ -205,7 +205,7 @@ abstract class Controller
             }
         }
         
-        $parameters = $request->segments();
+        $parameters = $this->request->segments();
         
         # Manage the received URL parameters
         if (is_array($parameters)) {
