@@ -26,6 +26,8 @@ class Users extends \pew\Controller
             if ($user = $this->model->find_by_username($post['username'])) {
                 # check if passwords match
                 if ($user['password'] === crypt($post['password'], $user['password'])) {
+                    unset($user['password']);
+                    $this->session->user = $user;
                     redirect('');
                 }
             }
@@ -51,7 +53,7 @@ class Users extends \pew\Controller
                 if (strlen($post['password']) >= 6) {
                     if ($post['password'] === $post['password_confirm']) {
                         $post['password'] = crypt($post['password']);
-                        $post['created'] - time();
+                        $post['created'] = time();
                         $this->model->save($post);
                         redirect('users/login');
                     } else {

@@ -162,7 +162,7 @@ abstract class Controller
     public function __construct(Request $request = null, $view = false)
     {
         # Assign Request, Route and View objects
-        $this->request = is_null($request) ? Pew::request() : $request;
+        $this->request = $request ?: Pew::request();
         $this->route = Pew::router();
 
         if ($view) {
@@ -275,13 +275,13 @@ abstract class Controller
             $this->model = Pew::model($this->url_slug);
             return $this->model;
         } elseif ($property === 'session') {
-            $this->session = \pew\Pew::session();
+            $this->session = Pew::session();
             return $this->session;
         } elseif ($property === 'auth') {
-            $this->auth = \pew\Pew::auth();
+            $this->auth = Pew::auth();
             return $this->auth;
         } elseif ($property === 'request') {
-            $this->request = \pew\Pew::request();
+            $this->request = Pew::request();
             return $this->request;
         } elseif (array_key_exists($property, $this->libs)) {
             return $this->libs[$property];
