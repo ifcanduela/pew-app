@@ -39,7 +39,7 @@ class Model
      *
      * @var array
      */
-    protected $_table_data = array();
+    protected $_table_data = [];
 
     /**
      * Current row data.
@@ -49,7 +49,7 @@ class Model
      *
      * @var array
      */
-    protected $_row_data = array();
+    protected $_row_data = [];
 
     /**
      * Related child models.
@@ -58,7 +58,7 @@ class Model
      *
      * @var array
      */
-    protected $_related_children = array();
+    protected $_related_children = [];
 
     /**
      * Related parent models.
@@ -67,7 +67,7 @@ class Model
      *
      * @var array
      */
-    protected $_related_parents = array();
+    protected $_related_parents = [];
 
     /**
      * Whether to query the related tables or not.
@@ -81,30 +81,30 @@ class Model
      *
      * The simplest way of defining a relationship is as follows:
      *
-     *     <code>public $has_many = array('comments' => 'user_id');</code>
+     *     <code>public $has_many = ['comments' => 'user_id'];</code>
      * 
      * This field can also be used with aliases using the following format:
      *
-     *     <code>public $has_many = array('user_comments' => array('comments' => 'user_id'));</code>
+     *     <code>public $has_many = ['user_comments' => ['comments' => 'user_id']];</code>
      *
      * @var array
      */
-    protected $has_many = array();
+    protected $has_many = [];
 
     /**
      * An associative array of parent tables.
      *
      * The simplest way of defining a relationship is as follows:
      *
-     *     <code>public $belongs_to = array('users' => 'user_id');</code>
+     *     <code>public $belongs_to = ['users' => 'user_id'];</code>
      * 
      * This field can also be used with aliases using the following format:
      *
-     *     <code>public $belongs_to = array('owner' => array('users' => 'user_id'));</code>
+     *     <code>public $belongs_to = ['owner' => ['users' => 'user_id'];</code>
      *
      * @var array
      */
-    protected $belongs_to = array();
+    protected $belongs_to = [];
 
     /**
      * Whether or not the related models have been initialised.
@@ -124,8 +124,8 @@ class Model
      *
      * @var string
      */
-    protected $_where = array();
-    protected $where = array();
+    protected $_where = [];
+    protected $where = [];
 
     /**
      * Sorting order for the query results.
@@ -156,8 +156,8 @@ class Model
      *
      * @var string
      */
-    protected $_having = array();
-    protected $having = array();
+    protected $_having = [];
+    protected $having = [];
 
     /**
      * The constructor builds the model!.
@@ -175,7 +175,7 @@ class Model
         } elseif (class_base_name(get_class($this)) === 'Model') {
             # if this is an instance of the Model class, get the
             # table from the $table parameter
-            throw new Exception('Model constructor error: Models must be assigned to a table.');
+            throw new \Exception('Model class must be atttached to a database table.');
         } elseif (!$this->table) {
             # else, if $table is not set in the Model class file,
             # guess the table name
@@ -245,7 +245,7 @@ class Model
                         $this->_related_parents[$alias] = compact('table', 'foreign_key', 'alias', 'model');
                     break;
                 default:
-                    throw new InvalidArgumentException();
+                    throw new \InvalidArgumentException("The relationship type $relationship_type is not supported.");
             }
 
             return true;
@@ -360,9 +360,10 @@ class Model
         if ($results) {
             $value = $arguments[0];
             list(, $method, $field) = $matches;
-            return $this->$method(array($field => $value));
+
+            return $this->$method([$field => $value]);
         } else {
-            return trigger_error('Method does not exist or is not available: ' . $field, E_USER_ERROR);
+            throw new \BadMethodCallException("Invalid method " . get_class($this) . "::$field() called.");
         }
     }
 
@@ -374,25 +375,38 @@ class Model
      * returns all rows, or invokes PDO::exec() for INSERT, UPDATE and DELETE
      * and return an integer with the number of affected rows.
      *
+     * This function can run prepared statements using named placeholders (with
+     * a colon) or anonymous placeholders (with a question mark).
+     *
      * @param string $query The query to run
-     * @return mixed The result from the query, either an array or an integer
+     * @param array $data Array of PDO placeholders and/or values
+     * @return mixed An array of rows or an integer with the amount of affected rows
      */
-    public function query($query)
+    public function query($query, array $data = [])
     {
+        # trim whitespace around the SQL
         $query = trim($query);
+        # extract the SQL clause being used (SELECT, INSERT, etc...)
+        $clause = strtoupper(strtok($query, ' '));
 
-        if (strtoupper(substr($query, 0, 7)) == 'SELECT ') {
-            # query is a SELECT, so try to return an array
-            $ret = $this->db->pdo->query($query)->fetchAll() or die($this->db->pdo->errorInfo());
-        } else {
-            # just run the query
-            $ret = $this->db->pdo->exec($query);
-            if ($ret === false) {
-                die($this->db->pdo->errorCode());
+        # prepare the SQL query
+        $stm = $this->db->pdo->prepare($query);
+        # run the prepared statement with the received keys and values
+        $success = $stm->execute($data);
+        
+        if ($success) {
+            if ($clause == 'SELECT') {
+                # return an array of tuples
+                return $stm->fetchAll();
+            } else {
+                # return number of affected rows
+                return $stm->rowCount($query);
             }
+        } else {
+            throw new \RuntimeException("The $clause operation failed");
         }
 
-        return $ret;
+        return false;
     }
 
     /**
@@ -411,7 +425,7 @@ class Model
         if (is_array($id)) {
             $this->where($id);
         } else {
-            $this->where(array($this->primary_key => $id));
+            $this->where([$this->primary_key => $id]);
         }
 
         #query the database
@@ -440,7 +454,7 @@ class Model
                 # search for child tables
                 foreach ($this->_related_children as $alias => $child) {
                     # use the associated model to find related items
-                    $result[$alias] = $this->$alias->find_all(array($child['foreign_key'] => $id));
+                    $result[$alias] = $this->$alias->find_all([$child['foreign_key'] => $id]);
                 }
 
                 # search for parent tables
@@ -459,7 +473,7 @@ class Model
         }
 
         if (method_exists($this, 'after_find')) {
-            $result = current($this->after_find(array($result)));
+            $result = current($this->after_find([$result]));
         }
 
         return $result;
@@ -500,7 +514,7 @@ class Model
 
                     foreach ($this->_related_children as $alias => $child) {
                         # prepare the find_all call
-                        $this->$alias->where(array($child['foreign_key'] => $value[$this->_table_data['primary_key']]));
+                        $this->$alias->where([$child['foreign_key'] => $value[$this->_table_data['primary_key']]]);
                         # use the associated model to find related items
                         $result[$key][$alias] = $this->$alias->find_all();
                     }
@@ -516,7 +530,7 @@ class Model
             }
         } else {
             # return empty array if there was no result
-            $result = array();
+            $result = [];
         }
 
         if (method_exists($this, 'after_find')) {
@@ -563,7 +577,7 @@ class Model
      */
     public function save($data)
     {
-        $record = array();
+        $record = [];
 
         if (method_exists($this, 'before_save')) {
             $data = $this->before_save($data);
@@ -577,12 +591,12 @@ class Model
         
         if (isset($record[$this->primary_key])) {
             # if $id is set, preform an UPDATE
-            $result = $this->db->set($record)->where(array($this->primary_key => $record[$this->primary_key]))->update($this->table);
-            $result = $this->db->where(array($this->primary_key => $record[$this->primary_key]))->single($this->table);
+            $result = $this->db->set($record)->where([$this->primary_key => $record[$this->primary_key]])->update($this->table);
+            $result = $this->db->where([$this->primary_key => $record[$this->primary_key]])->single($this->table);
         } else {
             # if $id is not set, perform an INSERT
             $result = $this->db->values($record)->insert($this->table);
-            $result = $this->db->where(array($this->primary_key => $result))->single($this->table);
+            $result = $this->db->where([$this->primary_key => $result])->single($this->table);
         }
 
         if (method_exists($this, 'after_save')) {
@@ -614,10 +628,13 @@ class Model
             return $this->db->delete($this->table);
         } elseif (!is_null($id) && !is_bool($id)) {
             # delete the item as received, ignoring previous conditions
-            return $this->db->where(array($this->primary_key => $id))->limit(1)->delete($this->table);
-        } else {
+            return $this->db->where([$this->primary_key => $id])->limit(1)->delete($this->table);
+        } elseif ($this->_where) {
             # delete everything that matches the conditions
             return $this->db->where($this->_where)->delete($this->table);
+        } else {
+            # no valid configuration
+            throw new \RuntimeException('Delete requires conditions or parameters');
         }
     }
 
