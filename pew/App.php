@@ -97,8 +97,7 @@ class App
         if ($view->render) {
             switch ($router->response_type()) {
                 case 'json':
-                    $data = array_merge($view->data(), $view_data);
-                    $page = json_encode($data);
+                    $page = json_encode($view_data);
                     header('Content-type: application/json');
                     break;
                 case 'xml':

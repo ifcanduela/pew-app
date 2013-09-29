@@ -137,7 +137,7 @@ class Pew
      * @return Object An instance of the required Controller
      * @throws InvalidArgumentException When no current controller exists and no class name is provided
      */
-    public static function controller($controller_name = null, \pew\libs\Request $request)
+    public static function controller($controller_name = null, \pew\libs\Request $request = null)
     {   
         $registry = Registry::instance();
 
@@ -155,6 +155,10 @@ class Pew
 
             $app_class_name = self::$config->app_namespace . '\\controllers\\' . $class_name;
             $pew_class_name = '\\pew\\controllers\\' . $class_name;
+
+            if (!$request) {
+                $request = self::request();
+            }
             
             if (class_exists($app_class_name)) {
                 return new $app_class_name($request);
