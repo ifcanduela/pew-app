@@ -551,12 +551,16 @@ class Database
         }
 
         # Try to prepare the statement
-        if (!$stm = $this->pdo->prepare($query)) {
+        try {
+            $stm = $this->pdo->prepare($query);
+        } catch (\PDOException $e) {
             throw new \PDOException("Query could not be prepared: $query");
         }
         
         # Execute the prepared statement
-        if (!$stm->execute($this->tags) || $stm->errorCode() !== '00000') {
+        try {
+            $stm->execute($this->tags);
+        } catch(\PDOException $e) {
             throw new \PDOException("Query could not be executed: $query");
         }
         
