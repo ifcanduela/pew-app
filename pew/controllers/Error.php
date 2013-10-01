@@ -70,7 +70,7 @@ class Error extends \pew\Controller
         parent::__construct($request);
 
         # If the script is not running on DEBUG, execution is definitely stopped
-        if (!\pew\Pew::config()->debug) {
+        if (!$this->pew->config()->debug) {
             # Render standard error page
             $this->show_404();
         }
@@ -224,7 +224,7 @@ ERROR_TEXT;
                 break;
         }
         
-        require \pew\Pew::config()->default_folder . 'views/error.layout.php';
+        require $this->pew->config()->default_folder . 'views/error.layout.php';
         
         exit();
     }
@@ -240,7 +240,7 @@ ERROR_TEXT;
     public function show_404()
     {
         header("HTTP/1.0 404 Not Found");
-        include(\pew\Pew::config()->system_folder . DS . 'views' . DS . $this->url_slug . DS . '404.php');
+        include($this->pew->config()->system_folder . DS . 'views' . DS . $this->url_slug . DS . '404.php');
         exit(404);
     }
 }

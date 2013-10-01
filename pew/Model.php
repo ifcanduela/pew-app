@@ -13,7 +13,7 @@ class Model
     /**
      * Database abstraction instance.
      *
-     * @var PewDatabase
+     * @var Database
      */
     public $db = null;
 
@@ -334,7 +334,7 @@ class Model
 
         if ($model_info) {
             if (is_null($model_info['model'])) {
-                $model_info['model'] = Pew::model($model_info['table']);
+                $model_info['model'] = Pew::instance()->model($model_info['table']);
             }
             
             return $model_info['model'];
@@ -371,7 +371,7 @@ class Model
      * Simple transitional function to run a query directly.
      *
      * This function interacts directly with the PDO abstraction layer of the
-     * PewDatabase object. It invokes PDO::query() to run SELECT statements and
+     * Database object. It invokes PDO::query() to run SELECT statements and
      * returns all rows, or invokes PDO::exec() for INSERT, UPDATE and DELETE
      * and return an integer with the number of affected rows.
      *

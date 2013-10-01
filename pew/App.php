@@ -12,13 +12,20 @@ namespace pew;
 class App
 {
     /**
+     * Pew object instance.
+     * 
+     * @var \pew\Pew
+     */
+    protected $pew;
+
+    /**
      * Initialization of components.
      *
      * @access public
      */
     public function __construct()
     {
-
+        $this->pew = \pew\Pew::instance();
     }
     
     /**
@@ -41,18 +48,18 @@ class App
      */
     public function run()
     {
-        $request = Pew::request();
-        $router  = Pew::router();
+        $request = $this->pew->request();
+        $router  = $this->pew->router();
 
         $router->route($request->segments(), $request->method());
         $controller_name = $router->controller();
         # Instantiate the main view
-        $view = Pew::view();
-        $view->folder(Pew::config()->app_folder . DIRECTORY_SEPARATOR . 'views');
+        $view = $this->pew->view();
+        $view->folder($this->pew->config()->app_folder . DIRECTORY_SEPARATOR . 'views');
         $view->template($router->controller() . '/' . $router->action());
-        $view->layout(Pew::config()->default_layout);
+        $view->layout($this->pew->config()->default_layout);
         # instantiate the controller
-        $controller = Pew::controller($controller_name, $request);
+        $controller = $this->pew->controller($controller_name, $request);
         
         # check controller instantiation
         if (!is_object($controller)) {
@@ -116,7 +123,7 @@ class App
     {
         if (!$view->exists()) {
             $defaultView = clone $view;
-            $defaultView->folder(Pew::config()->system_folder . 'views');
+            $defaultView->folder($this->pew->config()->system_folder . 'views');
 
             if ($defaultView->exists()) {
                 $output = $defaultView->render(null, $view_data);
@@ -132,12 +139,12 @@ class App
         }
 
         $layout = clone $view;
-        $layout->extension(Pew::config()->layout_ext);
+        $layout->extension($this->pew->config()->layout_ext);
         $layout->template($view->layout());
 
         if (!$layout->exists()) {
             $defaultLayout = clone($layout);
-            $defaultLayout->folder(Pew::config()->system_folder . 'views');
+            $defaultLayout->folder($this->pew->config()->system_folder . 'views');
 
             if (!$defaultLayout->exists()) {
                  throw new \Exception("Layout file could not be found: {$layout->folder()}{$layout->template()}");

@@ -6,6 +6,8 @@ namespace pew;
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'functions.php';
 # Autoloader class definition
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'Autoloader.php';
+# Registry class
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'libs' . DIRECTORY_SEPARATOR . 'Registry.php';
 
 use \pew\libs\Registry as Registry;
 
@@ -23,11 +25,25 @@ use \pew\libs\Registry as Registry;
 class Pew
 {
     /**
+     * The Pew object instance.
+     *
+     * @var \pew\Pew
+     */
+    private static $instance = null;
+
+    /**
      * Framework and application configuration settings.
      * 
      * @var \pew\libs\Registry
      */
-    protected static $config = null;
+    protected $config = null;
+
+    /**
+     * Framework class instance storage.
+     * 
+     * @var \pew\libs\Registry
+     */
+    protected $registry = null;
 
     /**
      * Constructor is out of bounds.
@@ -36,7 +52,17 @@ class Pew
      */
     protected function __construct()
     {
+        $this->registry = new Registry;
+        $this->config = new Registry;
+    }
 
+    public static function instance()
+    {
+        if (!isSet(self::$instance)) {
+            self::$instance = new Pew;
+        }
+
+        return self::$instance;
     }
 
     /**
@@ -48,19 +74,18 @@ class Pew
      * @param mixed $arguments A single argument or an array of arguments
      * @return Object An instance of the required class
      */
-    public static function get($index, $arguments = [])
+    public function get($index, $arguments = [])
     {
-        $registry = Registry::instance();
-        if (!isset($registry->$index)) {
+        if (!isset($this->registry->$index)) {
             if (class_exists($index)) {
                 $reflection_class = new \ReflectionClass($index);
-                $registry->$index = $reflection_class->newInstanceArgs($arguments);
+                $this->registry->$index = $reflection_class->newInstanceArgs($arguments);
             } else {
                 throw new \Exception("Class $index could not be found.");
             }
         }
         
-        return $registry->$index;
+        return $this->registry->$index;
     }
 
     /**
@@ -72,61 +97,60 @@ class Pew
      * @param $app_folder Folder name that holds the application folders and files
      * @return App Instance of the application
      */
-    public static function app($app_folder = 'app', $config_file = 'config')
+    public function app($app_folder = 'app', $config_file = 'config')
     {
-        if (!isset($registry->App)) {
+        if (!isset($this->registry->App)) {
             $appLoader = new Autoloader($app_folder, dirname(realpath($app_folder)));
             $appLoader->register();
             
             $pewLoader = new Autoloader('pew', dirname(__DIR__));
             $pewLoader->register();
             
-            $registry = Registry::instance();
+            $this->registry = Registry::instance();
 
             $pew_config = require_once __DIR__ . DIRECTORY_SEPARATOR . 'config.php';
-            self::$config = new Registry();
-            self::$config->import($pew_config);
+            $this->config->import($pew_config);
 
             # load app/config/{$config}.php
             $app_config = include getcwd() . DS . $app_folder . DS . 'config' . DS . $config_file . '.php';
 
             // merge user config with Pew config
-            self::$config->import($app_config);
+            $this->config->import($app_config);
 
-            if (!self::$config->env) {
-                self::$config->env = 'development';
+            if (!$this->config->env) {
+                $this->config->env = 'development';
             }
 
             # add application namespace and path
             $app_folder_name = trim(basename($app_folder));
-            self::$config->app_namespace = '\\' . $app_folder_name;
-            self::$config->app_folder = realpath($app_folder);
-            self::$config->app_config = $config_file;
+            $this->config->app_namespace = '\\' . $app_folder_name;
+            $this->config->app_folder = realpath($app_folder);
+            $this->config->app_config = $config_file;
 
             # load app/config/bootstrap.php
-            if (file_exists(self::$config->app_folder . '/config' . DS . 'bootstrap.php')) {
-                require self::$config->app_folder . '/config' . DS . 'bootstrap.php';
+            if (file_exists($this->config->app_folder . '/config' . DS . 'bootstrap.php')) {
+                require $this->config->app_folder . '/config' . DS . 'bootstrap.php';
             }
 
-            $registry->App = new App($app_folder);
+            $this->registry->App = new App($app_folder);
         }
 
-        return $registry->App;
+        return $this->registry->App;
     }
 
     /**
-     * Merges configuration arrays an return the resulting configuration.
+     * Merges configuration arrays and returns the resulting configuration.
      * 
      * @param array $config An array with configuration keys
      * @return Registry Object with configuration properties
      */
-    public static function config(array $config = null)
+    public function config(array $config = null)
     {
         if ($config) {
-            self::$config->import($config);
+            $this->config->import($config);
         }
 
-        return self::$config;
+        return $this->config;
     }
 
     /**
@@ -137,15 +161,15 @@ class Pew
      * @return Object An instance of the required Controller
      * @throws InvalidArgumentException When no current controller exists and no class name is provided
      */
-    public static function controller($controller_name = null, \pew\libs\Request $request = null)
+    public function controller($controller_name = null, \pew\libs\Request $request = null)
     {   
-        $registry = Registry::instance();
+        $this->registry = Registry::instance();
 
         # check if the class name is omitted
         if (!isset($controller_name)) {
-            if (isset($registry->CurrentRequestController)) {
+            if (isset($this->registry->CurrentRequestController)) {
                 # if exists, return the current controller
-                return $registry->CurrentRequestController;
+                return $this->registry->CurrentRequestController;
             } else {
                 # if not, throw an exception
                 throw new \InvalidArgumentException("No current controller could be retrieved");
@@ -153,7 +177,7 @@ class Pew
         } else {
             $class_name = file_name_to_class_name($controller_name);
 
-            $app_class_name = self::$config->app_namespace . '\\controllers\\' . $class_name;
+            $app_class_name = $this->config->app_namespace . '\\controllers\\' . $class_name;
             $pew_class_name = '\\pew\\controllers\\' . $class_name;
 
             if (!$request) {
@@ -179,15 +203,15 @@ class Pew
      * @param string $table_name Name of the table
      * @return Object An instance of the required Model
      */
-    public static function model($table_name)
+    public function model($table_name)
     {
-        $registry = Registry::instance();
+        $this->registry = Registry::instance();
 
-        $class_name = self::$config->app_namespace . '\\models\\' . file_name_to_class_name($table_name) . 'Model';
+        $class_name = $this->config->app_namespace . '\\models\\' . file_name_to_class_name($table_name) . 'Model';
         $class_base_name = class_base_name($class_name);
 
         # Check that the model has not been previously instantiated
-        if (!isset($registry->$class_name)) {
+        if (!isset($this->registry->$class_name)) {
             # Instantiate Model if the derived class is not available
             if (!class_exists($class_name)) {
                 $class_name = '\\pew\\Model';
@@ -197,10 +221,10 @@ class Pew
             $database = self::database();
 
             # Instantiation and storage
-            $registry->$class_name = new $class_name($database, $table_name);
+            $this->registry->$class_name = new $class_name($database, $table_name);
         }
         
-        return $registry->$class_name;
+        return $this->registry->$class_name;
     }
 
     /**
@@ -210,12 +234,12 @@ class Pew
      * @param mixed $arguments One or more arguments for the constructor of the library
      * @return Object An instance of the required Library
      */
-    public static function library($class_name, $arguments = null)
+    public function library($class_name, $arguments = null)
     {
         $library = null;
 
         try {
-            $library = self::get(self::$config->app_namespace . '\\libs\\' . $class_name);
+            $library = self::get($this->config->app_namespace . '\\libs\\' . $class_name);
         } catch (\Exception $e) {
             if (!$library) {
                 $library = self::get(__NAMESPACE__ . '\\libs\\' . $class_name);
@@ -237,17 +261,17 @@ class Pew
      * @return Object An instance of the database access object
      * @throws RuntimeException If database use is disabled
      */
-    public static function database($config = null)
+    public function database($config = null)
     {
-        $registry = Registry::instance();
+        $this->registry = Registry::instance();
 
-        if (!isset($registry->Database)) {
+        if (!isset($this->registry->Database)) {
             # load app/config/database.php
-            if (file_exists(self::$config->app_folder . DS . 'config' . DS . 'database.php')) {
-                self::$config->database_config = include self::$config->app_folder . DS . 'config' . DS . 'database.php';
+            if (file_exists($this->config->app_folder . DS . 'config' . DS . 'database.php')) {
+                $this->config->database_config = include $this->config->app_folder . DS . 'config' . DS . 'database.php';
             }
 
-            $db_config = self::$config->database_config;
+            $db_config = $this->config->database_config;
             $use_db = $db_config['use'];
 
             if ($use_db !== false) {
@@ -255,14 +279,14 @@ class Pew
                 
 
                 if (isset($db_config[$use])) {
-                    $registry->Database = new libs\Database($db_config[$use]);
+                    $this->registry->Database = new libs\Database($db_config[$use]);
                 } else {
                     throw new \RuntimeException("Database is disabled.");
                 }                
             }
         }
 
-        return $registry->Database;
+        return $this->registry->Database;
     }
     
     /**
@@ -271,16 +295,16 @@ class Pew
      * @param string $uri_string A list of slash-separated segments.
      * @return Request The initialised request object
      */
-    public static function request($uri_string = null)
+    public function request($uri_string = null)
     {
-        $registry = Registry::instance();
+        $this->registry = Registry::instance();
 
-        if (!isset($registry->Request)) {
+        if (!isset($this->registry->Request)) {
             # instantiate the request object
-            $registry->Request = $request = new libs\Request();
+            $this->registry->Request = $request = new libs\Request();
         }
 
-        return $registry->Request;
+        return $this->registry->Request;
     }
 
     /**
@@ -290,28 +314,28 @@ class Pew
      * @return Router The initialised request object
      * @throws Exception When the class does not exist.
      */
-    public static function router($uri_string = null)
+    public function router($uri_string = null)
     {
-        $registry = Registry::instance();
+        $this->registry = Registry::instance();
 
-        if (!isset($registry->Router)) {
+        if (!isset($this->registry->Router)) {
             $routes = [];
             # fetch the routes configuration
 
             // load app/config/routes.php
-            if (file_exists(self::$config->app_folder . DS . 'config' . DS . 'routes.php')) {
-                $routes = include self::$config->app_folder . DS .'config' . DS . 'routes.php';
+            if (file_exists($this->config->app_folder . DS . 'config' . DS . 'routes.php')) {
+                $routes = include $this->config->app_folder . DS .'config' . DS . 'routes.php';
             }
 
             # instantiate the router object
             $router = new libs\Router($routes);
-            $router->default_controller(self::$config->default_controller);
-            $router->default_action(self::$config->default_action);
+            $router->default_controller($this->config->default_controller);
+            $router->default_action($this->config->default_action);
 
-            $registry->Router = $router;
+            $this->registry->Router = $router;
         }
 
-        return $registry->Router;
+        return $this->registry->Router;
     }
 
     /**
@@ -319,20 +343,20 @@ class Pew
      * 
      * @return object The authentication object
      */
-    public static function auth()
+    public function auth()
     {
-        $registry = Registry::instance();
+        $this->registry = Registry::instance();
 
-        if (!isset($registry->Auth)) {
+        if (!isset($this->registry->Auth)) {
             $database = self::database();
             $session = self::session();
             // if (!$database || !$session) {
             //     throw new RuntimeException('Auth requires Database and Session providers');
             // }
-            $registry->Auth = new Auth($database, $session);
+            $this->registry->Auth = new Auth($database, $session);
         }
 
-        return $registry->Auth;
+        return $this->registry->Auth;
     }
 
     /**
@@ -340,15 +364,15 @@ class Pew
      * 
      * @return object The log object
      */
-    public static function log()
+    public function log()
     {
-        $registry = Registry::instance();
+        $this->registry = Registry::instance();
 
-        if (!isset($registry->Log)) {
-            $registry->Log = new PewLog(self::$config->log_level);
+        if (!isset($this->registry->Log)) {
+            $this->registry->Log = new PewLog($this->config->log_level);
         }
 
-        return $registry->Log;
+        return $this->registry->Log;
     }
 
     /**
@@ -356,15 +380,15 @@ class Pew
      * 
      * @return object The session object
      */
-    public static function session()
+    public function session()
     {
-        $registry = Registry::instance();
+        $this->registry = Registry::instance();
 
-        if (!isset($registry->Session)) {
-            $registry->Session = new \pew\libs\Session();
+        if (!isset($this->registry->Session)) {
+            $this->registry->Session = new \pew\libs\Session();
         }
 
-        return $registry->Session;
+        return $this->registry->Session;
     }
 
     /**
@@ -378,16 +402,23 @@ class Pew
      *
      * @return View A view object
      */
-    public static function view($key = '')
+    public function view($key = '')
     {
-        $registry = Registry::instance();
-
         $view_key = "View_$key";
 
-        if (!isset($registry->{$view_key})) {
-            $registry->{$view_key} = new View(self::$config->app_folder . DIRECTORY_SEPARATOR . 'views');
+        if (!isset($this->registry->{$view_key})) {
+            $this->registry->{$view_key} = new View($this->config->app_folder . DIRECTORY_SEPARATOR . 'views');
         }
 
-        return $registry->{$view_key};
+        return $this->registry->{$view_key};
+    }
+
+    public static function __callstatic($name, $arguments)
+    {
+        if (method_exists(self::$instance, $name)) {
+            return self::$instance->$name($arguments);
+        } else {
+            throw new \RuntimeException("No method $name in class " . __CLASS__);
+        }
     }
 }

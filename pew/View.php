@@ -59,6 +59,8 @@ class View
      */
     public function __construct($templates_folder = null)
     {
+        $this->pew = Pew::instance();
+
         if (is_null($templates_folder)) {
             $templates_folder = getcwd();
         }

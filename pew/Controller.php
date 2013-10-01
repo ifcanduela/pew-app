@@ -17,6 +17,13 @@ use pew\libs\Session;
 abstract class Controller
 {
     /**
+     * The Pew instance.
+     * 
+     * @var \pew\Pew
+     */
+    protected $pew;
+
+    /**
      * Data submitted by the browser agent via POST method.
      *
      * If no POST data is submitted for the current request, $post will be set
@@ -161,14 +168,16 @@ abstract class Controller
      */
     public function __construct(Request $request = null, $view = false)
     {
+        $this->pew = Pew::instance();
+
         # Assign Request, Route and View objects
-        $this->request = $request ?: Pew::request();
-        $this->route = Pew::router();
+        $this->request = $request ?: $this->pew->request();
+        $this->route = $this->pew->router();
 
         if ($view) {
             $this->view = $view;
         } else {
-            $this->view = Pew::view();
+            $this->view = $this->pew->view();
         }
         
         # Make sure $model is read through the __get magic method the first time
@@ -187,15 +196,15 @@ abstract class Controller
         ));
 
         # Global action prefix override
-        if (!$this->action_prefix && Pew::config()->action_prefix) {
-            $this->action_prefix = Pew::config()->action_prefix;
+        if (!$this->action_prefix && $this->pew->config()->action_prefix) {
+            $this->action_prefix = $this->pew->config()->action_prefix;
         }
         
         # Function libraries
         # @todo Move this to the __get function
         if (is_array($this->libs)) {
             foreach ($this->libs as $p => $library_class_name) {
-                $lib = Pew::library($library_class_name);
+                $lib = $this->pew->library($library_class_name);
                 
                 if ($lib === false) {
                     throw new \RuntimeException("Library $library_class_name cound not be found.");
@@ -244,7 +253,7 @@ abstract class Controller
     {
         if (!method_exists($this, $this->action_prefix . $action)) {
             # If the $action method does not exist, show an error page
-            $error = new \pew\controllers\Error(Pew::request(), \pew\controllers\Error::ACTION_MISSING);
+            $error = new \pew\controllers\Error($this->pew->request(), \pew\controllers\Error::ACTION_MISSING);
         }
 
         # Set default template before calling the action
@@ -272,16 +281,16 @@ abstract class Controller
     public function __get($property)
     {
         if ($property === 'model') {
-            $this->model = Pew::model($this->url_slug);
+            $this->model = $this->pew->model($this->url_slug);
             return $this->model;
         } elseif ($property === 'session') {
-            $this->session = Pew::session();
+            $this->session = $this->pew->session();
             return $this->session;
         } elseif ($property === 'auth') {
-            $this->auth = Pew::auth();
+            $this->auth = $this->pew->auth();
             return $this->auth;
         } elseif ($property === 'request') {
-            $this->request = Pew::request();
+            $this->request = $this->pew->request();
             return $this->request;
         } elseif (array_key_exists($property, $this->libs)) {
             return $this->libs[$property];

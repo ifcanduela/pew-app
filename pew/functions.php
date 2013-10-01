@@ -14,7 +14,7 @@
  */
 function pew($key)
 {
-    return \pew\Pew::config()->$key;
+    return \pew\Pew::instance()->config()->$key;
 
 }
 /**
@@ -643,7 +643,7 @@ function c2f($class_name)
 function redirect($url)
 {
     $url = ltrim($url, '/');
-    header('Location: ' . \pew\Pew::config()->app_url . $url);
+    header('Location: ' . \pew\Pew::instance()->config()->app_url . $url);
     exit(302);
 }
 
@@ -703,6 +703,9 @@ function check_dirs($path)
  */
 function slugify($str)
 {
+    # convert special characters to English ones
+    $str = iconv('UTF-8', 'ASCII//TRANSLIT', $str);
+
     # strip the string from URL-unfriendly characters
     $str = preg_replace('/[^\w\d +*._\-]/', '', $str);
     
@@ -740,7 +743,8 @@ function transliterate($str)
         'ú' => 'u', 'Ú' => 'U', 'ù' => 'u', 'Ù' => 'U', 'ŭ' => 'u', 'Ŭ' => 'U', 'û' => 'u', 'Û' => 'U', 'ů' => 'u', 'Ů' => 'U', 'ű' => 'u', 'Ű' => 'U', 'ũ' => 'u', 'Ũ' => 'U', 'ų' => 'u', 'Ų' => 'U', 'ū' => 'u', 'Ū' => 'U', 'ư' => 'u', 'Ư' => 'U', 'ü' => 'ue', 'Ü' => 'UE', 
         'ẃ' => 'w', 'Ẃ' => 'W', 'ẁ' => 'w', 'Ẁ' => 'W', 'ŵ' => 'w', 'Ŵ' => 'W', 'ẅ' => 'w', 'Ẅ' => 'W', 
         'ý' => 'y', 'Ý' => 'Y', 'ỳ' => 'y', 'Ỳ' => 'Y', 'ŷ' => 'y', 'Ŷ' => 'Y', 'ÿ' => 'y', 'Ÿ' => 'Y', 
-        'ź' => 'z', 'Ź' => 'Z', 'ž' => 'z', 'Ž' => 'Z', 'ż' => 'z', 'Ż' => 'Z', 'þ' => 'th', 'Þ' => 'Th', 'µ' => 'u', 'а' => 'a', 'А' => 'a', 'б' => 'b', 'Б' => 'b', 'в' => 'v', 'В' => 'v', 'г' => 'g', 'Г' => 'g', 'д' => 'd', 'Д' => 'd', 'е' => 'e', 'Е' => 'e', 'ё' => 'e', 'Ё' => 'e', 'ж' => 'zh', 'Ж' => 'zh', 'з' => 'z', 'З' => 'z', 'и' => 'i', 'И' => 'i', 'й' => 'j', 'Й' => 'j', 'к' => 'k', 'К' => 'k', 'л' => 'l', 'Л' => 'l', 'м' => 'm', 'М' => 'm', 'н' => 'n', 'Н' => 'n', 'о' => 'o', 'О' => 'o', 'п' => 'p', 'П' => 'p', 'р' => 'r', 'Р' => 'r', 'с' => 's', 'С' => 's', 'т' => 't', 'Т' => 't', 'у' => 'u', 'У' => 'u', 'ф' => 'f', 'Ф' => 'f', 'х' => 'h', 'Х' => 'h', 'ц' => 'c', 'Ц' => 'c', 'ч' => 'ch', 'Ч' => 'ch', 'ш' => 'sh', 'Ш' => 'sh', 'щ' => 'sch', 'Щ' => 'sch', 'ъ' => '', 'Ъ' => '', 'ы' => 'y', 'Ы' => 'y', 'ь' => '', 'Ь' => '', 'э' => 'e', 'Э' => 'e', 'ю' => 'ju', 'Ю' => 'ju', 'я' => 'ja', 'Я' => 'ja'
+        'ź' => 'z', 'Ź' => 'Z', 'ž' => 'z', 'Ž' => 'Z', 'ż' => 'z', 'Ż' => 'Z', 
+        'þ' => 'th', 'Þ' => 'Th', 'µ' => 'u', 'а' => 'a', 'А' => 'a', 'б' => 'b', 'Б' => 'b', 'в' => 'v', 'В' => 'v', 'г' => 'g', 'Г' => 'g', 'д' => 'd', 'Д' => 'd', 'е' => 'e', 'Е' => 'e', 'ё' => 'e', 'Ё' => 'e', 'ж' => 'zh', 'Ж' => 'zh', 'з' => 'z', 'З' => 'z', 'и' => 'i', 'И' => 'i', 'й' => 'j', 'Й' => 'j', 'к' => 'k', 'К' => 'k', 'л' => 'l', 'Л' => 'l', 'м' => 'm', 'М' => 'm', 'н' => 'n', 'Н' => 'n', 'о' => 'o', 'О' => 'o', 'п' => 'p', 'П' => 'p', 'р' => 'r', 'Р' => 'r', 'с' => 's', 'С' => 's', 'т' => 't', 'Т' => 't', 'у' => 'u', 'У' => 'u', 'ф' => 'f', 'Ф' => 'f', 'х' => 'h', 'Х' => 'h', 'ц' => 'c', 'Ц' => 'c', 'ч' => 'ch', 'Ч' => 'ch', 'ш' => 'sh', 'Ш' => 'sh', 'щ' => 'sch', 'Щ' => 'sch', 'ъ' => '', 'Ъ' => '', 'ы' => 'y', 'Ы' => 'y', 'ь' => '', 'Ь' => '', 'э' => 'e', 'Э' => 'e', 'ю' => 'ju', 'Ю' => 'ju', 'я' => 'ja', 'Я' => 'ja'
     ];
 
     $str = str_replace(array_keys($substitutions), array_values($substitutions), $str);
@@ -778,7 +782,7 @@ function to_underscores($str, $chars = [' ', '-'], $replacements = '_')
 function root($path = '')
 {
     $path = ltrim(str_replace('/', DIRECTORY_SEPARATOR, $path), ' \\/');
-    $root_path = \pew\Pew::config()->root_folder . $path;
+    $root_path = \pew\Pew::instance()->config()->root_folder . $path;
     
     return $root_path;
 }
@@ -796,7 +800,7 @@ function root($path = '')
  */
 function url($path = '')
 {
-    $url = \pew\Pew::config()->app_url . ltrim($path, '/');
+    $url = \pew\Pew::instance()->config()->app_url . ltrim($path, '/');
     
     return $url;
 }
@@ -808,7 +812,7 @@ function url($path = '')
  */
 function here()
 {
-    $uri = \pew\Pew::Router()->uri();
+    $uri = \pew\Pew::instance()->router()->uri();
 
     return $uri;
 }
@@ -828,7 +832,7 @@ function here()
 function www($path = '')
 {
     $path = ltrim($path, '/');
-    $www_url = rtrim(\pew\Pew::config()->www_url, '/') . '/' . $path;
+    $www_url = rtrim(\pew\Pew::instance()->config()->www_url, '/') . '/' . $path;
 
     return $www_url;
 }
@@ -849,7 +853,7 @@ function user()
         $return = false;
         
         if (class_exists('Pew') && USEAUTH) {
-            $user = \pew\Pew::auth()->user();
+            $user = \pew\Pew::instance()->auth()->user();
             if (is_array($user)) {
                 $return = (object) $user;
             }
@@ -870,14 +874,20 @@ function user()
  */
 function session($path = null, $default = null)
 {
+    static $pew;
+
+    if (!$pew) {
+        $pew = \pew\Pew::instance();
+    }
+
     if (is_null($path)) {
-        return \pew\Pew::session()->get();
+        return $pew->session()->get();
     }
 
     $indexes = explode('.', $path);
     $first_index = array_shift($indexes);
 
-    $value = \pew\Pew::session()->$first_index;
+    $value = $pew->session()->$first_index;
 
     while (!empty($indexes)) {
         $index = array_shift($indexes);
@@ -902,9 +912,14 @@ function session($path = null, $default = null)
 function flash($key = null, $default = null)
 {
     static $flash_data;
+    static $pew;
+
+    if (!$pew) {
+        $pew = \pew\Pew::instance();
+    }
 
     if (!$flash_data) {
-        $flash_data = \pew\Pew::session()->flash_data();
+        $flash_data = $pew->session()->flash_data();
     }
 
     if (!is_null($key)) {
