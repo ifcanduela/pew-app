@@ -49,6 +49,11 @@ class Database
     private $config;
 
     /**
+     * @var boolean Check if SQLite file is writable.
+     */
+    public $is_writable = true;
+
+    /**
      * @var string Last query run.
      */
     public $last_query = null;
@@ -162,9 +167,9 @@ class Database
                 switch ($engine) {
                     case self::SQLITE:
                         $this->pdo = new \PDO($engine . ':' . $file);
-                        if ($file !== ':memory:' && filesize($file) == 0 && function_exists('sqlite_init')) {
-                            sqlite_init($this->pdo);
-                        }
+                        
+                        # check if file and containing folder are writable
+                        $this->is_writable = is_writable(dirname($file)) && is_writable($file);
                     break;
                     
                     case self::MYSQL:

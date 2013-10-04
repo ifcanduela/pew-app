@@ -579,6 +579,10 @@ class Model
     {
         $record = [];
 
+        if (!$this->db->is_writable) {
+            throw new \RuntimeException("Database file is not writable.");
+        }
+
         if (method_exists($this, 'before_save')) {
             $data = $this->before_save($data);
         }
