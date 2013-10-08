@@ -147,7 +147,7 @@ class Image
             # Get file info
             $path_info = pathinfo($file);
             
-            if (!isset($path_info['extension']) || !in_array($path_info['extension'], array('jpeg', 'jpg', 'png', 'gif'))) {
+            if (!isset($path_info['extension']) || !in_array(strtolower($path_info['extension']), array('jpeg', 'jpg', 'png', 'gif'))) {
                 $this->set_Error(self::UNSUPPORTED_FORMAT, 'For the moment, only JPG, GIF and PNG image files are supported [' . $path_info['extension'] . ']');
                 return false;
             }
@@ -164,7 +164,7 @@ class Image
             $this->path      = $path_info['dirname'];
             $this->file_name = $path_info['basename'];
             $this->base_name = $path_info['filename'];
-            $this->extension = $path_info['extension'];
+            $this->extension = strtolower($path_info['extension']);
             $this->width     = $img_info[0];
             $this->height    = $img_info[1];
             $this->error     = '';
@@ -413,6 +413,7 @@ class Image
      */
     public function thumb_height($height = null)
     {
+        var_dump($height, $this->height());
         if (!is_null($height)) {
             $this->thumb_height = (int) $height;
             $this->thumb_width = round($height * $this->width() / $this->height());
