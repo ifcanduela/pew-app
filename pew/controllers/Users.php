@@ -58,22 +58,22 @@ class Users extends \pew\Controller
                         redirect('users/login');
                     } else {
                         # password and password_confirm fields do not match
-                        $this->session->flash('login error', 'Passwords do not match');
+                        $this->session->flash('signup error', 'Passwords do not match');
                         redirect('users/signup');
                     }
                 } else {
                     # the password is too short
-                    $this->session->flash('login error', 'Password must be at least 6 characters long');
+                    $this->session->flash('signup error', 'Password must be at least 6 characters long');
                     redirect('users/signup');
                 }
             } else {
                 # wrong username or password
-                $this->session->flash('login error', 'Invalid username');
+                $this->session->flash('signup error', 'Invalid username');
                 redirect('users/signup');
             }
         }
         
-        # the login view will be displayed if execution reaches this point
+        # the signup view will be displayed if execution reaches this point
     }
     
     /**
