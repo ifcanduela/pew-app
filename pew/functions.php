@@ -12,9 +12,19 @@
  * @param string $key Key to read
  * @return mixed The value for the key
  */
-function pew($key)
+function pew($key = null)
 {
-    return \pew\Pew::instance()->config()->$key;
+    static $pew;
+
+    if (!$pew) {
+        $pew = \pew\Pew::instance();
+    }
+
+    if (is_null($key)) {
+        return $pew;
+    } else {
+        return $pew->config()->$key;
+    }
 
 }
 /**
