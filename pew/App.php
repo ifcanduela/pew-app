@@ -84,17 +84,6 @@ class App
             $view_data = $controller->_action($router->action(), $router->parameters());
         }
 
-        # check if the controller action requires authentication
-        if (isset($controller->auth) && $controller->auth->require()) {
-            # check if the user is authenticated
-            if (!$controller->auth->gate()) {
-                # save the current request for later
-                $controller->auth->referrer($router->uri());
-                # display the login page
-                redirect('users/login');
-            }
-        }
-
         # call the after_action method if it's defined
         if (method_exists($controller, 'after_action')) {
             $controller->after_action();
