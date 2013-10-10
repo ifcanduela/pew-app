@@ -25,17 +25,42 @@ function pew($key = null)
     } else {
         return $pew->config()->$key;
     }
-
 }
+
 /**
+ * Logs something to a file.
+ *
+ * The location of the file must be available to write.
  * 
+ * @param mixed $what What you want to write to the log
+ * @return int Number of bytes written to file, or false on failure
+ */
+function flog($what, $filename = null)
+{
+    if (is_null($filename)) {
+        $filename = 'logs/log_' . date('Y-m-d') . '.txt';
+    }
+
+    $data = print_r($what, true);
+    $entry = date('Y-m-d H:i:s') . ' | ' . $data . PHP_EOL;
+    
+    return file_put_contents($filename, $entry, FILE_APPEND);
+}
+
+/**
+ * Extracts the base class name from a namespaced class.
+ *
+ * @param string $class_name Namespaced class name
+ * @return string Class name without namespace
  */
 function class_base_name($class_name)
 {
     $class_name_parts = explode('\\', $class_name);
     $class_base_name = end($class_name_parts);
+
     return $class_base_name;
 }
+
 /**
  * A basic configuration storage.
  *
@@ -143,26 +168,24 @@ function frand($from = null, $to = null)
  * inside &lt;pre> tags and preprending the optional $title parameter to help
  * identify the output. It will not produce HTML if the script is running from 
  * the console.
- *
- * Note that this function is not aware of the DEBUG constant, i.e. it will 
- * always output.
  * 
  * @param mixed $data The data to be printed
  * @param string $title Optional title of the printed data
+ * @param boolean $print Whether to print or return the output
  * @return void
  */
-function pr($data, $title = null)
+function pr($data, $title = null, $print = true)
 {
     # acquire formatted $data
     $echo = print_r($data, true);
     
     if (defined('STDIN')) {
-        # insert $title if it's provided
+        # don't add markup for console output
         if ($title) {
             $echo = "$title: $echo";
         }
     } else {
-        # insert $title if it's provided
+        # add markup for browser output
         if ($title) {
             $echo = "<em>$title</em>: $echo";
         }
@@ -170,8 +193,11 @@ function pr($data, $title = null)
         $echo = "<pre>$echo</pre>";
     }
     
-    # echo everything
-    echo $echo;
+    if ($print) {
+        echo $echo;
+    } else {
+        return $echo;
+    }
 }
 
 /**

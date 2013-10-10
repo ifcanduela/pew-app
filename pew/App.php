@@ -53,11 +53,12 @@ class App
 
         $router->route($request->segments(), $request->method());
         $controller_name = $router->controller();
+        
         # Instantiate the main view
         $view = $this->pew->view();
-        $view->folder($this->pew->config()->app_folder . DIRECTORY_SEPARATOR . 'views');
         $view->template($router->controller() . '/' . $router->action());
         $view->layout($this->pew->config()->default_layout);
+        
         # instantiate the controller
         $controller = $this->pew->controller($controller_name, $request);
         

@@ -407,7 +407,13 @@ class Pew
         $view_key = "View_$key";
 
         if (!isset($this->registry->{$view_key})) {
-            $this->registry->{$view_key} = new View($this->config->app_folder . DIRECTORY_SEPARATOR . 'views');
+            $prefix = in_array($this->config->views_folder{0}, ['/', '\\']) 
+                          ? $this->config->root_folder
+                          : $this->config->app_folder;
+
+            $views_folder = $prefix . DIRECTORY_SEPARATOR . trim($this->config->views_folder, '/\\');
+
+            $this->registry->{$view_key} = new View($views_folder);
         }
 
         return $this->registry->{$view_key};

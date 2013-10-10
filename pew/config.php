@@ -37,22 +37,22 @@ $cfg['app_url'] = $cfg['host'] . $cfg['path'];
 /**
  * @var string Full path to the base folder (filesystem).
  */
-$cfg['root_folder'] = getcwd() . DS;
+$cfg['root_folder'] = getcwd();
 
 /**
  * @var string Full path to the framework folder (filesystem).
  */
-$cfg['system_folder'] = dirname(__FILE__) . DS;
+$cfg['system_folder'] = dirname(__FILE__);
 
 /**
  * @var string Full path to the application folder (filesystem).
  */
-$cfg['app_folder'] = getcwd() . DS . 'app' . DS;
+$cfg['app_folder'] = getcwd() . DS . 'app';
 
 /**
  * @var string Full path to the public assets folder (filesystem).
  */
-$cfg['www_folder'] = getcwd() . DS . 'www' . DS;
+$cfg['www_folder'] = getcwd() . DS . 'www';
 
 /**
  * @var string Full path to the public assets folder (url).
@@ -93,12 +93,12 @@ $cfg['log_level'] = 0;
  *
  * This is used for both the Pew folder and the App folder
  */
-$cfg['models_folder'] = 'models' . DS;
-$cfg['controllers_folder'] = 'controllers' . DS;
-$cfg['views_folder'] = 'views' . DS;
-$cfg['elements_folder'] = 'views' . DS . 'elements' . DS;
-$cfg['layouts_folder'] = 'views' . DS;
-$cfg['libraries_folder'] = 'libs' . DS;
+$cfg['models_folder'] = 'models';
+$cfg['controllers_folder'] = 'controllers';
+$cfg['views_folder'] = 'views';
+$cfg['elements_folder'] = 'views' . DS . 'elements';
+$cfg['layouts_folder'] = 'views';
+$cfg['libraries_folder'] = 'libs';
 
 /**
  * @var string Default file extensions for files.
