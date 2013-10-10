@@ -89,9 +89,8 @@ class View
 
         # Output the view and save it into a buffer.
         ob_start();
-            require $template_file;
-            $template_output = ob_get_contents();
-        ob_end_clean();
+        require $template_file;
+        $template_output = ob_get_clean();
         
         return $template_output;
     }
@@ -123,13 +122,13 @@ class View
     {
         if (!is_null($folder)) {
             if (is_dir($folder)) {
-                $this->folder = rtrim($folder, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+                $this->folder = rtrim($folder, '\\/') . DIRECTORY_SEPARATOR;
             } else {
                 return false;
             }
         }
 
-        return rtrim($this->folder, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        return rtrim($this->folder, '\\/') . DIRECTORY_SEPARATOR;
     }
 
     /**
