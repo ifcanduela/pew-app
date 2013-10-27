@@ -818,7 +818,7 @@ function to_underscores($str, $chars = [' ', '-'], $replacements = '_')
 function root($path = '')
 {
     $path = ltrim(str_replace('/', DIRECTORY_SEPARATOR, $path), ' \\/');
-    $root_path = \pew\Pew::instance()->config()->root_folder . $path;
+    $root_path = \pew\Pew::instance()->config()->root_folder . DIRECTORY_SEPARATOR . $path;
     
     return $root_path;
 }
@@ -836,7 +836,7 @@ function root($path = '')
  */
 function url($path = '')
 {
-    $url = \pew\Pew::instance()->config()->app_url . ltrim($path, '/');
+    $url = rtrim(\pew\Pew::instance()->config()->app_url, '/') . '/' . ltrim($path, '/');
     
     return $url;
 }
