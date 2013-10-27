@@ -2,645 +2,514 @@
 
 namespace pew\libs;
 
-/**
- * The Image library class contains simple methods to manage pictures.
- * 
- * The user can load a picture from the local drives or use a submitted form
- * array to upload a file. The methods in this class copy files and resize or
- * crop images.
- *
- * The class uses the GD image library functions.
- *
- * @package pew/libs
- * @author ifcanduela <ifcanduela@gmail.com>
- */
+class ImageException extends \Exception {}
+class ImageNotFoundException extends ImageException {}
+class ImageNotLoadedException extends ImageException {}
+class ImageNotSupportedException extends ImageException {}
+class ImageSizeLimitExceededException extends ImageException {}
+
 class Image
 {
-    /*
-     * Error conditions.
-     */
-    const IMAGE_NOT_FOUND = 1;
-    const UNSUPPORTED_FORMAT = 2;
-    const IMAGE_WRITE_ERROR = 3;
-    const NO_IMAGE_LOADED = 4;
-    const IMAGE_CROP_ERROR = 5;
-    const IMAGE_RESIZE_ERROR = 6;
-    const INVALID_SIZE = 7;
+    const ANCHOR_BOTTOM = 'bottom';
+    const ANCHOR_BOTTOM_LEFT = 'bottom left';
+    const ANCHOR_BOTTOM_RIGHT = 'bottom right';
+    const ANCHOR_CENTER = 'center';
+    const ANCHOR_LEFT = 'left';
+    const ANCHOR_RIGHT = 'right';
+    const ANCHOR_TOP = 'top';
+    const ANCHOR_TOP_LEFT = 'top left';
+    const ANCHOR_TOP_RIGHT = 'top right';
 
     /**
-     * @var resource The image bitstream data.
+     * @var string Original file name.
      */
-    private $image_resource = null;
-    
-    /**
-     * @var string Fully-qualified path of original resource.
-     */
-    private $path;
+    private $source_filename;
 
     /**
-     * @var string Destination folder.
+     * @var string Destination file name.
      */
-    private $folder = '';
+    private $filename;
 
     /**
-     * @var string Image file name, without extension.
+     * @var resource A GD resource containing the image data
      */
-    private $file_name;
+    private $resource;
 
     /**
-     * @var string File name with extension of original resource.
+     * @var int Image type
+     * @see http://www.php.net/manual/en/function.image-type-to-mime-type.php
      */
-    private $base_name;
-    
-    /**
-     * @var string Original file extension.
-     */
-    private $extension;
+    private $image_type;
 
     /**
-     * @var string Original file MIME type.
+     * @var string Image file MIME type.
      */
     private $mime_type;
-    
-    /**
-     * @var int Image resource width, in pixels.
-     */
-    private $width;
-    
-    /**
-     * @var int Image resource height, in pixels.
-     */
-    private $height;
-    
-    /**
-     * @var int Thumbnail width, in pixels.
-     */
-    private $thumb_width = 100;
-    
-    /**
-     * @var int Thumbnail height, in pixels.
-     */
-    private $thumb_height = 100;
-    
-    /**
-     * @var bool Flag that tells if an image was previously loaded
-     */
-    private $loaded = false;
-    
-    /**
-     * @var string Last error message.
-     */
-    private $error_message = null;
-    
-    /**
-     * @var int Last error code.
-     */
-    private $error_code = 0;
 
     /**
-     * @var int Color from the GIF palette that makes pixels transparent.
+     * @var int Output quality.
      */
-    private $gif_transparent_color;
+    private $quality;
 
     /**
-     * @var int JPEG quality.
-     */
-    private $jpeg_quality = 75;
-    
-    /**
-     * Creates an instance of the Img class and optionally loads an image.
+     * Build a new image object.
+     * 
+     * @param string|array $file Image file to load
      *
-     * @param string $file Optional file name of image to process
+     * @todo Support images from $_FILES array.
      */
     public function __construct($file = null)
     {
-        $this->set_error(0);
-        $this->folder(getcwd());
+        $this->quality = 75;
 
-        # Make sure the parameter is somewhat valid
-        if (is_string($file)) {
-            # Check if we can find the file
-            if (file_exists($file)) {
-                # Initialize the instance
-                $this->load($file);
-            } else {
-                $this->set_error(self::IMAGE_NOT_FOUND, 'Image file could not be found: ' . $file);
-            }
-        } elseif (is_array($file) && isset($file['tmp_name'])) {
+        if (is_array($file)) {
             $this->upload($file);
-        }        
+        } elseif (is_string($file)) {
+            $this->load($file);
+        }
     }
 
-    /**
-     * Loads an image file for processing.
-     *
-     * @param string $file The image file name
-     * @return mixed Returns true if the image was loaded, false otherwise
-     */
-    public function load($file)
+    public function load($filename)
     {
-        $this->set_error(0);
-        $this->loaded = false;
-        
-        # Check if the image file exists
-        if (file_exists($file)) {
-            # Get file info
-            $path_info = pathinfo($file);
-            
-            if (!isset($path_info['extension']) || !in_array(strtolower($path_info['extension']), array('jpeg', 'jpg', 'png', 'gif'))) {
-                $this->set_Error(self::UNSUPPORTED_FORMAT, 'For the moment, only JPG, GIF and PNG image files are supported [' . $path_info['extension'] . ']');
-                return false;
-            }
-            
-            # Get image info
-            $img_info = getImageSize($file);
-            
-            # Create a binary image stream according to the image type
-            if (!$this->load_image_resource($file, $img_info['mime'])) {
-                $this->set_error(self::UNSUPPORTED_FORMAT, 'The provided image could not be loaded.');
-                return false;
-            }
-            
-            $this->path      = $path_info['dirname'];
-            $this->file_name = $path_info['basename'];
-            $this->base_name = $path_info['filename'];
-            $this->extension = strtolower($path_info['extension']);
-            $this->width     = $img_info[0];
-            $this->height    = $img_info[1];
-            $this->error     = '';
-            
-            $this->loaded = true;
-            
-        } else {
-            $this->loaded = false;
-            $this->set_error(self::IMAGE_NOT_FOUND, 'Image file could not be found: ' . $file);
+        if (!file_exists($filename)) {
+            throw new ImageNotFoundException("File {$filename} not found");
         }
 
-        return $this->loaded;
-    }
+        $this->source_filename = $this->filename = $filename;
 
-    public function upload(array $uploaded_file)
-    {
-        $this->loaded = false;
-        $this->set_error(0);
+        $this->init();
+        $this->load_resource($filename, $this->image_type);
 
-        # Load image resource
-        if (!$this->load_image_resource($uploaded_file['tmp_name'], $uploaded_file['type'])) {
-            $this->set_error(self::UNSUPPORTED_FORMAT, 'The image file could not be loaded');
-            $this->loaded = false;
-            return false;
-        }
-
-        $this->loaded = true;
-
-        $path_info = pathinfo($uploaded_file['name']);
-        $img_info = getImageSize($uploaded_file['tmp_name']);
-        
-        # set the path to the temporary uploads directory
-        $this->path      = dirname($uploaded_file['tmp_name']);
-        $this->file_name = basename($uploaded_file['tmp_name']);
-        $this->base_name = $path_info['filename'];
-        $this->extension = $path_info['extension'];
-        $this->width     = $img_info[0];
-        $this->height    = $img_info[1];
-        $this->error     = '';
-        
-        return $this->loaded = true;
-    }
-
-    /**
-     * Load an image file.
-     * 
-     * @param string $file Filesystem location and name of the image file
-     * @param string $mime_type MIME type of the image file
-     * @return boolean false on error, true otherwise
-     */
-    protected function load_image_resource($file, $mime_type)
-    {
-        $result = true;
-
-        # Create a binary image stream according to the image type
-        switch($mime_type) {
-            case 'image/jpeg':
-                $result = $this->image_resource = ImageCreateFromJPEG($file);
-                break;
-            case 'image/gif':
-                $result = $this->image_resource = ImageCreateFromGIF($file);
-                # Preserve GIF transparency
-                $result = $result && $transparent_index = ImageColorTransparent($this->image_resource);
-                if ($transparent_index != -1) {
-                    $this->transparent_color = ImageColorsForIndex($this->image_resource, $transparent_index);
-                }
-                break;
-            case 'image/png':
-                $this->image_resource = ImageCreateFromPNG($file);
-                # Preserve PNG alpha transparency
-                $result = ImageAlphaBlending($this->image_resource, true);
-                $result = $result && ImageSaveAlpha($this->image_resource, true);
-                break;
-            default:
-                $this->set_error(self::UNSUPPORTED_FORMAT, 'Invalid image file type');
-                $result = false;
-                break; 
-        }
-
-        $this->mime_type = $mime_type;
-
-        return $result;
-    }
-    
-    /**
-     * Saves a copy of the loaded image file to a folder.
-     *
-     * @param string $folder The absolute or relative filesystem location to
-     *               copy the loaded image. Leave empty to copy to Current
-     *               Working Directory.
-     * @return mixed Returns false if the image could not be copied, or the 
-     *               created image path and file name
-     */
-    public function save_to($folder = '')
-    {   
-        if (!$this->loaded) {
-            $this->set_error(self::NO_IMAGE_LOADED, 'No image was loaded (save_to)');
-            return false;
-        }
-        
-        # Clean the output folder name
-        if (empty($folder)) {
-            $folder = $this->folder();
-        }
-
-        $folder = rtrim($folder, '/\\') . PHP_EOL;
-        
-        # Create folders if necessary
-        if (!is_dir($folder)) {
-            mkdir($folder, 0777, true);
-        }
-        
-        # Copy the source file to destination
-        # Potential enhancement: allow the user to specify an output format,
-        # and use the image_resource to save the copy.
-        $src_file_name = $this->path . DIRECTORY_SEPARATOR . $this->file_name;
-        $dst_file_name = $folder . $this->file_name() . '.' . $this->extension;
-        
-        if (copy($src_file_name, $dst_file_name)) {
-            return $dst_file_name;
-        } else {
-            $this->set_error(self::IMAGE_WRITE_ERROR, 'Image file could not be copied');
-            return false;
-        }
-    }
-
-    /**
-     * Gets and sets the name assigned to the image.
-     *
-     * If the $file_name argument is boolean true the function will return
-     * the file name with extension instead of without it.
-     *
-     * @param string|bool $file_name The file name, without extension or a boolean value
-     * @return Image|string The file name if no argument is provided, the Image object otherwise
-     */
-    public function file_name($file_name = null)
-    {
-        if (is_string($file_name)) {
-            // handle $with_extension here
-            $this->base_name = preg_replace('/\-+/', '-', preg_replace('/([^A-Za-z0-9-_])/', '-', $file_name));
-            return $this;
-        } elseif (is_bool($file_name) && true === $file_name) {
-            return $this->base_name . '.' . $this->extension;
-        }
-
-        return $this->base_name;
-    }
-
-    /**
-     * Gets and set the folder for the image.
-     *
-     * @param string $folder The folder
-     * @return Image|string The folder if no argument is provided, the Image object otherwise
-     */
-    public function folder($folder = null)
-    {
-        if (!is_null($folder)) {
-            $this->folder = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, rtrim($folder, '/\\') . DIRECTORY_SEPARATOR);
-            return $this;
-        }
-
-        return $this->folder;
-    }
-    
-    /**
-     * Gets the current, full image file name.
-     *
-     * @return string The full path and filename of the destination image
-     */
-    public function folder_and_file_name()
-    {
-        return $this->folder() . $this->base_name . '.' . $this->extension;
-    }
-
-    /**
-     * Updates the output size for the thumbnails.
-     *
-     * @param int $width The width in pixels
-     * @param int $height The height in pixels. By default, it's the same as the 
-     *                    width
-     * @return mixed Returns The Img object instance ($this) or false if $width
-     *               is invalid
-     */
-    public function thumb_size($width = null, $height = null)
-    {
-        if (is_null($width)) {
-            return array($this->thumb_width, $this->thumb_height);
-        }
-
-        # Ensure the parameter is valid
-        if (!is_numeric($width)) {
-            $this->set_error(self::INVALID_SIZE, 'Specified thumbnail width is invalid (thumb_size)');
-            return false;
-        } else {
-            # If no valid height is provided, make it equal to the width
-            if (!is_numeric($height)) {
-                # Square thumbnail
-                $height = $width;
-            }
-            
-            $this->thumb_width = $width;
-            $this->thumb_height = $height;
-            
-            return $this;
-        }
-    }
-    
-    /**
-     * Set and get the thumb width.
-     *
-     * This function will set the height to null, so thumbnails are
-     * generated with a fixed width and proportional height.
-     *
-     * If null is passed as argument the function will just return the
-     * current thumbnail width.
-     *
-     * Use thumb_size() to set both sizes.
-     * 
-     * @param int $width Widt hin pixels
-     * @return int Width in pixels
-     */
-    public function thumb_width($width = null)
-    {
-        if (!is_null($width)) {
-            $this->thumb_width = (int) $width;
-            $this->thumb_height = round($width * $this->height() / $this->width());
-            return $this;
-        }
-
-        return $this->thumb_width;
-    }
-
-    /**
-     * Set and get the thumb height.
-     *
-     * This function will set the width to null, so thumbnails are
-     * generated with a fixed height and proportional width.
-     *
-     * If null is passed as argument the function will just return the
-     * current thumbnail height.
-     *
-     * Use thumb_size() to set both sizes.
-     * 
-     * @param int $height Height in pixels
-     * @return int Height in pixels
-     */
-    public function thumb_height($height = null)
-    {
-        var_dump($height, $this->height());
-        if (!is_null($height)) {
-            $this->thumb_height = (int) $height;
-            $this->thumb_width = round($height * $this->width() / $this->height());
-            return $this;
-        }
-
-        return $this->thumb_height;
-    }
-
-    /**
-     * Resets the thumbnail size to the default.
-     *
-     * @return object The Img object instance ($this)
-     */
-    public function reset_thumb_size()
-    {
-        $this->thumb_size(100, 100);
-        
         return $this;
     }
 
     /**
-     * Get the current image width.
+     * Load an image uploaded from the $_FILES array.
      * 
-     * @return int Image width in pixels
+     * @param array $file An uploaded file
+     * @return Image The image resource
+     */
+    public function upload(array $file)
+    {
+        if (!file_exists($file['tmp_name'])) {
+            throw new ImageNotFoundException("Uploaded file {$filename} not found");
+        }
+
+        $this->source_filename = $file['tmp_name'];
+        $this->filename = $file['name'];
+
+        $this->init();
+        $this->load_resource($file['tmp_name'], $this->image_type);
+
+        return $this;
+    }
+
+    /**
+     * Load an image.
+     * 
+     * @param string $filename   [description]
+     * @param int $image_type One of the IMAGETYPE_* constants
+     * @return int Return value from the imageCreateFrom* function
+     */
+    private function load_resource($filename, $image_type)
+    {
+        switch ($image_type) {
+            case IMAGETYPE_JPEG:
+                $this->resource = imageCreateFromJPEG($filename);
+                break;
+
+            case IMAGETYPE_PNG:
+                $this->resource = imageCreateFromPNG($filename);
+                break;
+
+            case IMAGETYPE_GIF:
+                $this->resource = imageCreateFromGIF($filename);
+                break;
+
+            default:
+                throw new ImageNotSupportedException("The image format of file {$filename} is not supported");
+        }
+
+        return false;
+    }
+
+    /**
+     * Initialize some image properties.
+     * 
+     * @return Image Then image object
+     */
+    private function init()
+    {
+        $fileinfo = getImageSize($this->source_filename);
+        list($this->width, $this->height, $this->image_type) = $fileinfo;
+        $this->mime_type = $fileinfo['mime'];
+
+        return $this;
+    }
+
+    /**
+     * Reload the original image.
+     *
+     * This method undoes resizing and cropping.
+     * 
+     * @return Image The image object
+     */
+    public function reload()
+    {
+        if (!$this->source_filename) {
+            throw new ImageNotLoadedException("Image not loaded");
+        }
+        
+        $this->init();
+        $this->load_resource($this->source_filename, $this->image_type);
+
+        return $this;
+    }
+
+    /**
+     * Save the loaded image to a file.
+     *
+     * The image type defaults to the original image type, and the quality defaults to 75.
+     *
+     * @see http://www.php.net/manual/en/function.image-type-to-mime-type.php
+     * 
+     * @param string $destination Destiantion folder or filename
+     * @param int $image_type One of the IMAGETYPE_* constants
+     * @param int $quality Output quality (0 - 100)
+     * @return int Result of the image* functions
+     */
+    public function save($destination, $image_type = null, $quality = null)
+    {
+        if (!$this->resource) {
+            throw new ImageNotLoadedException("Image not loaded");
+        }
+        
+        if (!$destination) {
+            $destination = getcwd();
+        }
+
+        if (is_null($image_type)) {
+            $image_type = $this->image_type;
+        }
+
+        if (is_null($quality)) {
+            $quality = $this->quality;
+        }
+
+        if (strpos(basename($destination), '.') === false) {
+            $destination .= DIRECTORY_SEPARATOR . basename($this->filename);
+        }
+
+        switch ($image_type) {
+            case IMAGETYPE_JPEG:
+                return imageJPEG($this->resource, $destination, $quality);
+            
+            case IMAGETYPE_PNG:
+                return imagePNG($this->resource, $destination, $quality * 9 / 100);
+
+            case IMAGETYPE_GIF:
+                return imageGIF($this->resource, $destination);
+
+            default:
+                throw new ImageNotSupportedException("The image format of file {$this->source_filename} is not supported");
+        }
+
+        return false; 
+    }
+
+    /**
+     * Set or get the file name.
+     * 
+     * @param string $filename New file name
+     * @return Image|string The image object, or the file name
+     */
+    public function filename($filename = null)
+    {
+        if (!$this->resource) {
+            throw new ImageNotLoadedException("Image not loaded");
+        }
+
+        if (!is_null($filename)) {
+            $this->filename = $filename;
+            return $this;
+        }
+
+        return $this->filename;
+    }
+
+    /**
+     * Get the aspect ratio of the loaded image.
+     * 
+     * @return float Aspect ratio of the loaded image
+     */
+    public function ratio()
+    {
+        if (!$this->resource) {
+            throw new ImageNotLoadedException("Image not loaded");
+        }
+
+        return $this->width / $this->height;
+    }
+
+
+    /**
+     * Get the width nof the loaded image.
+     * 
+     * @return int Width in pixels
      */
     public function width()
     {
-        if (!$this->loaded) {
-            $this->set_error(self::NO_IMAGE_LOADED, 'No image was loaded (width)');
-            return false;
+        if (!$this->resource) {
+            throw new ImageNotLoadedException("Image not loaded");
         }
 
-        if (!$this->width) {
-            $this->width = imagesx($this->resource);
-        }
-
-        return $this->width;
+        return imageSX($this->resource);
     }
 
     /**
-     * Get the current image height.
+     * Get the height nof the loaded image.
      * 
-     * @return int Image height in pixels
+     * @return int Height in pixels
      */
     public function height()
     {
-        if (!$this->loaded) {
-            $this->set_error(self::NO_IMAGE_LOADED, 'No image was loaded (height)');
-            return false;
+        if (!$this->resource) {
+            throw new ImageNotLoadedException("Image not loaded");
         }
 
-        if (!$this->height) {
-            $this->height = imagesy($this->resource);
-        }
-
-        return $this->height;
+        return imageSY($this->resource);
     }
 
     /**
-     * Get or set the JPEG compression quality.
+     * Get the MIME type of the loaded image.
      * 
-     * @return int JPEG compression quality
-     */
-    public function jpeg_quality($jpeg_quality = null)
-    {
-        if ($jpeg_quality) {
-            $this->jpeg_quality = max(min($jpeg_quality, 100), 0);
-        }
-
-        return $this->jpeg_quality;
-    }
-
-    /**
-     * Creates a resized and cropped copy of the loaded image.
-     *
-     * This function will create an image based on the loaded image. The result
-     * is always a proportinally-resized and cropped image, and the method
-     * supports thumbnails bigger than the source image.
-     *
-     * The destination file name can be controlled by calling
-     * setDestinationName(),and the output size can be set with setthumbSize()
-     * or reset with reset_thumb_size(). By default THUMBNAIL_WIDTH and
-     * THUMBNAIL_HEIGHT are used, and those constants default to a 100x100px
-     * image.
-     *
-     * @param string $folder The absolute or relative filesystem location to
-     *               copy the loaded image. Leave empty to copy to Current
-     *               Working Directory.
-     * @return mixed Returns The Img object instance ($this) or the created
-     *               image path and file name
-     */
-    public function save_thumb_to($folder = '')
-    {
-        if (!$this->loaded) {
-            $this->set_error(self::NO_IMAGE_LOADED, 'No image was loaded (save_thumb_to)');
-            return false;
-        }
-        
-        if (!is_resource($this->image_resource)) {
-            $this->set_error(self::NO_IMAGE_LOADED, 'Image resource is not loaded (save_thumb_to)');
-            return false;
-        }
-        
-        # Get image size properties
-        $s_w = $this->width;
-        $s_h = $this->height;
-        $d_w = $this->thumb_width;
-        $d_h = $this->thumb_height;
-
-        # calculate source image ratio
-        $s_ratio = $s_w / $s_h;
-
-        # check and calculate thumbnail dimensions
-        if (is_null($d_w)) {
-            $d_w = $d_h * $s_ratio;
-        }
-        if (is_null($d_h)) {
-            $d_h = $d_w * $s_ratio;
-        }
-        $d_ratio = $d_w / $d_h;
-        
-        # Check whether to crop vertically or horizontally
-        if ($s_ratio < $d_ratio) {
-            # Crop top and bottom
-            $t_w = $d_w;
-            $t_h = round($s_h * ($d_w / $s_w));
-        } elseif($s_ratio > $d_ratio) {
-            # Crop left and right
-            $t_h = $d_h;
-            $t_w = round($s_w * ($d_h / $s_h));
-        } else {
-            # Don't need to crop
-            $t_h = $d_h;
-            $t_w = $d_w;
-        }
-    
-        # Crop coordinates
-        $dif_w = abs($d_w - $t_w);
-        $dif_h = abs($d_h - $t_h);
-        $pos_x = floor($dif_w / 2);
-        $pos_y = floor($dif_h / 2);
-        
-        # Create destination canvas in memory to paste the resized image
-        $resized = ImageCreateTrueColor($t_w, $t_h);
-        
-        # Resize the image to target dimensions
-        if (!ImageCopyResampled($resized, $this->image_resource, 0, 0, 0, 0, $t_w, $t_h, $s_w, $s_h)) {
-            $this->set_error(self::IMAGE_RESIZE_ERROR, 'Image could not be resized');
-            return false;
-        }
-        
-        # A second destination canvas to paste the cropped image
-        $cropped = ImageCreateTrueColor($d_w, $d_h);
-        
-        # Crop the image to thumbnail dimensions
-        if (!ImageCopyResampled($cropped, $resized, 0, 0, $pos_x, $pos_y, $d_w, $d_h, $d_w, $d_h)) {
-            $this->set_error(self::IMAGE_CROP_ERROR, 'Image could not be cropped');
-            return false;
-        }
-        
-        # We don't need this anymore
-        ImageDestroy($resized);
-        
-        # Clean the destination folder
-        if (empty($folder)) {
-            $folder = getcwd();
-        }
-        
-        $folder = rtrim($folder, '/') . '/';
-        
-        # Create folders if necessary
-        if (!is_dir($folder)) {
-            mkdir($folder, 0777, true);
-        }
-        
-        # Create final image, with 80% of compression quality
-        if (!ImageJPEG($cropped, $folder . $this->base_name . '.' . $this->extension, $this->jpeg_quality)) {
-            $this->set_error(self::IMAGE_WRITE_ERROR, 'Image could not be written to destination');
-            return false;
-        }
-        
-        # We don't need this anymore
-        ImageDestroy($cropped);
-        
-        return $folder . $this->base_name . '.' . $this->extension;
-    }
-
-    /**
-     * Get loaded image MIME type
-     * 
-     * @return string MIME type
+     * @return string The MIME type
      */
     public function mime_type()
     {
+        if (!$this->resource) {
+            throw new ImageNotLoadedException("Image not loaded");
+        }
+
         return $this->mime_type;
     }
 
     /**
-     * Set the error code and message.
+     * Sets or gets the output quality.
+     *
+     * The value must be a percentage, even for PNG images.
      * 
-     * @param int $code Error code
-     * @param string $message Error message
+     * @param int $quality Output quality (0 - 100)
+     * @return Image|int The image object, or the current quality setting
      */
-    protected function set_error($code, $message = '')
+    public function quality($quality = null)
     {
-        $this->error_code = $code;
-        $this->error_message = $message;
+        if (!is_null($quality)) {
+            $quality = (int) $quality;
+            if ($quality >= 0 && $quality <= 100) {
+                $this->quality = (double) $quality;
+            } else {
+                throw new \BadMethodCallException("The quality for Image::quality must be an integer between 0 and 100");
+            }
+
+            return $this;
+        }
+
+        return $this->quality;
     }
 
     /**
-     * Get the last error message.
+     * Resizes an image.
      * 
-     * @return string The error message
+     * @param int $w The target width
+     * @param int $h The target height
+     * @return Image The image object
      */
-    public function error_message()
+    public function resize($w, $h)
     {
-        return $this->error_message;
+        if (!$this->resource) {
+            throw new ImageNotLoadedException("Image not loaded");
+        }
+
+        if (!is_int($w) && !is_int($h)) {
+            throw new \BadMethodCallException("Image::resize() requires its first or second argument to be integers");
+        }
+
+        $new_w = (int) $w;
+        $new_h = (int) $h;
+
+        if (!$new_w) {
+            $new_w = $new_h * $this->width / $this->height;
+        } elseif (!$new_h) {
+            $new_h = $new_w * $this->height / $this->width;
+        }
+
+        $resized = imageCreateTrueColor($new_w, $new_h);
+        imageCopyResampled($resized, $this->resource, 0, 0, 0, 0, $new_w, $new_h, $this->width, $this->height);
+
+        imageDestroy($this->resource);
+        $this->resource = $resized;
+        $this->width = imageSX($resized);
+        $this->height = imageSY($resized);
+
+        return $this;
     }
 
     /**
-     * Get the last error code.
+     * Crops an image.
      * 
-     * @return string The error code
+     * @param int $w Cropped width
+     * @param int $h Cropped height
+     * @param string $anchor One of the ANCHOR constants of the class.
+     * @return Image The image object
      */
-    public function error_code()
+    public function crop($w, $h, $anchor = self::ANCHOR_CENTER)
     {
-        return $this->error_code;
+        if (!$this->resource) {
+            throw new ImageNotLoadedException("Image not loaded");
+        }
+
+        $valid_anchors = [
+            self::ANCHOR_BOTTOM,
+            self::ANCHOR_BOTTOM_LEFT,
+            self::ANCHOR_BOTTOM_RIGHT,
+            self::ANCHOR_CENTER,
+            self::ANCHOR_LEFT,
+            self::ANCHOR_RIGHT,
+            self::ANCHOR_TOP,
+            self::ANCHOR_TOP_LEFT,
+            self::ANCHOR_TOP_RIGHT,
+        ];
+
+        if (!in_array($anchor, $valid_anchors)) {
+            throw new \BadMethodCallException("Invalid anchor point for Image::crop()");
+        }
+
+        $old_w = $this->width();
+        $old_h = $this->height();
+
+        $x_offset = ($old_w - $w) / 2;
+        $y_offset = ($old_h - $h) / 2;
+        
+        if (in_array($anchor, [self::ANCHOR_TOP_LEFT, self::ANCHOR_TOP, self::ANCHOR_TOP_RIGHT])) {
+            $y_offset = 0;
+        }
+
+        if (in_array($anchor, [self::ANCHOR_BOTTOM_LEFT, self::ANCHOR_BOTTOM, self::ANCHOR_BOTTOM_RIGHT])) {
+            $y_offset = $old_h - $h;
+        }
+
+        if (in_array($anchor, [self::ANCHOR_TOP_LEFT, self::ANCHOR_LEFT, self::ANCHOR_BOTTOM_LEFT])) {
+            $x_offset = 0;
+        }
+
+        if (in_array($anchor, [self::ANCHOR_TOP_RIGHT, self::ANCHOR_RIGHT, self::ANCHOR_BOTTOM_RIGHT])) {
+            $x_offset = $old_w - $w;
+        }
+
+        $cropped = imageCreateTrueColor($w, $h);
+        imagecopyresampled($cropped, $this->resource, 0, 0, $x_offset, $y_offset, $w, $h, $w, $h);
+
+        imageDestroy($this->resource);
+        $this->resource = $cropped;
+        $this->width = $w;
+        $this->height = $h;
+
+        return $this;
+    }
+
+    /**
+     * Resized and crops an image to create a thumbnail.
+     * 
+     * @param int $w Thumbnail width
+     * @param int $h Thumbnail height
+     * @return Image The image object
+     */
+    public function box($w, $h)
+    {
+        if (!$this->resource) {
+            throw new ImageNotLoadedException("Image not loaded");
+        }
+
+        $ratio = $w / $h;
+
+        if ($this->ratio() >= $ratio) {
+            $this->resize(null, $h);
+        } else {
+            $this->resize($w, null);
+        }
+
+        $this->crop($w, $h, self::ANCHOR_CENTER);
+
+        return $this;
+    }
+
+    /**
+     * Sends the current image to the browser.
+     *
+     * The image type defaults to the original image type, and the quality defaults to 75.
+     *
+     * @see http://www.php.net/manual/en/function.image-type-to-mime-type.php
+     * 
+     * @param int $image_type One of the IMAGETYPE_* constants
+     * @param int $quality Quality of the PNG or JPEG output, from 0 to 100
+     */
+    public function serve($image_type = null, $quality = null)
+    {
+        if (!$this->resource) {
+            throw new ImageNotLoadedException("Image not loaded");
+        }
+
+        if (is_null($image_type)) {
+            $image_type = $this->image_type;
+        }
+
+        if (is_null($quality)) {
+            $quality = $this->quality;
+        }
+
+        ob_start();
+
+            switch ($image_type) {
+                case IMAGETYPE_JPEG:
+                    imageJPEG($this->resource, null, $quality);
+                    break;
+
+                case IMAGETYPE_PNG:
+                    imagePNG($this->resource, null, $quality * 9 / 100);
+                    break;
+                    
+                case IMAGETYPE_GIF:
+                    imageGIF($this->resource);
+                    break;
+                    
+                default:
+                    throw new ImageNotSupportedException("The image type supplied to Image::serve() is not supported");
+            }
+
+        $stream = ob_get_clean();
+        header("Content-type:" . image_type_to_mime_type($image_type));
+        die($stream);
+    }
+
+    /**
+     * Get the RGB values for a pixel in the loaded image.
+     * 
+     * @param int $x Horizontal coordinate
+     * @param int $y Vertical coordinate
+     * @return array Red, green and blue values, from 0 to 255
+     */
+    public function color_at($x, $y)
+    {
+        if (!$this->resource) {
+            throw new ImageNotLoadedException("Image not loaded");
+        }
+
+        $rgb = imageColorAt($this->resource, $x, $y);
+        $r = ($rgb >> 16) & 0xFF;
+        $g = ($rgb >> 8)  & 0xFF;
+        $b =  $rgb        & 0xFF;
+
+        return [$r, $g, $b];
     }
 }
