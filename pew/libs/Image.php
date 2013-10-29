@@ -8,6 +8,12 @@ class ImageNotLoadedException extends ImageException {}
 class ImageNotSupportedException extends ImageException {}
 class ImageSizeLimitExceededException extends ImageException {}
 
+/**
+ * A class to facilitate the creation of thumbnails.
+ *
+ * @package pew/libs
+ * @author ifcanduela <ifcanduela@gmail.com>
+ */
 class Image
 {
     const ANCHOR_BOTTOM = 'bottom';
@@ -55,8 +61,6 @@ class Image
      * Build a new image object.
      * 
      * @param string|array $file Image file to load
-     *
-     * @todo Support images from $_FILES array.
      */
     public function __construct($file = null)
     {
@@ -69,6 +73,26 @@ class Image
         }
     }
 
+    /**
+     * Removes the resource data.
+     * 
+     * @return null
+     */
+    public function __destroy()
+    {
+        if ($this->resource) {
+            imageDestroy($this->resource);
+        }
+    }
+
+    /**
+     * Load an image file.
+     *
+     * Only JPEG, PNG and GIF images are supported.
+     * 
+     * @param string $filename Location of the image file
+     * @return Image The image object
+     */
     public function load($filename)
     {
         if (!file_exists($filename)) {
@@ -78,7 +102,7 @@ class Image
         $this->source_filename = $this->filename = $filename;
 
         $this->init();
-        $this->load_resource($filename, $this->image_type);
+        $this->load_file($filename, $this->image_type);
 
         return $this;
     }
@@ -99,19 +123,19 @@ class Image
         $this->filename = $file['name'];
 
         $this->init();
-        $this->load_resource($file['tmp_name'], $this->image_type);
+        $this->load_file($file['tmp_name'], $this->image_type);
 
         return $this;
     }
 
     /**
-     * Load an image.
+     * Create an image from a file.
      * 
-     * @param string $filename   [description]
+     * @param string $filename The image file name
      * @param int $image_type One of the IMAGETYPE_* constants
      * @return int Return value from the imageCreateFrom* function
      */
-    private function load_resource($filename, $image_type)
+    private function load_file($filename, $image_type)
     {
         switch ($image_type) {
             case IMAGETYPE_JPEG:
@@ -131,6 +155,20 @@ class Image
         }
 
         return false;
+    }
+
+    /**
+     * Get the image resource.
+     * 
+     * @return resource The image data
+     */
+    public function image()
+    {
+        if (!$this->resource) {
+            throw new ImageNotLoadedException("Image not loaded");
+        }
+        
+        return $this->resource;
     }
 
     /**
@@ -161,7 +199,7 @@ class Image
         }
         
         $this->init();
-        $this->load_resource($this->source_filename, $this->image_type);
+        $this->load_file($this->source_filename, $this->image_type);
 
         return $this;
     }
@@ -235,6 +273,29 @@ class Image
         }
 
         return $this->filename;
+    }
+
+
+    /**
+     * Get the extension for the image.
+     * 
+     * @param boolean $dot Whether to include a dot before the extension or not
+     * @param int  $image_type One of the IMAGETYPE_* constants
+     * @return string The extension corresponding to the image
+     */
+    public function extension($dot = true, $image_type = null)
+    {
+        if (is_null($image_type)) {
+            if (!$this->image_type) {
+                throw new \RuntimeException("Cannot find extension");
+            }
+
+            $image_type = $this->image_type;
+        }
+
+        $extension = image_type_to_extension($image_type, $dot);
+
+        return str_replace(['jpeg', 'tiff'], ['jpg', 'tif'], $extension);
     }
 
     /**
