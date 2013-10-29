@@ -6,6 +6,10 @@ namespace pew;
  * Implementation of the PSR-0 autoloader.
  * 
  * Simplified from Jonathan H. Wage's Gist at https://gist.github.com/jwage/221634
+ *
+ * @package pew
+ * @author Jonathan H. Wage
+ * @author ifcanduela <ifcanduela@gmail.com>
  */
 class Autoloader
 {
