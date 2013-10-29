@@ -78,6 +78,7 @@ class App
         if (method_exists($controller, 'before_action')) {
             $controller->before_action();
         }
+
         # call the action method and let the controller decide what to do
         if (isSet($skip_action) && $skip_action) {
             $view_data = array();
@@ -113,12 +114,12 @@ class App
     {
         if (!$view->exists()) {
             $defaultView = clone $view;
-            $defaultView->folder($this->pew->config()->system_folder . 'views');
+            $defaultView->folder($this->pew->config()->system_folder . DIRECTORY_SEPARATOR . 'views');
 
             if ($defaultView->exists()) {
                 $output = $defaultView->render(null, $view_data);
             } else {
-                throw new \Exception("View file could not be found: {$view->folder()}{$view->template()}");
+                throw new ViewTemplateNotFoundException("View file could not be found: {$view->folder()}{$view->template()}");
             }
         } else {
             $output = $view->render(null, $view_data);
