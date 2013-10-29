@@ -5,7 +5,7 @@ namespace pew\libs;
 /**
  * Session management class.
  * 
- * @package pew
+ * @package pew/libs
  * @author ifcanduela <ifcanduela@gmail.com>
  */
 class Session
