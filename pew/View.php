@@ -2,6 +2,10 @@
 
 namespace pew;
 
+class ViewException extends \Exception {}
+class ViewTemplateNotFoundException extends ViewException {}
+class ViewElementFileNotFoundException extends ViewTemplateNotFoundException {}
+
 /**
  * This class encapsulates the view rendering functionality.
  * 
@@ -80,11 +84,14 @@ class View
             $template = $this->template;
         }
 
-        $this->data = array_merge($this->data, $data);
-
         # Get the view file
-        $template_file = $this->folder() . $template . $this->extension();
+        $template_file = $this->folder() . DIRECTORY_SEPARATOR . $template . $this->extension();
 
+        if (!file_exists($template_file)) {
+            throw new ViewTemplateNotFoundException("Template {$template_file} not found");
+        }
+
+        $this->data = array_merge($this->data, $data);
         extract($this->data);
 
         # Output the view and save it into a buffer.
@@ -107,7 +114,7 @@ class View
             $template = $this->template;
         }
 
-        return file_exists($this->folder() . $template . $this->extension());
+        return file_exists($this->folder() . DIRECTORY_SEPARATOR . $template . $this->extension());
     }
 
     /**
@@ -121,14 +128,10 @@ class View
     public function folder($folder = null)
     {
         if (!is_null($folder)) {
-            if (is_dir($folder)) {
-                $this->folder = rtrim($folder, '\\/') . DIRECTORY_SEPARATOR;
-            } else {
-                return false;
-            }
+            $this->folder = rtrim($folder, '\\/');
         }
 
-        return rtrim($this->folder, '\\/') . DIRECTORY_SEPARATOR;
+        return rtrim($this->folder, '\\/');
     }
 
     /**
@@ -225,11 +228,11 @@ class View
      */
     public function element($element, $element_data = null)
     {
-        $element_file = $this->folder() . $element . $this->extension();
+        $element_file = $this->folder() . DIRECTORY_SEPARATOR . $element . $this->extension();
         
         # If the element .php file cannot be found, show an error page.
         if (!file_exists($element_file)) {
-            throw new \Exception("The element file $element_file could not be found.");
+            throw new ViewElementFileNotFound("The element file $element_file could not be found.");
         }
 
         # If there are variables, make them easily available to the template.
