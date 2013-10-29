@@ -836,7 +836,16 @@ function root($path = '')
  */
 function url($path = '')
 {
-    $url = rtrim(\pew\Pew::instance()->config()->app_url, '/') . '/' . ltrim($path, '/');
+    static $base;
+
+    if (!$base) {
+        $router = pew()->request();
+        $base = $router->scheme() 
+              . $router->host() 
+              . ($router->port() ? ':' . $router->port() : '');
+    }
+
+    $url = $base . '/' . ltrim($path, '/');
     
     return $url;
 }
