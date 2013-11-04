@@ -548,7 +548,7 @@ class Database
      * @param string $query The SQL query to run
      * @return PDOStatement The resulting PDO Statement object
      * @throws PDOException In case of preparation or execution error
-     **/
+     */
     protected function run_query($query)
     {
         if (!$this->connect()) {
@@ -613,7 +613,7 @@ class Database
      * @param string $table_name The table name
      * @param array $conditions Conditions
      * @return int Number of rows deleted
-     * @throws Exception Exception thrown if no table is set
+     * @throws InvalidArgumentException Exception thrown if no table is set
      */
     public function single($table = null, $fields = null)
     {
