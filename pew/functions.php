@@ -836,18 +836,8 @@ function root($path = '')
  */
 function url($path = '')
 {
-    static $base;
-
-    if (!$base) {
-        $router = pew()->request();
-        $base = $router->scheme() 
-              . $router->host() 
-              . ($router->port() ? ':' . $router->port() : '');
-    }
-
-    $url = $base . '/' . ltrim($path, '/');
-    
-    return $url;
+    $path = trim($path, '/');
+    return pew('app_url') . $path;
 }
 
 /**
@@ -876,8 +866,8 @@ function here()
  */
 function www($path = '')
 {
-    $path = ltrim($path, '/');
-    $www_url = rtrim(\pew\Pew::instance()->config()->www_url, '/') . '/' . $path;
+    $path = trim($path, '/');
+    $www_url = rtrim(\pew\Pew::instance()->config()->www_url, '/') . ($path ? '/' . $path : '');
 
     return $www_url;
 }
