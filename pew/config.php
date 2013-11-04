@@ -22,7 +22,8 @@ $cfg = [];
  * @var string Server string. This goes before URL to assemble a full server URL.
  */
 $cfg['host'] = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') 
-             . $_SERVER['SERVER_NAME'];
+             . $_SERVER['SERVER_NAME']
+             . ($_SERVER['SERVER_PORT'] != 80 ? ':' . $_SERVER['SERVER_PORT'] : '');
 
 /**
  * @var string Root path (url), '/' in case of root installation.
