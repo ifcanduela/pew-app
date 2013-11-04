@@ -119,7 +119,7 @@ class App
             if ($defaultView->exists()) {
                 $output = $defaultView->render(null, $view_data);
             } else {
-                throw new ViewTemplateNotFoundException("View file could not be found: {$view->folder()}{$view->template()}");
+                throw new ViewTemplateNotFoundException("View file could not be found: {$view->folder()}/{$view->template()}");
             }
         } else {
             $output = $view->render(null, $view_data);
