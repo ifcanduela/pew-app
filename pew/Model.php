@@ -221,7 +221,6 @@ class Model
      * @param string $relationship_type Either 'child' or 'parent'
      * @param string $alias Name of the relationship
      * @param string|array $fk The name of the FK or a array with [table_name, FK_name]
-     * @param string $table_name Table of the related model
      * @return boolean false if the table does not exist, true otherwise
      */
     protected function add_related_model($relationship_type, $alias, $fk)
