@@ -28,9 +28,9 @@ class Registry implements \Countable, \ArrayAccess
      *
      * Set to public to allow instantiation of multiple registries.
      */
-    public function __construct()
+    public function __construct(array $items = [])
     {
-        
+        $this->items = $items;
     }
 
     /**
@@ -41,42 +41,37 @@ class Registry implements \Countable, \ArrayAccess
      */
     public static function instance()
     {
-        if (!isset(self::$instance)) {
-            self::$instance = new self;
+        if (!isset(static::$instance)) {
+            static::$instance = new static;
         }
 
-        return self::$instance;
+        return static::$instance;
     }
 
     /**
      * Import a set of keys and values into the current registry.
      * 
      * @param array $data Associative array with keys and values to import.
-     * @return int Number of new values
      */
     public function import(array $data)
     {
-        $prev_count = count($this->items);
-
         foreach ($data as $key => $value) {
-            $this->items[$key] = $value;
+            $this->offsetSet($key, $value);
         }
-
-        return count($this->items) - $prev_count;
     }
 
     /**
-     * Checks whether the registry is empty.
+     * Retrieve all the keys stored in the registry.
      * 
-     * @return boolean True if the registry is empty, false otherwise
+     * @return array Array of stored keys
      */
-    public function is_empty()
+    public function keys()
     {
-        return count($this->items) === 0;
+        return array_keys($this->items);
     }
 
     /**
-     * Counts the number of stored items.
+     * Count the number of stored items.
      *
      * Countable implementation.
      * 
@@ -88,27 +83,42 @@ class Registry implements \Countable, \ArrayAccess
     }
 
     /**
-     * Checks if an offset exists.
+     * Check if an offset exists.
      *
      * ArrayAccess implementation.
      * 
-     * @return boolean True if the offset exists, false otherwise
+     * @return bool True if the offset exists, false otherwise
      */
     public function offsetExists($offset)
     {
-        return $this->__isset($offset);
+        return array_key_exists($offset, $this->items);
     }
 
     /**
-     * Gets the value at an offset.
+     * Get the value at an offset.
      *
      * ArrayAccess implementation.
      * 
      * @return mixed The value at the offset.
+     * @throws \InvalidArgumentException When the offset does not exist
      */
     public function offsetGet($offset)
     {
-        return $this->__get($offset);
+        if (!array_key_exists($offset, $this->items)) {
+            throw new \InvalidArgumentException("The key {$offset} is not defined");
+        }
+
+        $value = $this->items[$offset];
+
+        $is_callable = is_object($value) && method_exists($value, '__invoke');
+
+        if (isSet($this)) {
+            $registry = $this;
+        } else {
+            $registry = static::instance();
+        }
+
+        return $is_callable ? $value($registry) : $value;
     }
 
     /**
@@ -120,71 +130,61 @@ class Registry implements \Countable, \ArrayAccess
      */
     public function offsetSet($offset, $value)
     {
-        return $this->__set($offset, $value);
+        $this->items[$offset] = $value;
     }
 
     /**
-     * Removes an offset.
+     * Remove an offset.
      *
      * ArrayAccess implementation.
-     * 
-     * @return boolean True if the offset is removed, false otherwise
+     *
+     * @param string $offset The offset to remove
      */
     public function offsetUnset($offset)
     {
-        return $this->__unset($offset);
+        unset($this->items[$id]);
     }
 
     /**
-     * Sets a value in the registry.
+     * Set a value in the registry.
      * 
-     * @param mixed $key Key for the value
+     * @param string $key Key for the value
      * @param mixed Value to store
      */
     public function __set($key, $value)
     {
-        $this->items[$key] = $value;
+        return $this->offsetSet($key, $value);
     }
 
     /**
-     * Gets a stored value from the registry.
+     * Get a stored value from the registry.
      * 
      * @param mixed $key Key for the value
-     * @return mixed Value stored or NULL
+     * @return mixed Stored value
      */
     public function __get($key)
     {
-        if (array_key_exists($key, $this->items)) {
-            return $this->items[$key];
-        }
-
-        return null;
+        return $this->offsetGet($key);
     }
 
     /**
-     * Checks if a key is in use.
+     * Check if a key is in use.
      * 
      * @param mixed $key Key to check
-     * @return boolean True if the key has been set, false otherwise.
+     * @return bool True if the key has been set, false otherwise.
      */
     public function __isset($key)
     {
-        return array_key_exists($key, $this->items);
+        return $this->offsetExists($key);
     }
 
     /**
-     * Removes a stored value from the registry.
+     * Remove a stored value from the registry.
      * 
      * @param mixed $key Key to delete
-     * @return boolean True on success, true on failure
      */
     public function __unset($key)
     {
-        if (array_key_exists($key, $this->items)) {
-            unset($this->items[$key]);
-            return true;
-        }
-
-        return true;
+        $this->offsetUnset($key);
     }
 }
