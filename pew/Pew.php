@@ -3,11 +3,14 @@
 namespace pew;
 
 # Assorted functions
-require_once __DIR__ . DIRECTORY_SEPARATOR . 'functions.php';
+require_once __DIR__ . '/functions.php';
 # Autoloader class definition
-require_once __DIR__ . DIRECTORY_SEPARATOR . 'Autoloader.php';
+require_once __DIR__ . '/Autoloader.php';
 # Registry class
-require_once __DIR__ . DIRECTORY_SEPARATOR . 'libs' . DIRECTORY_SEPARATOR . 'Registry.php';
+require_once __DIR__ . '/libs/' . 'Registry.php';
+
+# Autoload framework classes
+(new Autoloader('pew', dirname(__DIR__)))->register();
 
 use \pew\libs\Registry as Registry;
 
@@ -52,7 +55,7 @@ class Pew
      */
     protected function __construct()
     {
-        $this->registry = new Registry;
+        $this->registry = Registry::instance();
         $this->config = new Registry;
     }
 
@@ -103,21 +106,18 @@ class Pew
             $appLoader = new Autoloader($app_folder, dirname(realpath($app_folder)));
             $appLoader->register();
             
-            $pewLoader = new Autoloader('pew', dirname(__DIR__));
-            $pewLoader->register();
-            
             $this->registry = Registry::instance();
 
-            $pew_config = require_once __DIR__ . DIRECTORY_SEPARATOR . 'config.php';
+            $pew_config = require_once __DIR__ . '/config.php';
             $this->config->import($pew_config);
 
             # load app/config/{$config}.php
-            $app_config = include getcwd() . DS . $app_folder . DS . 'config' . DS . $config_file . '.php';
+            $app_config = include getcwd() . '/' . $app_folder . '/config/' . $config_file . '.php';
 
             // merge user config with Pew config
             $this->config->import($app_config);
 
-            if (!$this->config->env) {
+            if (!isSet($this->config->env)) {
                 $this->config->env = 'development';
             }
 
@@ -128,8 +128,8 @@ class Pew
             $this->config->app_config = $config_file;
 
             # load app/config/bootstrap.php
-            if (file_exists($this->config->app_folder . '/config' . DS . 'bootstrap.php')) {
-                require $this->config->app_folder . '/config' . DS . 'bootstrap.php';
+            if (file_exists($this->config->app_folder . '/config/bootstrap.php')) {
+                require $this->config->app_folder . '/config/bootstrap.php';
             }
 
             $this->registry->App = new App($app_folder);
@@ -266,23 +266,25 @@ class Pew
         $this->registry = Registry::instance();
 
         if (!isset($this->registry->Database)) {
-            # load app/config/database.php
-            if (file_exists($this->config->app_folder . DS . 'config' . DS . 'database.php')) {
-                $this->config->database_config = include $this->config->app_folder . DS . 'config' . DS . 'database.php';
+            if (!is_array($config)) {
+                # load app/config/database.php
+                if (file_exists($this->config->app_folder . '/config/database.php')) {
+                    $this->config->database_config = include $this->config->app_folder . '/config/database.php';
+                }
+
+                $db_config = $this->config->database_config;
+                $use_db = $db_config['use'];
+
+                if ($use_db !== false) {
+                    $use = is_string($config) ? $config : (!is_string($use_db) ? 'default' : $use_db);
+                }
+                $config = $db_config[$use];
             }
 
-            $db_config = $this->config->database_config;
-            $use_db = $db_config['use'];
-
-            if ($use_db !== false) {
-                $use = is_string($config) ? $config : (!is_string($use_db) ? 'default' : $use_db);
-                
-
-                if (isset($db_config[$use])) {
-                    $this->registry->Database = new libs\Database($db_config[$use]);
-                } else {
-                    throw new \RuntimeException("Database is disabled.");
-                }                
+            if (isset($config)) {
+                $this->registry->Database = new libs\Database($config);
+            } else {
+                throw new \RuntimeException("Database is disabled.");
             }
         }
 
@@ -323,8 +325,8 @@ class Pew
             # fetch the routes configuration
 
             // load app/config/routes.php
-            if (file_exists($this->config->app_folder . DS . 'config' . DS . 'routes.php')) {
-                $routes = include $this->config->app_folder . DS .'config' . DS . 'routes.php';
+            if (file_exists($this->config->app_folder . '/config/routes.php')) {
+                $routes = include $this->config->app_folder . '/config/routes.php';
             }
 
             # instantiate the router object
@@ -411,7 +413,7 @@ class Pew
                           ? $this->config->root_folder
                           : $this->config->app_folder;
 
-            $views_folder = $prefix . DIRECTORY_SEPARATOR . trim($this->config->views_folder, '/\\');
+            $views_folder = $prefix . '/' . trim($this->config->views_folder, '/\\');
 
             $this->registry->{$view_key} = new View($views_folder);
         }
