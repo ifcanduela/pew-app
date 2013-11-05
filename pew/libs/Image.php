@@ -392,7 +392,7 @@ class Image
             throw new ImageNotLoadedException("Image not loaded");
         }
 
-        if (!is_int($w) && !is_int($h)) {
+        if (!is_numeric($w) && !is_numeric($h)) {
             throw new \BadMethodCallException("Image::resize() requires its first or second argument to be integers");
         }
 
