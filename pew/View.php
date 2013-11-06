@@ -40,7 +40,7 @@ class View
      * 
      * @var string
      */
-    protected $layout= 'index';
+    protected $layout= 'default.layout';
 
     /**
      * Templates file extension.
@@ -228,11 +228,11 @@ class View
      */
     public function element($element, $element_data = null)
     {
-        $element_file = $this->folder() . DIRECTORY_SEPARATOR . $element . $this->extension();
+        $element_file = $this->folder() . '/' . $element . $this->extension();
         
         # If the element .php file cannot be found, show an error page.
         if (!file_exists($element_file)) {
-            throw new ViewElementFileNotFound("The element file $element_file could not be found.");
+            throw new ViewElementFileNotFoundException("The element file $element_file could not be found.");
         }
 
         # If there are variables, make them easily available to the template.
