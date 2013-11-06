@@ -272,9 +272,16 @@ class Pew
                 $db_config = $this->config->database_config;
                 $use_db = $db_config['use'];
 
-                if ($use_db !== false) {
-                    $use = is_string($config) ? $config : (!is_string($use_db) ? 'default' : $use_db);
+                if (is_string($config)) {
+                    if (!array_key_exists($config, $db_config)) {
+                        throw new \RuntimeException("Database configuration preset '$config' does not exist");
+                    }
+
+                    $use = $config;
+                } else {
+                    $use = is_string($use_db) ? $use_db : 'default';
                 }
+
                 $config = $db_config[$use];
             }
 

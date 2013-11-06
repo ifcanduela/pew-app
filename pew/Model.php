@@ -8,8 +8,13 @@ namespace pew;
  * @package pew
  * @author ifcanduela <ifcanduela@gmail.com>
  */
-class Model
+class Model implements \ArrayAccess
 {
+    /**
+     * @var string|boolean Database configuration preset to use.
+     */
+    protected $db_config = false;
+
     /**
      * Database abstraction instance.
      *
@@ -39,17 +44,16 @@ class Model
      *
      * @var array
      */
-    protected $_table_data = [];
+    protected $table_data = [];
 
     /**
-     * Current row data.
+     * Current resultset.
      *
-     * Holds an index for each table column. It's accessed by the __set and __get
-     * magic methods.
+     * Holds an index for each record in the last resultset.
      *
      * @var array
      */
-    protected $_row_data = [];
+    protected $record = [];
 
     /**
      * Related child models.
@@ -58,7 +62,7 @@ class Model
      *
      * @var array
      */
-    protected $_related_children = [];
+    protected $related_children = [];
 
     /**
      * Related parent models.
@@ -67,14 +71,14 @@ class Model
      *
      * @var array
      */
-    protected $_related_parents = [];
+    protected $related_parents = [];
 
     /**
      * Whether to query the related tables or not.
      *
      * @var boolean
      */
-    protected $_find_related = false;
+    protected $find_related = false;
 
     /**
      * An associative array of child tables.
@@ -105,11 +109,6 @@ class Model
      * @var array
      */
     protected $belongs_to = [];
-
-    /**
-     * Whether or not the related models have been initialised.
-     */
-    protected $_initialised = false;
 
     /**
      * Fields to retrieve in SELECT statements.
@@ -165,10 +164,14 @@ class Model
      * @param string $table Name of the table
      * @return array An indexed array with all fetched rows, in associative arrays
      */
-    public function __construct($db, $table = null)
+    public function __construct($db = null, $table = null)
     {
         # get the Database class instance
-        $this->db = $db;
+        if ($db) {
+            $this->db = $db;
+        } else {
+            $this->db = Pew::database($this->db_config);
+        }
 
         if (!is_null($table)) {
             $this->table = $table;
@@ -183,12 +186,16 @@ class Model
         }
 
         # some metadata about the table
-        $this->_table_data['name'] = $this->table;
-        $this->_table_data['primary_key'] = $this->db->get_pk($this->table);
-        $this->_table_data['columns'] = $this->db->get_cols($this->table);
+        $this->table_data['name'] = $this->table;
+        $this->table_data['primary_key'] = $this->db->get_pk($this->table);
+        $columns = $this->db->get_cols($this->table);
+        $this->table_data['columns'] = $columns;
+        $this->table_data['column_names'] = array_combine($columns, array_fill(0, count($columns), null));
+
+        $this->record = $this->table_data['column_names'];
 
         if (!$this->primary_key) {
-            $this->primary_key = $this->_table_data['primary_key'];
+            $this->primary_key = $this->table_data['primary_key'];
         }
 
         foreach ($this->belongs_to as $alias => $fk) {
@@ -238,10 +245,10 @@ class Model
         if ($this->db->table_exists($table)) {
             switch ($relationship_type) {
                 case 'child':
-                        $this->_related_children[$alias] = compact('table', 'foreign_key', 'alias', 'model');
+                        $this->related_children[$alias] = compact('table', 'foreign_key', 'alias', 'model');
                     break;
                 case 'parent':
-                        $this->_related_parents[$alias] = compact('table', 'foreign_key', 'alias', 'model');
+                        $this->related_parents[$alias] = compact('table', 'foreign_key', 'alias', 'model');
                     break;
                 default:
                     throw new \InvalidArgumentException("The relationship type $relationship_type is not supported.");
@@ -291,8 +298,8 @@ class Model
      */
     public function remove_child($table)
     {
-        if (array_key_exists($table, $this->_related_children)) {
-            unset($this->_related_children[$table]);
+        if (array_key_exists($table, $this->related_children)) {
+            unset($this->related_children[$table]);
         }
 
         return $this;
@@ -306,40 +313,11 @@ class Model
      */
     public function remove_parent($table)
     {
-        if (array_key_exists($table,  $this->_related_parents)) {
-            unset($this->_related_parents[$table]);
+        if (array_key_exists($table,  $this->related_parents)) {
+            unset($this->related_parents[$table]);
         }
 
         return $this;
-    }
-
-    /**
-     * Getter for related tables.
-     *
-     * @param string $field Field name to retrieve
-     * @return mixed Field value if field exists, false otherwise
-     */
-    public function __get($related_model_alias)
-    {
-        $model_info = null;
-
-        if (array_key_exists($related_model_alias, $this->_related_parents)) {
-            $model_info =& $this->_related_parents[$related_model_alias];
-        }
-
-        if (array_key_exists($related_model_alias, $this->_related_children)) {
-            $model_info =& $this->_related_children[$related_model_alias];
-        }
-
-        if ($model_info) {
-            if (is_null($model_info['model'])) {
-                $model_info['model'] = Pew::instance()->model($model_info['table']);
-            }
-            
-            return $model_info['model'];
-        } else {
-            return null;
-        }
     }
 
     /**
@@ -439,43 +417,19 @@ class Model
         $this->reset();
 
         if ($result) {
-            $id = $result[$this->_table_data['primary_key']];
-
-            # map the fields to the $_table_data['data'] array
-            foreach ($result as $key => $value) {
-                $this->_table_data['data'][$key] = $value;
-            }
-
-            if ($this->_find_related) {
-                # disable the find_related behavior for later calls
-                $this->_find_related = false;
-
-                # search for child tables
-                foreach ($this->_related_children as $alias => $child) {
-                    # use the associated model to find related items
-                    $result[$alias] = $this->$alias->find_all([$child['foreign_key'] => $id]);
-                }
-
-                # search for parent tables
-                foreach ($this->_related_parents as $alias => $parent) {
-                    # use the associated model to find related items
-                    $result[$alias] = $this->$alias->find($result[$parent['foreign_key']]);
-                }
-                
-                # re-enable the find_related behavior for later calls
-                $this->_find_related = true;
-            }
+            $this->record = array_merge($this->table_data['column_names'], (array) $result);
         } else {
             # if there was no result, return false
-            $this->_table_data['data'] = null;
-            $result = false;
+            $this->table_data['data'] = [];
+            $result = $this->table_data['column_names'];
+            return false;
         }
 
         if (method_exists($this, 'after_find')) {
-            $result = current($this->after_find([$result]));
+            $this->record = current($this->after_find([$result]));
         }
 
-        return $result;
+        return $this;
     }
 
     /**
@@ -503,32 +457,12 @@ class Model
         $this->reset();
 
         if ($result) {
-            if ($this->_find_related) {
-                # disable the find_related behavior for later calls
-                $this->_find_related = false;
-
-                # search child and parent tables
-                foreach ($result as $key => $value) {
-                    $id = $value[$this->primary_key];
-
-                    foreach ($this->_related_children as $alias => $child) {
-                        # prepare the find_all call
-                        $this->$alias->where([$child['foreign_key'] => $value[$this->_table_data['primary_key']]]);
-                        # use the associated model to find related items
-                        $result[$key][$alias] = $this->$alias->find_all();
-                    }
-
-                    foreach ($this->_related_parents as $alias => $parent) {
-                        # use the associated model to find related items
-                        $result[$key][$parent['alias']] = $this->$alias->find($value[$parent['foreign_key']]);
-                    }
-                }
-
-                # re-enable the find_related behavior for later calls
-                $this->_find_related = true;
+            foreach ($result as $key => $value) {
+                $result[$key] = clone $this;
+                $result[$key]->record = $value;
             }
         } else {
-            # return empty array if there was no result
+            # return an empty array if there was no result
             $result = [];
         }
 
@@ -537,6 +471,33 @@ class Model
         }
 
         return $result;
+    }
+
+    /**
+     * Get an empty record.
+     * 
+     * @return array An associative array of column names and null values
+     */
+    public function blank()
+    {
+        return $this->table_data['column_names'];
+    }
+
+    /**
+     * Get or set the current record values.
+     *
+     * This method will only update values for fields set in the $attributes argument.
+     * 
+     * @param array $attributes Associative array of column names and values
+     * @return array An associative array of current column names and values
+     */
+    public function attributes(array $attributes = null)
+    {
+        if (!is_null($attributes)) {
+            $this->record = array_merge($this->record, $attributes);
+        }
+
+        return $this->record;
     }
 
     /**
@@ -574,22 +535,26 @@ class Model
      * @param array $data An associative array with database fields and values
      * @return mixed The saved item on success, false otherwise
      */
-    public function save($data)
+    public function save($data = null)
     {
-        $record = [];
-
-        if (!$this->db->is_writable) {
-            throw new \RuntimeException("Database file is not writable.");
+        if (is_null($data)) {
+            $data = $this->record;
         }
 
         if (method_exists($this, 'before_save')) {
             $data = $this->before_save($data);
         }
 
+        $record = [];
+
         foreach ($data as $key => $value) {
-            if (in_array($key, $this->_table_data['columns'])) {
-                $record[$key] = $value;
+            if (in_array($key, $this->table_data['columns'])) {
+                $record[$key]->record = $value;
             }
+        }
+
+        if (!$this->db->is_writable) {
+            throw new \RuntimeException("Database file is not writable.");
         }
         
         if (isset($record[$this->primary_key])) {
@@ -642,24 +607,6 @@ class Model
     }
 
     /**
-     * Enables or disables the recursive find functionality.
-     *
-     * If the $status argument is not true or false, this method just returns
-     * the status.
-     *
-     * @param bool $status Status
-     * @return bool The status of the functionality
-     */
-    public function find_related($status = null)
-    {
-        if (is_bool($status)) {
-            $this->_find_related = $status;
-        }
-
-        return $this->_find_related;
-    }
-
-    /**
      * Returns the primary key value created in the last INSERT statement.
      *
      * @return mixed The primaary key value of the last inserted row
@@ -677,8 +624,8 @@ class Model
      */
     public function select($fields)
     {
-        $this->_where = $conditions;
-        $this->db->where($conditions);
+        $this->_fields = $fields;
+        $this->db->fields($fields);
 
         return $this;
     }
@@ -730,7 +677,6 @@ class Model
                 return $this->limit;
             }
         }
-
     }
 
     /**
@@ -797,21 +743,41 @@ class Model
         }
     }
 
+    /**
+     * Start a PDO transaction.
+     * 
+     * @return bool True on success, false on failure
+     */
     public function begin()
     {
         return $this->db->pdo->beginTransaction();
     }
 
+    /**
+     * Commit a PDO transaction.
+     * 
+     * @return bool True on success, false on failure
+     */
     public function commit()
     {
         return $this->db->pdo->commit();
     }
 
+    /**
+     * Roll back a PDO transaction.
+     * 
+     * @return bool True on success, false on failure
+     */
     public function rollback()
     {
         return $this->db->pdo->rollback();
     }
 
+    /**
+     * Reset the SQL clauses.
+     * 
+     * @return Model The model instance
+     */
     protected function reset()
     {
         $this->_order_by = null;
@@ -820,5 +786,116 @@ class Model
         $this->_where = null;
         $this->_limit = null;
         $this->_fields = '*';
+
+        return $this;
+    }
+
+    /**
+     * Check if an column or related model exists.
+     * 
+     * @return bool True if the offset exists, false otherwise
+     */
+    public function offsetExists($offset)
+    {
+        $has_column = array_key_exists($offset, $this->table_data['column_names']);
+        $has_related_parent = array_key_exists($offset, $this->related_parents);
+        $has_related_child = array_key_exists($offset, $this->related_children);
+
+        return $has_column || $has_related_parent || $has_related_child;
+    }
+
+    /**
+     * Get a record field value or related model.
+     * 
+     * @return mixed The value at the offset.
+     * @throws \InvalidArgumentException When the offset does not exist
+     */
+    public function offsetGet($offset)
+    {
+        if (!$this->offsetExists($offset)) {
+            throw new \InvalidArgumentException("Invalid model field " . get_class($this) . '::' . $offset);
+        }
+
+        if (isSet($this->record[$offset])) {
+            return $this->record[$offset];
+        }
+
+        if (isSet($this->related_children[$offset])) {
+            $m = Pew::instance()->model($this->related_children[$offset]['table']);
+            $condition = [$this->related_children[$offset]['foreign_key'] => $this->record[$this->table_data['primary_key']]];
+            return $m->where($condition)->find_all();
+        }
+
+        if (isSet($this->related_parents[$offset])) {
+            $m = Pew::instance()->model($this->related_parents[$offset]['table']);
+            return $m->find($this->record[$this->related_parents[$offset]['foreign_key']]);
+        }
+
+        return $this->record[$offset];
+    }
+
+    /**
+     * Set the value of a record column.
+     * 
+     * @return void
+     */
+    public function offsetSet($offset, $value)
+    {
+        $this->record[$offset] = $value;
+    }
+
+    /**
+     * Remove an offset.
+     *
+     * ArrayAccess implementation.
+     *
+     * @param string $offset The offset to remove
+     */
+    public function offsetUnset($offset)
+    {
+        unset($this->record[$id]);
+    }
+
+    /**
+     * Set a value in the registry.
+     * 
+     * @param string $key Key for the value
+     * @param mixed Value to store
+     */
+    public function __set($key, $value)
+    {
+        return $this->offsetSet($key, $value);
+    }
+
+    /**
+     * Get a stored value from the registry.
+     * 
+     * @param mixed $key Key for the value
+     * @return mixed Stored value
+     */
+    public function __get($key)
+    {
+        return $this->offsetGet($key);
+    }
+
+    /**
+     * Check if a key is in use.
+     * 
+     * @param mixed $key Key to check
+     * @return bool True if the key has been set, false otherwise.
+     */
+    public function __isset($key)
+    {
+        return $this->offsetExists($key);
+    }
+
+    /**
+     * Remove a stored value from the registry.
+     * 
+     * @param mixed $key Key to delete
+     */
+    public function __unset($key)
+    {
+        $this->offsetUnset($key);
     }
 }

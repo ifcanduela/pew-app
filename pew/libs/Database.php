@@ -39,6 +39,16 @@ class Database
     public $pdo = null;
 
     /**
+     * @var int PDO statement fetch mode.
+     */
+    public $fetch_mode = \PDO::FETCH_ASSOC;
+
+    /**
+     * @var string PDO statement fetch class.
+     */
+    public $fetch_class;
+
+    /**
      * @var bool Connection established flag.
      */
     private $is_connected = false;
@@ -156,7 +166,7 @@ class Database
     /**
      * Connects to the configured database provider.
      *
-     * @returns bool True if the connection was successful, false otherwise
+     * @return bool True if the connection was successful, false otherwise
      */
     protected function connect()
     {
@@ -600,10 +610,9 @@ class Database
         }
         
         $query = $this->get_query('SELECT');
-        
         $stm = $this->run_query($query);
-        
         $this->reset();
+
         return $stm->fetchColumn();
     }
 
@@ -634,11 +643,16 @@ class Database
         }
         
         $query = $this->get_query('SELECT');
-        
         $stm = $this->run_query($query);
-        
         $this->reset();
-        return $stm->fetch(\PDO::FETCH_ASSOC);
+
+        if ($this->fetch_class) {
+            $stm->setFetchMode(\PDO::FETCH_CLASS, $this->fetch_class);
+        } else {
+            $stm->setFetchMode($this->fetch_mode);
+        }
+
+        return $stm->fetch();
     }
 
     /**
@@ -664,11 +678,16 @@ class Database
         }
         
         $query = $this->get_query('select', $this->from);
-        
         $stm = $this->run_query($query);
-        
         $this->reset();
-        return $stm->fetchAll(\PDO::FETCH_ASSOC);
+
+        if ($this->fetch_class) {
+            $stm->setFetchMode(\PDO::FETCH_CLASS, $this->fetch_class);
+        } else {
+            $stm->setFetchMode($this->fetch_mode);
+        }
+
+        return $stm->fetchAll();
     }
 
     /**
