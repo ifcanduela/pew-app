@@ -57,6 +57,8 @@ class Pew
     {
         $this->registry = Registry::instance();
         $this->config = new Registry;
+
+        $this->init();
     }
 
     public static function instance()
@@ -66,6 +68,12 @@ class Pew
         }
 
         return self::$instance;
+    }
+
+    protected function init()
+    {
+        $pew_config = require_once __DIR__ . '/config.php';
+        $this->config->import($pew_config);
     }
 
     /**
@@ -105,11 +113,6 @@ class Pew
         if (!isset($this->registry->App)) {
             $appLoader = new Autoloader($app_folder, dirname(realpath($app_folder)));
             $appLoader->register();
-            
-            $this->registry = Registry::instance();
-
-            $pew_config = require_once __DIR__ . '/config.php';
-            $this->config->import($pew_config);
 
             # load app/config/{$config}.php
             $app_config = include getcwd() . '/' . $app_folder . '/config/' . $config_file . '.php';
@@ -162,9 +165,7 @@ class Pew
      * @throws InvalidArgumentException When no current controller exists and no class name is provided
      */
     public function controller($controller_name = null, \pew\libs\Request $request = null)
-    {   
-        $this->registry = Registry::instance();
-
+    {
         # check if the class name is omitted
         if (!isset($controller_name)) {
             if (isset($this->registry->CurrentRequestController)) {
@@ -205,8 +206,6 @@ class Pew
      */
     public function model($table_name)
     {
-        $this->registry = Registry::instance();
-
         $class_name = $this->config->app_namespace . '\\models\\' . file_name_to_class_name($table_name) . 'Model';
         $class_base_name = class_base_name($class_name);
 
@@ -263,8 +262,6 @@ class Pew
      */
     public function database($config = null)
     {
-        $this->registry = Registry::instance();
-
         if (!isset($this->registry->Database)) {
             if (!is_array($config)) {
                 # load app/config/database.php
@@ -299,8 +296,6 @@ class Pew
      */
     public function request($uri_string = null)
     {
-        $this->registry = Registry::instance();
-
         if (!isset($this->registry->Request)) {
             # instantiate the request object
             $this->registry->Request = $request = new libs\Request();
@@ -318,8 +313,6 @@ class Pew
      */
     public function router($uri_string = null)
     {
-        $this->registry = Registry::instance();
-
         if (!isset($this->registry->Router)) {
             $routes = [];
             # fetch the routes configuration
@@ -347,8 +340,6 @@ class Pew
      */
     public function auth()
     {
-        $this->registry = Registry::instance();
-
         if (!isset($this->registry->Auth)) {
             $database = self::database();
             $session = self::session();
@@ -368,8 +359,6 @@ class Pew
      */
     public function log()
     {
-        $this->registry = Registry::instance();
-
         if (!isset($this->registry->Log)) {
             $this->registry->Log = new PewLog($this->config->log_level);
         }
@@ -384,8 +373,6 @@ class Pew
      */
     public function session()
     {
-        $this->registry = Registry::instance();
-
         if (!isset($this->registry->Session)) {
             $this->registry->Session = new \pew\libs\Session();
         }
