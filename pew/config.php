@@ -21,9 +21,13 @@ $cfg = [];
 /**
  * @var string Server string. This goes before URL to assemble a full server URL.
  */
-$cfg['host'] = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') 
-             . $_SERVER['SERVER_NAME']
-             . ($_SERVER['SERVER_PORT'] != 80 ? ':' . $_SERVER['SERVER_PORT'] : '');
+if (isSet($_SERVER['SERVER_NAME'])) {
+    $cfg['host'] = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') 
+                 . $_SERVER['SERVER_NAME']
+                 . ($_SERVER['SERVER_PORT'] != 80 ? ':' . $_SERVER['SERVER_PORT'] : '');
+} else {
+    $cfg['host'] = php_sapi_name();
+}
 
 /**
  * @var string Root path (url), '/' in case of root installation.
@@ -61,6 +65,11 @@ $cfg['www_folder'] = getcwd() . DS . 'www';
 $cfg['www_url'] = $cfg['app_url'] . 'www/';
 
 /**
+ * @var default namespace for application classes
+ */
+$cfg['app_namespace'] = 'app';
+
+/**
  * @var string Framework version numbers.
  */
 $cfg['version_major'] = '0';
@@ -72,7 +81,9 @@ $cfg['version_string'] = "{$cfg['version_major']}.{$cfg['version_minor']}.{$cfg[
 /**
  * @var boolean Whether the App is running on the localhost space.
  */
-$cfg['localhost'] = in_array($_SERVER['REMOTE_ADDR'], array('localhost', '127.0.0.1', '::1'));
+$cfg['localhost'] = isSet($_SERVER['REMOTE_ADDR']) 
+                  ? in_array($_SERVER['REMOTE_ADDR'], array('localhost', '127.0.0.1', '::1')) 
+                  : php_sapi_name() == 'cli';
 
 /**
  * @var string Option to use a prefix for action method names in controllers.
@@ -108,7 +119,7 @@ $cfg['libraries_folder'] = 'libs';
  */
 $cfg['view_ext'] = '.php';
 $cfg['element_ext'] = '.php';
-$cfg['layout_ext'] = '.layout.php';
+$cfg['layout_ext'] = '.php';
 $cfg['class_ext'] = '.php';
 
 /**
@@ -124,7 +135,7 @@ $cfg['default_action'] = 'index';
 /**
  * @var string Default layout to use if none is specified (no extension)
  */
-$cfg['default_layout'] = 'default';
+$cfg['default_layout'] = 'default.layout';
 
 /**
  * @var array Configured routes.
