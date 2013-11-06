@@ -60,7 +60,7 @@ class App
         $view->layout($this->pew->config()->default_layout);
         
         # instantiate the controller
-        $controller = $this->pew->controller($controller_name, $request);
+        $controller = $this->pew->controller($controller_name);
         
         # check controller instantiation
         if (!is_object($controller)) {
@@ -114,12 +114,12 @@ class App
     {
         if (!$view->exists()) {
             $defaultView = clone $view;
-            $defaultView->folder($this->pew->config()->system_folder . DIRECTORY_SEPARATOR . 'views');
+            $defaultView->folder($this->pew->config()->system_folder . '/views');
 
             if ($defaultView->exists()) {
                 $output = $defaultView->render(null, $view_data);
             } else {
-                throw new ViewTemplateNotFoundException("View file could not be found: {$view->folder()}/{$view->template()}");
+                throw new ViewTemplateNotFoundException("View file could not be found: {$view->folder()}/{$view->template()}{$view->template()}");
             }
         } else {
             $output = $view->render(null, $view_data);
@@ -138,7 +138,7 @@ class App
             $defaultLayout->folder($this->pew->config()->system_folder . 'views');
 
             if (!$defaultLayout->exists()) {
-                 throw new \Exception("Layout file could not be found: {$layout->folder()}{$layout->template()}");
+                 throw new \Exception("Layout file could not be found: {$layout->folder()}/{$layout->template()}{$layout->extension()}");
             }
 
             $layout = $defaultLayout;
