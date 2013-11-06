@@ -298,4 +298,9 @@ abstract class Controller
         
         throw new \RuntimeException("Property Controller::\$$property does not exist");
     }
+
+    public function __invoke($action, $params)
+    {
+        return $this->_action($action, $params);
+    }
 }
