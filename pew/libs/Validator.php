@@ -54,7 +54,7 @@ class Validator
     }
 
     /**
-     * Validate an item agains the current ruleset.
+     * Validate an item against the current ruleset.
      * 
      * @param array $item Item to validate
      * @return bool True id the validation succeeded, false on failure
@@ -106,6 +106,18 @@ class Validator
     public function errors()
     {
         return $this->errors;
+    }
+
+    /**
+     * Check the field has a non-null value.
+     * 
+     * @param array $item Item to validate
+     * @param string $field Field to validate
+     * @return bool True if the value is correct, false otherwise
+     */
+    protected function validate_not_null($item, $field)
+    {
+        return !is_null($item[$field]);
     }
 
     /**
