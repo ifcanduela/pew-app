@@ -27,7 +27,7 @@ class Users extends \pew\Controller
                 # check if passwords match
                 if ($user['password'] === crypt($post['password'], $user['password'])) {
                     unset($user['password']);
-                    $this->session->user = $user;
+                    $this->session->user = $user->attributes();
                     redirect('');
                 }
             }
