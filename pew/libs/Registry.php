@@ -21,7 +21,7 @@ class Registry implements \Countable, \ArrayAccess
     /** 
      * @var array Key/value list
      */
-    private $items = array();
+    private $items = [];
 
     /**
      * Constructor.
@@ -142,7 +142,7 @@ class Registry implements \Countable, \ArrayAccess
      */
     public function offsetUnset($offset)
     {
-        unset($this->items[$id]);
+        unset($this->items[$offset]);
     }
 
     /**
