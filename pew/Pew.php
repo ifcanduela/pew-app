@@ -17,10 +17,8 @@ use \pew\libs\Registry as Registry;
 /**
  * An object store.
  * 
- * The Pew class is a hybrid registry/factory that contains singleton-like
- * instances of classes in the framework. It's implemented as a collection
- * of static methods that return instances of Controllers, Models and other 
- * classes.
+ * The Pew class is a registry/factory that can build instances of classes
+ * in the framework.
  * 
  * @package pew
  * @author ifcanduela <ifcanduela@gmail.com>
@@ -53,7 +51,7 @@ class Pew
      *
      * @throws Exception
      */
-    protected function __construct()
+    public function __construct()
     {
         $this->registry = Registry::instance();
         $this->config = new Registry;
@@ -61,6 +59,11 @@ class Pew
         $this->init();
     }
 
+    /**
+     * Create a Pew instance.
+     * 
+     * @return pew\Pew
+     */
     public static function instance()
     {
         if (!isSet(self::$instance)) {
@@ -70,10 +73,15 @@ class Pew
         return self::$instance;
     }
 
+    /**
+     * Load the framework configuration file.
+     */
     protected function init()
     {
-        $pew_config = require_once __DIR__ . '/config.php';
-        $this->config->import($pew_config);
+        if (file_exists(__DIR__ .'/config.php')) {
+            $pew_config = require_once __DIR__ . '/config.php';
+            $this->config->import($pew_config);
+        }
     }
 
     /**

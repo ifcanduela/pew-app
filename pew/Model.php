@@ -8,7 +8,7 @@ namespace pew;
  * @package pew
  * @author ifcanduela <ifcanduela@gmail.com>
  */
-class Model implements \ArrayAccess
+class Model implements \ArrayAccess, \IteratorAggregate
 {
     /**
      * @var string|boolean Database configuration preset to use.
@@ -167,22 +167,18 @@ class Model implements \ArrayAccess
     public function __construct($db = null, $table = null)
     {
         # get the Database class instance
-        if ($db) {
-            $this->db = $db;
-        } else {
-            $this->db = Pew::database($this->db_config);
-        }
+        $this->db = $db ?: Pew::database($this->db_config);
 
         if (!is_null($table)) {
             $this->table = $table;
         } elseif (class_base_name(get_class($this)) === 'Model') {
             # if this is an instance of the Model class, get the
             # table from the $table parameter
-            throw new \Exception('Model class must be atttached to a database table.');
+            throw new \Exception('Model class must be attached to a database table.');
         } elseif (!$this->table) {
             # else, if $table is not set in the Model class file,
             # guess the table name
-            $this->table = str_replace('_model', '', class_name_to_file_name(get_class($this)));
+            $this->table = str_replace('_model', '', class_name_to_file_name(basename(get_class($this))));
         }
 
         # some metadata about the table
@@ -192,6 +188,7 @@ class Model implements \ArrayAccess
         $this->table_data['columns'] = $columns;
         $this->table_data['column_names'] = array_combine($columns, array_fill(0, count($columns), null));
 
+        # initialize an empty record
         $this->record = $this->table_data['column_names'];
 
         if (!$this->primary_key) {
@@ -199,11 +196,11 @@ class Model implements \ArrayAccess
         }
 
         foreach ($this->belongs_to as $alias => $fk) {
-            $this->add_related_model('parent', $alias, $fk);
+            $this->attach('parent', $alias, $fk);
         }
 
         foreach ($this->has_many as $alias => $fk) {
-            $this->add_related_model('child', $alias, $fk);
+            $this->attach('child', $alias, $fk);
         }
     }
 
@@ -230,7 +227,7 @@ class Model implements \ArrayAccess
      * @param string|array $fk The name of the FK or a array with [table_name, FK_name]
      * @return boolean false if the table does not exist, true otherwise
      */
-    protected function add_related_model($relationship_type, $alias, $fk)
+    protected function attach($relationship_type, $alias, $fk)
     {
         $table = $alias;
 
@@ -270,7 +267,7 @@ class Model implements \ArrayAccess
      */
     public function add_child($table, $foreign_key)
     {
-        $this->add_related_model('child', $table, $foreign_key);
+        $this->attach('child', $table, $foreign_key);
 
         return $this;
     }
@@ -285,7 +282,7 @@ class Model implements \ArrayAccess
      */
     public function add_parent($table, $foreign_key)
     {
-        $this->add_related_model('parent', $table, $foreign_key);
+        $this->attach('parent', $table, $foreign_key);
 
         return $this;
     }
@@ -293,13 +290,13 @@ class Model implements \ArrayAccess
     /**
      * Removes a has-many relationship from the model.
      *
-     * @param string $table The related table
+     * @param string $alias The relationship alias
      * @return Model The model object
      */
-    public function remove_child($table)
+    public function remove_child($alias)
     {
-        if (array_key_exists($table, $this->related_children)) {
-            unset($this->related_children[$table]);
+        if (array_key_exists($alias, $this->related_children)) {
+            unset($this->related_children[$alias]);
         }
 
         return $this;
@@ -308,13 +305,13 @@ class Model implements \ArrayAccess
     /**
      * Removes a belongs-to relationship from the model.
      *
-     * @param type $table The related table
+     * @param type $alias The relationship alias
      * @return Model The model object
      */
-    public function remove_parent($table)
+    public function remove_parent($alias)
     {
-        if (array_key_exists($table,  $this->related_parents)) {
-            unset($this->related_parents[$table]);
+        if (array_key_exists($alias,  $this->related_parents)) {
+            unset($this->related_parents[$alias]);
         }
 
         return $this;
@@ -342,6 +339,33 @@ class Model implements \ArrayAccess
         } else {
             throw new \BadMethodCallException("Invalid method " . get_class($this) . "::$field() called.");
         }
+    }
+
+    /**
+     * Get an empty record.
+     * 
+     * @return array An associative array of column names and null values
+     */
+    public function blank()
+    {
+        return $this->table_data['column_names'];
+    }
+
+    /**
+     * Get or set the current record values.
+     *
+     * This method will only update values for fields set in the $attributes argument.
+     * 
+     * @param array $attributes Associative array of column names and values
+     * @return array An associative array of current column names and values
+     */
+    public function attributes(array $attributes = null)
+    {
+        if (!is_null($attributes)) {
+            $this->record = array_merge($this->record, $attributes);
+        }
+
+        return $this->record;
     }
 
     /**
@@ -474,33 +498,6 @@ class Model implements \ArrayAccess
     }
 
     /**
-     * Get an empty record.
-     * 
-     * @return array An associative array of column names and null values
-     */
-    public function blank()
-    {
-        return $this->table_data['column_names'];
-    }
-
-    /**
-     * Get or set the current record values.
-     *
-     * This method will only update values for fields set in the $attributes argument.
-     * 
-     * @param array $attributes Associative array of column names and values
-     * @return array An associative array of current column names and values
-     */
-    public function attributes(array $attributes = null)
-    {
-        if (!is_null($attributes)) {
-            $this->record = array_merge($this->record, $attributes);
-        }
-
-        return $this->record;
-    }
-
-    /**
      * Count the rows that fit the criteria.
      *
      * @param array $where An associative array with field name/field value
@@ -547,9 +544,9 @@ class Model implements \ArrayAccess
 
         $record = [];
 
-        foreach ($data as $key => $value) {
-            if (in_array($key, $this->table_data['columns'])) {
-                $record[$key]->record = $value;
+        foreach ($this->table_data['columns'] as  $key) {
+            if (isSet($key, $data)) {
+                $record[$key] = $data[$key];
             }
         }
 
@@ -558,7 +555,7 @@ class Model implements \ArrayAccess
         }
         
         if (isset($record[$this->primary_key])) {
-            # if $id is set, preform an UPDATE
+            # if $id is set, perform an UPDATE
             $result = $this->db->set($record)->where([$this->primary_key => $record[$this->primary_key]])->update($this->table);
             $result = $this->db->where([$this->primary_key => $record[$this->primary_key]])->single($this->table);
         } else {
@@ -604,6 +601,31 @@ class Model implements \ArrayAccess
             # no valid configuration
             throw new \RuntimeException('Delete requires conditions or parameters');
         }
+    }
+
+    /**
+     * Validate the data agains a validator.
+     * 
+     * @param  [type] $record [description]
+     * @return [type]         [description]
+     */
+    public function validate($record = null, array $rules = null)
+    {
+        if (is_null($rules)) {
+            if (!property_exists($this, 'rules')) {
+                throw new \RuntimeException("No valdation rules configured for model " . get_class($this));
+            } else {
+                $rules = $this->rules;
+            }
+        }
+
+        if (is_null($record)) {
+            $record = $this->record;
+        }
+
+        $validator = new \pew\libs\Validator($rules);
+
+        return $validator->validate($record);
     }
 
     /**
@@ -797,7 +819,7 @@ class Model implements \ArrayAccess
      */
     public function offsetExists($offset)
     {
-        $has_column = array_key_exists($offset, $this->table_data['column_names']);
+        $has_column = array_key_exists($offset, $this->record);
         $has_related_parent = array_key_exists($offset, $this->related_parents);
         $has_related_child = array_key_exists($offset, $this->related_children);
 
@@ -821,14 +843,28 @@ class Model implements \ArrayAccess
         }
 
         if (isSet($this->related_children[$offset])) {
-            $m = Pew::instance()->model($this->related_children[$offset]['table']);
-            $condition = [$this->related_children[$offset]['foreign_key'] => $this->record[$this->table_data['primary_key']]];
-            return $m->where($condition)->find_all();
+            $related_model = Pew::instance()->model($this->related_children[$offset]['table']);
+            $fk = $this->record[$this->primary_key];
+            
+            if (!is_null($fk)) {
+                $condition = [$this->related_children[$offset]['foreign_key'] => $fk];
+                $this->record[$offset] = $related_model->where($condition)->find_all();
+                return $this->record[$offset];
+            } else {
+                return $related_model;
+            }
         }
 
         if (isSet($this->related_parents[$offset])) {
-            $m = Pew::instance()->model($this->related_parents[$offset]['table']);
-            return $m->find($this->record[$this->related_parents[$offset]['foreign_key']]);
+            $related_model = Pew::instance()->model($this->related_parents[$offset]['table']);
+            $pk = $this->record[$this->related_parents[$offset]['foreign_key']];
+
+            if (!is_null($pk)) {
+                $this->record[$offset] = $related_model->find($pk);
+                return $this->record[$offset];
+            } else {
+                return $related_model;
+            }
         }
 
         return $this->record[$offset];
@@ -897,5 +933,15 @@ class Model implements \ArrayAccess
     public function __unset($key)
     {
         $this->offsetUnset($key);
+    }
+
+    /**
+     * Allow iteration over the current record fields.
+     * 
+     * @return ArrayIterator
+     */
+    public function getIterator()
+    {
+        return new \ArrayIterator($this->record);
     }
 }
