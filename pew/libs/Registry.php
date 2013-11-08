@@ -61,6 +61,16 @@ class Registry implements \Countable, \ArrayAccess
     }
 
     /**
+     * Export all keys and values in the current registry.
+     * 
+     * @return array An associative array
+     */
+    public function export()
+    {
+        return $this->items;
+    }
+
+    /**
      * Retrieve all the keys stored in the registry.
      * 
      * @return array Array of stored keys
