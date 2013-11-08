@@ -2,6 +2,8 @@
 
 namespace pew;
 
+use \pew\libs\Registry;
+
 class ViewException extends \Exception {}
 class ViewTemplateNotFoundException extends ViewException {}
 class ViewElementFileNotFoundException extends ViewTemplateNotFoundException {}
@@ -12,7 +14,7 @@ class ViewElementFileNotFoundException extends ViewTemplateNotFoundException {}
  * @package pew
  * @author ifcanduela <ifcanduela@gmail.com>
  */
-class View
+class View extends \pew\libs\Registry
 {
     /**
      * Render the view or not.
@@ -48,13 +50,6 @@ class View
      * @var string
      */
     protected $extension = '.php';
-
-    /**
-     * Data items for the template.
-     * 
-     * @var array
-     */
-    protected $data = [];
     
     /**
      * Creates a View object based on a folder.
@@ -91,8 +86,8 @@ class View
             throw new ViewTemplateNotFoundException("Template {$template_file} not found");
         }
 
-        $this->data = array_merge($this->data, $data);
-        extract($this->data);
+        $view_data = array_merge($this->export(), $data);
+        extract($view_data);
 
         # Output the view and save it into a buffer.
         ob_start();
@@ -195,31 +190,6 @@ class View
     }
 
     /**
-     * Set or get view data.
-     *
-     * This function return all current view items if no arguments are passed.
-     *
-     * When creating or updating a data item, the View object is returned for chaining.
-     * 
-     * @param string $key Data item key.
-     * @param mixed $value Data item value
-     * @return mixed Data item value
-     */
-    public function data($key = null, $value = null)
-    {
-        if (is_null($key)) {
-            return $this->data;
-        } elseif (!is_null($value)) {
-            $this->data[$key] = $value;
-            return $this;
-        } elseif (array_key_exists($key, $this->data)) {
-            return $this->data[$key];
-        }
-
-        return null;
-    }
-    
-    /**
      * Load and output a snippet into the current view.
      * 
      * @param string $element The snippet to be loaded, relative to the templates folder
@@ -245,54 +215,5 @@ class View
         
         # Render the element.
         require $element_file;
-    }
-
-    /**
-     * Set view data directly.
-     * 
-     * @param string $key Data item key
-     * @param mixed $value Data item value
-     */
-    public function __set($key, $value)
-    {
-        $this->data[$key] = $value;
-    }
-
-    /**
-     * Get view data item value.
-     * 
-     * @param string $key Data item key
-     * @return mixed Data item value
-     */
-    public function __get($key)
-    {
-        if (array_key_exists($key, $this->data)) {
-            return $this->data[$key];
-        }
-
-        return null;
-    }
-
-    /**
-     * Check if a data item has been created.
-     * 
-     * @param string $key Data item key
-     * @return boolean
-     */
-    public function __isset($key)
-    {
-        return array_key_exists($key, $this->data);
-    }
-
-    /**
-     * Remove a data item.
-     * 
-     * @param string $key Data item key
-     */
-    public function __unset($key)
-    {
-        if (array_key_exists($key, $this->data)) {
-            unset($this->data[$key]);
-        }
     }
 }
