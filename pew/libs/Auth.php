@@ -1,6 +1,6 @@
 <?php 
 
-namespace pew;
+namespace pew\libs;
 
 /**
  * User login data and procedures.
