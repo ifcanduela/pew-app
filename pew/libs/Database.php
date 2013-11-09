@@ -168,7 +168,7 @@ class Database
      *
      * @return bool True if the connection was successful, false otherwise
      */
-    protected function connect()
+    public function connect()
     {
         if (!$this->is_connected) {
             extract($this->config);
@@ -201,6 +201,12 @@ class Database
         $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
         return $this->is_connected;
+    }
+
+    public function disconnect()
+    {
+        $this->pdo = null;
+        $this->is_connected = false;
     }
 
     /**

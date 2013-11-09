@@ -336,9 +336,11 @@ class Model implements \ArrayAccess, \IteratorAggregate
             list(, $method, $field) = $matches;
 
             return $this->$method([$field => $value]);
-        } else {
-            throw new \BadMethodCallException("Invalid method " . get_class($this) . "::$field() called.");
+        } elseif ($model = Pew::instance()->model($field)) {
+            return $model;
         }
+
+        throw new \BadMethodCallException("Invalid method " . get_class($this) . "::$field() called.");
     }
 
     /**
@@ -453,7 +455,7 @@ class Model implements \ArrayAccess, \IteratorAggregate
             $this->record = current($this->after_find([$result]));
         }
 
-        return $this;
+        return clone $this;
     }
 
     /**
@@ -943,5 +945,16 @@ class Model implements \ArrayAccess, \IteratorAggregate
     public function getIterator()
     {
         return new \ArrayIterator($this->record);
+    }
+
+    /**
+     * Disconnect the PDO instance before serialization.
+     * 
+     * @return array [description]
+     */
+    public function __sleep()
+    {
+        $this->db->disconnect();
+        return array_keys(get_object_vars($this));
     }
 }
