@@ -13,8 +13,6 @@ namespace pew\libs;
  * The methods contained within this class are aimed to simplify basic database
  * operations, such as simple selects, inserts and updates.
  *
- * The PDO object is public to facilitate complex queries.
- *
  * One of the ways of using this class is the following:
  *
  *      $pdb = new \pew\libs\Database($config);
@@ -36,7 +34,7 @@ class Database
     /**
      * @var PDO PHP Data Object for database access.
      */
-    public $pdo = null;
+    private $pdo = null;
 
     /**
      * @var int PDO statement fetch mode.
