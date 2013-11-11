@@ -2,6 +2,8 @@
 
 namespace pew;
 
+use pew\libs\ModelRelationship;
+
 /**
  * The basic model class, with database description and access methods.
  *
@@ -115,7 +117,6 @@ class Model implements \ArrayAccess, \IteratorAggregate
      *
      * @var string
      */
-    protected $_fields = '*';
     protected $fields = '*';
 
     /**
@@ -123,7 +124,6 @@ class Model implements \ArrayAccess, \IteratorAggregate
      *
      * @var string
      */
-    protected $_where = [];
     protected $where = [];
 
     /**
@@ -131,7 +131,6 @@ class Model implements \ArrayAccess, \IteratorAggregate
      *
      * @var string
      */
-    protected $_order_by = null;
     protected $order_by = null;
 
     /**
@@ -139,7 +138,6 @@ class Model implements \ArrayAccess, \IteratorAggregate
      *
      * @var string
      */
-    protected $_limit = null;
     protected $limit = null;
 
     /**
@@ -147,7 +145,6 @@ class Model implements \ArrayAccess, \IteratorAggregate
      *
      * @var string
      */
-    protected $_group_by = null;
     protected $group_by = null;
 
     /**
@@ -155,8 +152,21 @@ class Model implements \ArrayAccess, \IteratorAggregate
      *
      * @var string
      */
-    protected $_having = [];
     protected $having = [];
+
+    /**
+     * SQL query clauses.
+     * 
+     * @var array
+     */
+    protected $clauses = [
+        'fields' => '*',
+        'where' => [],
+        'group_by' => '',
+        'having' => [],
+        'limit' => '',
+        'order_by' => '',
+    ];
 
     /**
      * The constructor builds the model!.
@@ -195,12 +205,12 @@ class Model implements \ArrayAccess, \IteratorAggregate
             $this->primary_key = $this->table_data['primary_key'];
         }
 
-        foreach ($this->belongs_to as $alias => $fk) {
-            $this->attach('parent', $alias, $fk);
+        foreach ($this->belongs_to as $alias => $info) {
+            $this->attach('parent', new ModelRelationship($alias, $info));
         }
 
         foreach ($this->has_many as $alias => $fk) {
-            $this->attach('child', $alias, $fk);
+            $this->attach('child', new ModelRelationship($alias, $fk));
         }
     }
 
@@ -227,33 +237,17 @@ class Model implements \ArrayAccess, \IteratorAggregate
      * @param string|array $fk The name of the FK or a array with [table_name, FK_name]
      * @return boolean false if the table does not exist, true otherwise
      */
-    protected function attach($relationship_type, $alias, $fk)
+    protected function attach($relationship_type, ModelRelationship $relationship)
     {
-        $table = $alias;
-
-        if (is_array($fk)) {
-            list($table, $foreign_key) = $fk;
-        } else {
-            $foreign_key = $fk;
-        }
-
-        $model = null;
-
-        if ($this->db->table_exists($table)) {
-            switch ($relationship_type) {
-                case 'child':
-                        $this->related_children[$alias] = compact('table', 'foreign_key', 'alias', 'model');
-                    break;
-                case 'parent':
-                        $this->related_parents[$alias] = compact('table', 'foreign_key', 'alias', 'model');
-                    break;
-                default:
-                    throw new \InvalidArgumentException("The relationship type $relationship_type is not supported.");
-            }
-
-            return true;
-        } else {
-            return false;
+        switch ($relationship_type) {
+            case 'child':
+                    $this->related_children[$relationship->alias()] = $relationship;
+                break;
+            case 'parent':
+                    $this->related_parents[$relationship->alias()] = $relationship;
+                break;
+            default:
+                throw new \InvalidArgumentException("The relationship type $relationship_type is not supported.");
         }
     }
 
@@ -438,7 +432,7 @@ class Model implements \ArrayAccess, \IteratorAggregate
                         ->having($this->having())
                         ->limit($this->limit())
                         ->order_by($this->order_by())
-                        ->single($this->table, $this->_fields);
+                        ->single($this->table, $this->clauses['fields']);
 
         $this->reset();
 
@@ -478,7 +472,7 @@ class Model implements \ArrayAccess, \IteratorAggregate
                     ->having($this->having())
                     ->limit($this->limit())
                     ->order_by($this->order_by())
-                    ->select($this->table, $this->_fields);
+                    ->select($this->table, $this->clauses['fields']);
 
         $this->reset();
 
@@ -510,15 +504,15 @@ class Model implements \ArrayAccess, \IteratorAggregate
     {
         # if conditions are provided, overwrite the previous model conditions
         if (is_array($where)) {
-            $this->_where = $where;
+            $this->clauses['where'] = $where;
         }
 
         # query the database
         $result = $this->db
                     ->fields('count(*)')
-                    ->where($this->_where)
-                    ->group_by($this->_group_by)
-                    ->having($this->_having)
+                    ->where($this->clauses['where'])
+                    ->group_by($this->clauses['group_by'])
+                    ->having($this->clauses['having'])
                     ->limit(1)
                     ->cell($this->table);
 
@@ -596,9 +590,9 @@ class Model implements \ArrayAccess, \IteratorAggregate
         } elseif (!is_null($id) && !is_bool($id)) {
             # delete the item as received, ignoring previous conditions
             return $this->db->where([$this->primary_key => $id])->limit(1)->delete($this->table);
-        } elseif ($this->_where) {
+        } elseif ($this->clauses['where']) {
             # delete everything that matches the conditions
-            return $this->db->where($this->_where)->delete($this->table);
+            return $this->db->where($this->clauses['where'])->delete($this->table);
         } else {
             # no valid configuration
             throw new \RuntimeException('Delete requires conditions or parameters');
@@ -648,7 +642,7 @@ class Model implements \ArrayAccess, \IteratorAggregate
      */
     public function select($fields)
     {
-        $this->_fields = $fields;
+        $this->clauses['fields'] = $fields;
         $this->db->fields($fields);
 
         return $this;
@@ -663,13 +657,13 @@ class Model implements \ArrayAccess, \IteratorAggregate
     public function where($conditions = null)
     {
         if (!is_null($conditions)) {
-            $this->_where = $conditions;
+            $this->clauses['where'] = $conditions;
             $this->db->where($conditions);
 
             return $this;
         } else {
-            if (isset($this->_where)) {
-                return $this->_where;
+            if (isset($this->clauses['where'])) {
+                return $this->clauses['where'];
             } else {
                 return $this->where;
             }
@@ -688,15 +682,15 @@ class Model implements \ArrayAccess, \IteratorAggregate
     {
         if (is_numeric($count)) {
             if (isset($start) && is_numeric($start)) {
-                $this->_limit = "$start, $count";
+                $this->clauses['limit'] = "$start, $count";
             } else {
-                $this->_limit = $count;
+                $this->clauses['limit'] = $count;
             }
 
             return $this;
         } else {
-            if (isset($this->_limit)) {
-                return $this->_limit;
+            if (isset($this->clauses['limit'])) {
+                return $this->clauses['limit'];
             } else {
                 return $this->limit;
             }
@@ -712,11 +706,11 @@ class Model implements \ArrayAccess, \IteratorAggregate
     public function order_by($order_by = null)
     {
         if (!is_null($order_by)) {
-            $this->_order_by = $order_by;
+            $this->clauses['order_by'] = $order_by;
             return $this;
         } else {
-            if (isset($this->_order_by)) {
-                return $this->_order_by;
+            if (isset($this->clauses['order_by'])) {
+                return $this->clauses['order_by'];
             } else {
                 return $this->order_by;
             }
@@ -734,11 +728,11 @@ class Model implements \ArrayAccess, \IteratorAggregate
     public function group_by($group_by = null)
     {
         if (!is_null($group_by)) {
-            $this->_group_by= $group_by;
+            $this->clauses['group_by']= $group_by;
             return $this;
         } else {
-            if (isset($this->_group_by)) {
-                return $this->_group_by;
+            if (isset($this->clauses['group_by'])) {
+                return $this->clauses['group_by'];
             } else {
                 $this->group_by;
             }
@@ -756,11 +750,11 @@ class Model implements \ArrayAccess, \IteratorAggregate
     public function having($having = null)
     {
         if (!is_null($having)) {
-            $this->_having= $having;
+            $this->clauses['having']= $having;
             return $this;
         } else {
-            if (isset($this->_having)) {
-                return $this->_having;
+            if (isset($this->clauses['having'])) {
+                return $this->clauses['having'];
             } else {
                 $this->having;
             }
@@ -804,14 +798,40 @@ class Model implements \ArrayAccess, \IteratorAggregate
      */
     protected function reset()
     {
-        $this->_order_by = null;
-        $this->_group_by = null;
-        $this->_having = null;
-        $this->_where = null;
-        $this->_limit = null;
-        $this->_fields = '*';
+        $this->clauses['fields'] = $this->fields;
+        $this->clauses['where'] = $this->where;
+        $this->clauses['order_by'] = $this->order_by;
+        $this->clauses['group_by'] = $this->group_by;
+        $this->clauses['having'] = $this->having;
+        $this->clauses['limit'] = $this->limit;
 
         return $this;
+    }
+
+    /**
+     * Get or set several SQL clauses.
+     *
+     * Accepted clauses are:
+     *     - fields: comma-separated list of fields
+     *     - where: array of conditions
+     *     - group_by: comma-separated list of fields
+     *     - having: array of conditions
+     *     - order_by: comma-separated list of fields
+     *     - limit: count, offset
+     *
+     * @param array $clauses
+     */
+    public function clauses(array $clauses = null)
+    {
+        if (!is_null($clauses)) {
+            foreach ($clauses as $key => $value) {
+                if (array_key_exists($key, $this->clauses)) {
+                    $this->clauses[$key] = $value;
+                }
+            }
+        }
+
+        return $this->clauses;
     }
 
     /**
@@ -845,12 +865,15 @@ class Model implements \ArrayAccess, \IteratorAggregate
         }
 
         if (isSet($this->related_children[$offset])) {
-            $related_model = Pew::instance()->model($this->related_children[$offset]['table']);
+            $relationship = $this->related_children[$offset];
+            $related_model = Pew::instance()->model($relationship->table);
             $fk = $this->record[$this->primary_key];
-            
             if (!is_null($fk)) {
-                $condition = [$this->related_children[$offset]['foreign_key'] => $fk];
-                $this->record[$offset] = $related_model->where($condition)->find_all();
+                $related_model->clauses($relationship->clauses());
+                $condition = [$relationship->foreign_key => $fk];
+                $related_model->where($condition);
+                
+                $this->record[$offset] = $related_model->find_all();
                 return $this->record[$offset];
             } else {
                 return $related_model;
@@ -858,10 +881,13 @@ class Model implements \ArrayAccess, \IteratorAggregate
         }
 
         if (isSet($this->related_parents[$offset])) {
-            $related_model = Pew::instance()->model($this->related_parents[$offset]['table']);
-            $pk = $this->record[$this->related_parents[$offset]['foreign_key']];
+            $relationship = $this->related_parents[$offset];
+            $related_model = Pew::instance()->model($relationship->table);
+            $pk = $this->record[$relationship->foreign_key];
 
             if (!is_null($pk)) {
+                $related_model->clauses($relationship->clauses());
+                
                 $this->record[$offset] = $related_model->find($pk);
                 return $this->record[$offset];
             } else {

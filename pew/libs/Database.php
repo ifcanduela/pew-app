@@ -595,7 +595,7 @@ class Database
      * @return int Number of rows deleted
      * @throws Exception Exception thrown if no table is set
      */
-    public function cell($table = null, $fields = null)
+    public function cell($fields = null, $table = null)
     {
         if (isset($table)) {
             $this->from = $table;
