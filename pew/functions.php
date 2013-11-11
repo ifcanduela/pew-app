@@ -23,7 +23,7 @@ function pew($key = null)
     if (is_null($key)) {
         return $pew;
     } else {
-        return $pew->config()->$key;
+        return isSet($pew->config()->$key) ? $pew->config()->$key : null;
     }
 }
 
