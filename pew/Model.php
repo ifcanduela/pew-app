@@ -2,6 +2,8 @@
 
 namespace pew;
 
+use pew\Pew;
+use pew\libs\Database;
 use pew\libs\ModelRelationship;
 
 /**
@@ -171,14 +173,20 @@ class Model implements \ArrayAccess, \IteratorAggregate
     /**
      * The constructor builds the model!.
      *
+     * @param Database $db Database instance to use
      * @param string $table Name of the table
      * @return array An indexed array with all fetched rows, in associative arrays
      */
     public function __construct($db = null, $table = null)
     {
         # get the Database class instance
-        $this->db = $db ?: Pew::database($this->db_config);
+        $this->db = ($db instanceof Database) ? $db : Pew::database($this->db_config);
 
+        $this->init($table);
+    }
+
+    public function init($table)
+    {
         if (!is_null($table)) {
             $this->table = $table;
         } elseif (class_base_name(get_class($this)) === 'Model') {
@@ -206,11 +214,11 @@ class Model implements \ArrayAccess, \IteratorAggregate
         }
 
         foreach ($this->belongs_to as $alias => $info) {
-            $this->attach('parent', new ModelRelationship($alias, $info));
+            $this->add_parent($alias, $info);
         }
 
-        foreach ($this->has_many as $alias => $fk) {
-            $this->attach('child', new ModelRelationship($alias, $fk));
+        foreach ($this->has_many as $alias => $info) {
+            $this->add_child($alias, $info);
         }
     }
 
@@ -227,6 +235,36 @@ class Model implements \ArrayAccess, \IteratorAggregate
         }
 
         return $this->table;
+    }
+
+    /**
+     * Adds a has-many relationship to the model.
+     *
+     * @param type $alias The related table name or an alias if $foreign_key is an array
+     * @param string|array $info The foreign key in this model's table,  or an 
+     *     array with [table_name, FK_name]
+     * @return Model The model object ($this)
+     */
+    public function add_child($alias, $info)
+    {
+        $this->attach('child', new ModelRelationship($alias, $info));
+
+        return $this;
+    }
+
+    /**
+     * Adds a belongs-to relationship to the model.
+     *
+     * @param type $alias The related table name or an alias if $foreign_key is an array
+     * @param string|array $info The foreign key in this model's table,  or an 
+     *     array with [table_name, FK_name]
+     * @return Model The model object ($this)
+     */
+    public function add_parent($alias, $info)
+    {
+        $this->attach('parent', new ModelRelationship($alias, $info));
+
+        return $this;
     }
 
     /**
@@ -249,36 +287,6 @@ class Model implements \ArrayAccess, \IteratorAggregate
             default:
                 throw new \InvalidArgumentException("The relationship type $relationship_type is not supported.");
         }
-    }
-
-    /**
-     * Adds a has-many relationship to the model.
-     *
-     * @param type $alias The related table name or an alias if $foreign_key is an array
-     * @param string|array $foreign_key The foreign key in this model's table,  or an 
-     *     array with [table_name, FK_name]
-     * @return Model The model object ($this)
-     */
-    public function add_child($table, $foreign_key)
-    {
-        $this->attach('child', $table, $foreign_key);
-
-        return $this;
-    }
-
-    /**
-     * Adds a belongs-to relationship to the model.
-     *
-     * @param type $alias The related table name or an alias if $foreign_key is an array
-     * @param string|array $foreign_key The foreign key in this model's table,  or an 
-     *     array with [table_name, FK_name]
-     * @return Model The model object ($this)
-     */
-    public function add_parent($table, $foreign_key)
-    {
-        $this->attach('parent', $table, $foreign_key);
-
-        return $this;
     }
 
     /**
@@ -387,7 +395,7 @@ class Model implements \ArrayAccess, \IteratorAggregate
         $clause = strtoupper(strtok($query, ' '));
 
         # prepare the SQL query
-        $stm = $this->db->pdo->prepare($query);
+        $stm = $this->db->pdo()->prepare($query);
         # run the prepared statement with the received keys and values
         $success = $stm->execute($data);
         
@@ -631,7 +639,7 @@ class Model implements \ArrayAccess, \IteratorAggregate
      */
     public function last_insert_id()
     {
-        return $this->db->pdo->LastInsertId();
+        return $this->db->pdo()->LastInsertId();
     }
 
     /**
@@ -768,7 +776,7 @@ class Model implements \ArrayAccess, \IteratorAggregate
      */
     public function begin()
     {
-        return $this->db->pdo->beginTransaction();
+        return $this->db->pdo()->beginTransaction();
     }
 
     /**
@@ -778,7 +786,7 @@ class Model implements \ArrayAccess, \IteratorAggregate
      */
     public function commit()
     {
-        return $this->db->pdo->commit();
+        return $this->db->pdo()->commit();
     }
 
     /**
@@ -788,7 +796,7 @@ class Model implements \ArrayAccess, \IteratorAggregate
      */
     public function rollback()
     {
-        return $this->db->pdo->rollback();
+        return $this->db->pdo()->rollback();
     }
 
     /**
