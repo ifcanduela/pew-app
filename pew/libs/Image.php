@@ -115,8 +115,8 @@ class Image
      */
     public function upload(array $file)
     {
-        if (!file_exists($file['tmp_name'])) {
-            throw new ImageNotFoundException("Uploaded file {$filename} not found");
+        if (!file_exists($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
+            throw new ImageNotFoundException("Uploaded file {$filename} not found [temp={$file['tmp_name']}]");
         }
 
         $this->source_filename = $file['tmp_name'];
@@ -274,7 +274,6 @@ class Image
 
         return $this->filename;
     }
-
 
     /**
      * Get the extension for the image.

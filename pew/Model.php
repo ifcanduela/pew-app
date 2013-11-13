@@ -6,6 +6,8 @@ use pew\Pew;
 use pew\libs\Database;
 use pew\libs\ModelRelationship;
 
+class ModelTableNotFoundException extends \RuntimeException {}
+
 /**
  * The basic model class, with database description and access methods.
  *
@@ -199,6 +201,10 @@ class Model implements \ArrayAccess, \IteratorAggregate
             $this->table = str_replace('_model', '', class_name_to_file_name(basename(get_class($this))));
         }
 
+        if (false === $this->db->table_exists($this->table)) {
+            throw new ModelTableNotFoundException("Table {$this->table} for model " . get_class($this) . " not found.");
+        }
+
         # some metadata about the table
         $this->table_data['name'] = $this->table;
         $this->table_data['primary_key'] = $this->db->get_pk($this->table);
@@ -262,7 +268,7 @@ class Model implements \ArrayAccess, \IteratorAggregate
      */
     public function add_parent($alias, $info)
     {
-        $this->attach('parent', new ModelRelationship($alias, $info));
+        $this->attach('parent', $m = new ModelRelationship($alias, $info));
 
         return $this;
     }
@@ -430,7 +436,7 @@ class Model implements \ArrayAccess, \IteratorAggregate
         if (is_array($id)) {
             $this->where($id);
         } else {
-            $this->where([$this->primary_key => $id]);
+            $this->clauses['where'][$this->primary_key] = $id;
         }
 
         #query the database
@@ -517,12 +523,12 @@ class Model implements \ArrayAccess, \IteratorAggregate
 
         # query the database
         $result = $this->db
-                    ->fields('count(*)')
+                    ->from($this->table)
                     ->where($this->clauses['where'])
                     ->group_by($this->clauses['group_by'])
                     ->having($this->clauses['having'])
                     ->limit(1)
-                    ->cell($this->table);
+                    ->cell('count(*)');
 
         return $result;
     }
@@ -876,15 +882,19 @@ class Model implements \ArrayAccess, \IteratorAggregate
             $relationship = $this->related_children[$offset];
             $related_model = Pew::instance()->model($relationship->table);
             $fk = $this->record[$this->primary_key];
+
             if (!is_null($fk)) {
-                $related_model->clauses($relationship->clauses());
-                $condition = [$relationship->foreign_key => $fk];
-                $related_model->where($condition);
-                
+                # get the relationship clauses
+                $clauses = $relationship->clauses();
+                # add a constraint for the relationship FK
+                $clauses['where'][$relationship->foreign_key] = $fk;
+                # update the model clauses
+                $related_model->clauses($clauses);
+                # fetch the related records
                 $this->record[$offset] = $related_model->find_all();
                 return $this->record[$offset];
             } else {
-                return $related_model;
+                return false;
             }
         }
 
@@ -894,12 +904,14 @@ class Model implements \ArrayAccess, \IteratorAggregate
             $pk = $this->record[$relationship->foreign_key];
 
             if (!is_null($pk)) {
-                $related_model->clauses($relationship->clauses());
-                
+                # get the relationship clauses
+                $clauses = $relationship->clauses();
+                # update the FK constraint
+                $related_model->clauses($clauses);
                 $this->record[$offset] = $related_model->find($pk);
                 return $this->record[$offset];
             } else {
-                return $related_model;
+                return false;
             }
         }
 

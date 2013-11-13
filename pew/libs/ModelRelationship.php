@@ -57,7 +57,7 @@ class ModelRelationship extends \pew\libs\Registry
             }
         }
 
-        $this->table = $key;
+        $this->table = $table;
         $this->foreign_key = $foreign_key;
 
         foreach ($this->clauses as $clause) {

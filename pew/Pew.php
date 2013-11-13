@@ -278,19 +278,18 @@ class Pew
                 }
 
                 $db_config = $this->config->database_config;
-                $use_db = $db_config['use'];
 
-                if (is_string($config)) {
-                    if (!array_key_exists($config, $db_config)) {
-                        throw new \RuntimeException("Database configuration preset '$config' does not exist");
-                    }
-
-                    $use = $config;
+                if (isSet($this->config->use_db)) {
+                    $use_db = $this->config->use_db;
                 } else {
-                    $use = is_string($use_db) ? $use_db : 'default';
+                    $use_db = 'default';
                 }
 
-                $config = $db_config[$use];
+                if (!array_key_exists($use_db, $db_config)) {
+                    throw new \RuntimeException("Database configuration preset '$use_db' does not exist");
+                }
+
+                $config = $db_config[$use_db];
             }
 
             if (isset($config)) {

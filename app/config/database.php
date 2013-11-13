@@ -2,8 +2,6 @@
 
 return [
 
-	'use' => 'sqlite',
-
     'sqlite' => [
         'engine' => 'sqlite',
         'file' => 'app/config/db.sqlite3'
