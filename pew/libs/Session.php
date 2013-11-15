@@ -18,6 +18,13 @@ class Session
     const FLASH_DATA = '__flash__';
 
     /**
+     * Array index for the generated CSRF token.
+     *
+     * @var string
+     */
+    const CSRF_TOKEN = '__CSRF_TOKEN__';
+
+    /**
      * Session sub-index for the current instance.
      *
      * @var string
@@ -50,7 +57,6 @@ class Session
         }
 
         $this->group($group);
-
         $this->open();
     }
 
@@ -260,6 +266,34 @@ class Session
         unset($_SESSION[$this->group()][$key]);
 
         return $return;
+    }
+
+    /**
+     * Get a random security token.
+     * 
+     * @return string A security token.
+     */
+    public function get_token()
+    {
+        $token = md5(uniqid());
+        $this->set(self::CSRF_TOKEN, $token);
+
+        return $token;
+    }
+
+    /**
+     * Check a token string agains a previously-set token.
+     * 
+     * @param string $token Token to check
+     * @return boolean True if the token is valid, false otherwise
+     */
+    public function check_token($token)
+    {
+        if ($this->exists(self::CSRF_TOKEN))) {
+            return $token === $this->get(self::CSRF_TOKEN);
+        }
+
+        return false;
     }
 
     public function __set($key, $value)
