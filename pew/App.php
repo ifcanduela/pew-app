@@ -2,6 +2,8 @@
 
 namespace pew;
 
+use pew\Pew;
+
 /**
  * The App class is a simple interface between the front controller and the
  * rest of the controllers.
@@ -12,60 +14,31 @@ namespace pew;
 class App
 {
     /**
-     * Pew object instance.
-     * 
-     * @var \pew\Pew
-     */
-    protected $pew;
-
-    /**
-     * Initialization of components.
-     *
-     * @access public
-     */
-    public function __construct()
-    {
-        $this->pew = \pew\Pew::instance();
-    }
-    
-    /**
      * Application entry point, manages controllers, actions and views.
      *
-     * The dispatcher accepts a path string, which should be formed according
-     * to the .htaccess rules in the root of the app directory structure. It
-     * then retrieves a PewRequest object with current request info.
-     *
      * This function is responsible of creating an instance of the appropriate
-     * Controller class and calling its action() methods, which will handle
-     * the data processing.
-     *
-     * When the action() method is done, the dispatcher checks if actions is
-     * protected against non-authenticated access. If the check is passed, the
-     * Controller::view() method is invoked.
-     * 
-     * @param string $params optional slash-separated string of url parameters
-     * @access public
+     * Controller class and calling its action() method, which will handle
+     * the controller call.
      */
     public function run()
     {
-        $request = $this->pew->request();
-        $router  = $this->pew->router();
+        $request = Pew::instance()->request();
+        $router  = Pew::instance()->router();
+        $view = Pew::instance()->view();
 
         $router->route($request->segments(), $request->method());
-        $controller_name = $router->controller();
         
         # Instantiate the main view
-        $view = $this->pew->view();
         $view->template($router->controller() . '/' . $router->action());
-        $view->layout($this->pew->config()->default_layout);
+        $view->layout(Pew::instance()->config()->default_layout);
         
         # instantiate the controller
-        $controller = $this->pew->controller($controller_name);
+        $controller = Pew::instance()->controller($router->controller());
         
         # check controller instantiation
         if (!is_object($controller)) {
             if ($view->exists()) {
-                $controller = new controllers\Pages($request, $view);
+                $view->title($router->action());
                 $skip_action = true;
             } else {
                 # display an error page if the controller could not be instanced
@@ -114,7 +87,7 @@ class App
     {
         if (!$view->exists()) {
             $defaultView = clone $view;
-            $defaultView->folder($this->pew->config()->system_folder . '/views');
+            $defaultView->folder(Pew::instance()->config()->system_folder . '/views');
 
             if ($defaultView->exists()) {
                 $output = $defaultView->render(null, $view_data);
@@ -130,12 +103,12 @@ class App
         }
 
         $layout = clone $view;
-        $layout->extension($this->pew->config()->layout_ext);
+        $layout->extension(Pew::instance()->config()->layout_ext);
         $layout->template($view->layout());
 
         if (!$layout->exists()) {
             $defaultLayout = clone($layout);
-            $defaultLayout->folder($this->pew->config()->system_folder . 'views');
+            $defaultLayout->folder(Pew::instance()->config()->system_folder . 'views');
 
             if (!$defaultLayout->exists()) {
                  throw new \Exception("Layout file could not be found: {$layout->folder()}/{$layout->template()}{$layout->extension()}");

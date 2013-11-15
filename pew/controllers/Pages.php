@@ -13,17 +13,6 @@ use \pew\Pew as Pew;
 class Pages extends \pew\Controller
 {
     /**
-     * Whether to instance a database controller or not.
-     *
-     * Override the default value of the $use_db property in Controller because
-     * Pages does not need database access trough a Model.
-     *
-     * @var boolean
-     * @access protected
-     */
-    protected $use_db = false;
-    
-    /**
      * The action method of the Pages controller overwrites the same method of
      * the Controller class, to use the action parameter as a view parameter.
      *
