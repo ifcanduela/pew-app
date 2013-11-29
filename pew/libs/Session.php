@@ -67,9 +67,10 @@ class Session
      */
     protected function open()
     {
-        $this->session_id = session_id();
-        
-        if ("" === $this->session_id) {
+        if (session_status() === PHP_SESSION_DISABLED) {
+            throw new \RuntimeException("Native session handling is disabled");
+        }
+        if (session_status() === PHP_SESSION_NONE) {
             session_start();
             $this->session_id = session_id();
         }
@@ -91,7 +92,7 @@ class Session
      */
     public function is_open()
     {
-        return !empty($this->session_id);
+        return session_status() === PHP_SESSION_ACTIVE;
     }
 
     /**
@@ -289,7 +290,7 @@ class Session
      */
     public function check_token($token)
     {
-        if ($this->exists(self::CSRF_TOKEN))) {
+        if ($this->exists(self::CSRF_TOKEN)) {
             return $token === $this->get(self::CSRF_TOKEN);
         }
 

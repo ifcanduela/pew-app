@@ -367,23 +367,23 @@ class Pew
     }
 
     /**
-     * Get or instance a log object
+     * Get a FileLogger instance.
      * 
-     * @return object The log object
+     * @return \pew\libs\FileLogger The log instance
      */
     public function log()
     {
-        if (!isset($this->registry->Log)) {
-            $this->registry->Log = new PewLog($this->config->log_level);
+        if (!isset($this->registry->FileLogger)) {
+            $this->registry->FileLogger = new libs\FileLogger('logs', $this->config->log_level);
         }
 
-        return $this->registry->Log;
+        return $this->registry->FileLogger;
     }
 
     /**
-     * Get or instance a session object
+     * Get a Session instance.
      * 
-     * @return object The session object
+     * @return \pew\libs\Session The Session object
      */
     public function session()
     {
@@ -403,7 +403,7 @@ class Pew
      * $key = 'default' -> the base folder is the views folder of the framework
      * $key = !null     -> the view is a new instance
      *
-     * @return View A view object
+     * @return \pew\View A view object
      */
     public function view($key = '')
     {

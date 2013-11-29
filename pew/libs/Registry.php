@@ -122,13 +122,7 @@ class Registry implements \Countable, \ArrayAccess
 
         $is_callable = is_object($value) && method_exists($value, '__invoke');
 
-        if (isSet($this)) {
-            $registry = $this;
-        } else {
-            $registry = static::instance();
-        }
-
-        return $is_callable ? $value($registry) : $value;
+        return $is_callable ? $value($this) : $value;
     }
 
     /**

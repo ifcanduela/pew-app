@@ -6,6 +6,7 @@ use pew\Pew;
 use pew\libs\Database;
 use pew\libs\ModelRelationship;
 
+class ModelTableNotSpecifiedException extends \Exception {}
 class ModelTableNotFoundException extends \RuntimeException {}
 
 /**
@@ -194,7 +195,7 @@ class Model implements \ArrayAccess, \IteratorAggregate
         } elseif (class_base_name(get_class($this)) === 'Model') {
             # if this is an instance of the Model class, get the
             # table from the $table parameter
-            throw new \Exception('Model class must be attached to a database table.');
+            throw new ModelTableNotSpecifiedException('Model class must be attached to a database table.');
         } elseif (!$this->table) {
             # else, if $table is not set in the Model class file,
             # guess the table name
@@ -879,11 +880,11 @@ class Model implements \ArrayAccess, \IteratorAggregate
         }
 
         if (isSet($this->related_children[$offset])) {
-            $relationship = $this->related_children[$offset];
-            $related_model = Pew::instance()->model($relationship->table);
             $fk = $this->record[$this->primary_key];
 
             if (!is_null($fk)) {
+                $relationship = $this->related_children[$offset];
+                $related_model = Pew::instance()->model($relationship->table);
                 # get the relationship clauses
                 $clauses = $relationship->clauses();
                 # add a constraint for the relationship FK

@@ -224,7 +224,7 @@ ERROR_TEXT;
                 break;
         }
         
-        require $this->pew->config()->default_folder . 'views/error.layout.php';
+        require $this->pew->config()->system_folder . '/views/error.layout.php';
         
         exit();
     }
@@ -232,15 +232,14 @@ ERROR_TEXT;
     /**
      * This function displays the 404 HTTP error: Document Not Found
      *
-     * Implementation pending.
+     * This shows a picture of a cat.
      *
      * @return void
-     * @todo This should display a cat
      */
     public function show_404()
     {
         header("HTTP/1.0 404 Not Found");
-        include($this->pew->config()->system_folder . DS . 'views' . DS . $this->url_slug . DS . '404.php');
+        include($this->pew->config()->system_folder . '/views/' . $this->url_slug . '/404.php');
         exit(404);
     }
 }

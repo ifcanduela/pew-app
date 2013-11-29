@@ -40,6 +40,7 @@ class FileLogger
 
     public function __construct($logs_directory = 'logs', $minimum_level = self::INFO)
     {
+        $this->log_filename = 'log_' . date('Y-m-d') . '.txt';
         $this->logs_directory = $logs_directory;
         $this->minimum_level = $minimum_level;
     }
@@ -82,6 +83,8 @@ class FileLogger
 
     /**
      * Log a debug-level message.
+     *
+     * Messages can have placeholders surrounded by {}.
      * 
      * @param string $msg Message to log
      * @param array $context Key/value pairs to replace in the message
@@ -94,6 +97,8 @@ class FileLogger
 
     /**
      * Log an info-level message.
+     *
+     * Messages can have placeholders surrounded by {}.
      * 
      * @param string $msg Message to log
      * @param array $context Key/value pairs to replace in the message
@@ -106,6 +111,8 @@ class FileLogger
 
     /**
      * Log a notice-level message.
+     *
+     * Messages can have placeholders surrounded by {}.
      * 
      * @param string $msg Message to log
      * @param array $context Key/value pairs to replace in the message
@@ -118,6 +125,8 @@ class FileLogger
 
     /**
      * Log a warning-level message.
+     *
+     * Messages can have placeholders surrounded by {}.
      * 
      * @param string $msg Message to log
      * @param array $context Key/value pairs to replace in the message
@@ -130,6 +139,8 @@ class FileLogger
 
     /**
      * Log an error-level message.
+     *
+     * Messages can have placeholders surrounded by {}.
      * 
      * @param string $msg Message to log
      * @param array $context Key/value pairs to replace in the message
@@ -142,6 +153,8 @@ class FileLogger
 
     /**
      * Log a critical-level message.
+     *
+     * Messages can have placeholders surrounded by {}.
      * 
      * @param string $msg Message to log
      * @param array $context Key/value pairs to replace in the message
@@ -154,6 +167,8 @@ class FileLogger
 
     /**
      * Log an alert-level message.
+     *
+     * Messages can have placeholders surrounded by {}.
      * 
      * @param string $msg Message to log
      * @param array $context Key/value pairs to replace in the message
@@ -166,6 +181,8 @@ class FileLogger
 
     /**
      * Log an emergency-level message.
+     *
+     * Messages can have placeholders surrounded by {}.
      * 
      * @param string $msg Message to log
      * @param array $context Key/value pairs to replace in the message
@@ -178,6 +195,8 @@ class FileLogger
 
     /**
      * Log a message.
+     *
+     * Messages can have placeholders surrounded by {}.
      * 
      * @param int $level One of the FileLogger class constants
      * @param string $msg Message to log
@@ -197,7 +216,7 @@ class FileLogger
                      . ' | ' 
                      . $this->interpolate($msg, $context)
                      . PHP_EOL;
-            var_dump($msg, $context);
+                     
             file_put_contents($this->location(), $message, FILE_APPEND);
         }
 

@@ -32,7 +32,7 @@ class Database
     const SQLITE = 'sqlite';
 
     /**
-     * @var PDO PHP Data Object for database access.
+     * @var \PDO PHP Data Object for database access.
      */
     private $pdo = null;
 
@@ -147,18 +147,22 @@ class Database
      * Connects to the specified database engine and sets PDO error mode to
      * ERRMODE_EXCEPTION.
      * 
-     * @param array $config Alternate configuration settings
+     * @param mixed $config A PDO object or an array
      * @throws InvalidArgumentException If the DB engine is not selected
      */
-    public function __construct(array $config)
+    public function __construct($config = null)
     {
-        if (!isset($config['engine'])) {
-            throw new \InvalidArgumentException('Database engine was not selected');
-        }
+        if (is_array($config)) {
+            if (!isset($config['engine'])) {
+                throw new \InvalidArgumentException('Database engine was not selected');
+            }
 
-        $this->config = $config;
-        
-        $this->connect();
+            $this->config = $config;
+            
+            $this->connect($config);
+        } elseif (is_object($config)) {
+            $this->pdo($config);
+        }
     }
     
     /**
@@ -166,10 +170,10 @@ class Database
      *
      * @return bool True if the connection was successful, false otherwise
      */
-    public function connect()
+    public function connect($config)
     {
         if (!$this->is_connected) {
-            extract($this->config);
+            extract($config);
             
             try {
                 switch ($engine) {
@@ -186,13 +190,12 @@ class Database
                             $engine . ':dbname=' . $name . ';host=' . $host,
                             $user, $pass, array(\PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'UTF8'")
                         );
-                    break;
                 }
                 
                 $this->is_connected = true;
-            } catch (PDOException $e) {
+            } catch (\PDOException $e) {
                 $this->is_connected = false;
-                throw new \Exception('PDO connection failed: ' . $e->getMessage());
+                throw $e;
             }
          }
         
@@ -201,6 +204,11 @@ class Database
         return $this->is_connected;
     }
 
+    /**
+     * Destroy the PDO connection.
+     * 
+     * @return null
+     */
     public function disconnect()
     {
         $this->pdo = null;
@@ -208,7 +216,7 @@ class Database
     }
 
     /**
-     * Sets and retrieves the PDO instance in use.
+     * Set and retrieves the PDO instance in use.
      * 
      * @param PDO $pdo Set a PDO instance for the wrapper.
      * @return PDO The PDO instance
@@ -217,6 +225,7 @@ class Database
     {
         if ($pdo) {
             $this->pdo = $pdo;
+            $this->is_connected = true;
         }
 
         return $this->pdo;
@@ -383,32 +392,32 @@ class Database
      */
     public function get_pk($table, $as_array = false)
     {
-        if (!$this->connect()) {
+        if (!$this->is_connected) {
             throw new \PDOException;
         }
         
         $pk = array();
         
-        switch ($this->config['engine']) {
-            case self::SQLITE:
+        try {
+            $sql = "SHOW COLUMNS FROM {$table}";
+            $primary_key_index = 'Key';
+            $primary_key_value = 'PRI';
+            $table_name_index = 'Field';
+            $stm = $this->pdo->query($sql);
+            $r = $stm->fetchAll();
+        } catch (\PDOException $e) {
+            try {
                 $sql = "PRAGMA table_info({$table})";
                 $primary_key_index = 'pk';
                 $primary_key_value = 1;
                 $table_name_index = 'name';
-            break; 
-            
-            case self::MYSQL:
-            default:
-                $sql = "SHOW COLUMNS FROM {$table}";
-                $primary_key_index = 'Key';
-                $primary_key_value = 'PRI';
-                $table_name_index = 'Field';
-            break;
+                $stm = $this->pdo->query($sql);
+                $r = $stm->fetchAll();
+            } catch (\PDOException $e) {
+                throw $e;
+            }
         }
-        
-        # Get all columns from a selected table
-        $r = $this->pdo->query($sql)->fetchAll();
-                
+
         # Search all columns for the Primary Key flag
         foreach ($r as $col) {
             if (($col[$primary_key_index] == $primary_key_value)) {
@@ -433,26 +442,29 @@ class Database
      */
     public function get_cols($table)
     {
-        if (!$this->connect()) {
+        if (!$this->is_connected) {
             throw new \PDOException;
         }
         
         $cols = array();
         
-        switch ($this->config['engine']) {
-            case self::SQLITE:
+        try {
+            $sql = "SHOW COLUMNS FROM {$table}";
+            $table_name_index = 'Field';
+
+            # Get all columns from a selected table
+            $r = $this->pdo->query($sql)->fetchAll();
+        } catch (\PDOException $e) {
+            try {
                 $sql = "PRAGMA table_info({$table})";
                 $table_name_index = 'name';
-                break;
-            case self::MYSQL:
-            default:
-                $sql = "SHOW COLUMNS FROM {$table}";
-                $table_name_index = 'Field';
-                break;
+                
+                # Get all columns from a selected table
+                $r = $this->pdo->query($sql)->fetchAll();
+            } catch (\PDOException $e) {
+                throw $e;
+            }
         }
-        
-        # Get all columns from a selected table
-        $r = $this->pdo->query($sql)->fetchAll();
         
         # Add column names to $cols array
         foreach ($r as $col) {
@@ -475,7 +487,7 @@ class Database
         try {
             $this->pdo->prepare("SELECT 1 FROM $table");
             $exists = true;
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             $exists = false;
         }
         
@@ -565,7 +577,7 @@ class Database
      */
     protected function run_query($query)
     {
-        if (!$this->connect()) {
+        if (!$this->is_connected) {
             throw new \PDOException;
         }
 
@@ -807,6 +819,8 @@ class Database
                 $sql = "DELETE FROM $table $this->where";
                 $this->tags = $this->where_tags;
                 break;
+            default:
+                throw new \RuntimeException("Unknown query mode: {$type}");
         }
         
         $sql = trim(preg_replace('/\s+/', ' ', $sql));

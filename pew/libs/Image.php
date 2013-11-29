@@ -74,11 +74,11 @@ class Image
     }
 
     /**
-     * Removes the resource data.
+     * Remove the resource data.
      * 
      * @return null
      */
-    public function __destroy()
+    public function __destruct()
     {
         if ($this->resource) {
             imageDestroy($this->resource);
@@ -116,7 +116,7 @@ class Image
     public function upload(array $file)
     {
         if (!file_exists($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
-            throw new ImageNotFoundException("Uploaded file {$filename} not found [temp={$file['tmp_name']}]");
+            throw new ImageNotFoundException("Uploaded file {$file['filename']} not found [temp={$file['tmp_name']}]");
         }
 
         $this->source_filename = $file['tmp_name'];
@@ -355,7 +355,7 @@ class Image
     }
 
     /**
-     * Sets or gets the output quality.
+     * Set or get the output quality.
      *
      * The value must be a percentage, even for PNG images.
      * 
@@ -366,8 +366,9 @@ class Image
     {
         if (!is_null($quality)) {
             $quality = (int) $quality;
+
             if ($quality >= 0 && $quality <= 100) {
-                $this->quality = (double) $quality;
+                $this->quality = $quality;
             } else {
                 throw new \BadMethodCallException("The quality for Image::quality must be an integer between 0 and 100");
             }
@@ -379,10 +380,13 @@ class Image
     }
 
     /**
-     * Resizes an image.
+     * Resize an image.
+     *
+     * If one of the dimensions is null the resize operation will 
+     * maintain the aspect ratio of the source image.
      * 
-     * @param int $w The target width
-     * @param int $h The target height
+     * @param int|null $w The target width
+     * @param int|null $h The target height
      * @return Image The image object
      */
     public function resize($w, $h)
@@ -416,7 +420,7 @@ class Image
     }
 
     /**
-     * Crops an image.
+     * Crop an image.
      * 
      * @param int $w Cropped width
      * @param int $h Cropped height
@@ -479,7 +483,7 @@ class Image
     }
 
     /**
-     * Resized and crops an image to create a thumbnail.
+     * Resize and crop an image to create a thumbnail.
      * 
      * @param int $w Thumbnail width
      * @param int $h Thumbnail height
@@ -505,7 +509,7 @@ class Image
     }
 
     /**
-     * Sends the current image to the browser.
+     * Send the current image to the browser.
      *
      * The image type defaults to the original image type, and the quality defaults to 75.
      *

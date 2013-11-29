@@ -9,11 +9,6 @@
  */
 
 /**
- * Filesystem separator.
- */
-define('DS', DIRECTORY_SEPARATOR);
-
-/**
  * @var array Configuration array.
  */
 $cfg = [];
@@ -36,7 +31,7 @@ $cfg['path'] = str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRI
 
 /**
  * @var string Full path (url) to the app, including server name and folder path.
-*/
+ */
 $cfg['app_url'] = $cfg['host'] . $cfg['path'];
 
 /**
@@ -52,12 +47,12 @@ $cfg['system_folder'] = dirname(__FILE__);
 /**
  * @var string Full path to the application folder (filesystem).
  */
-$cfg['app_folder'] = getcwd() . DS . 'app';
+$cfg['app_folder'] = getcwd() . DIRECTORY_SEPARATOR . 'app';
 
 /**
  * @var string Full path to the public assets folder (filesystem).
  */
-$cfg['www_folder'] = getcwd() . DS . 'www';
+$cfg['www_folder'] = getcwd() . DIRECTORY_SEPARATOR . 'www';
 
 /**
  * @var string Full path to the public assets folder (url).
@@ -108,7 +103,7 @@ $cfg['log_level'] = 0;
 $cfg['models_folder'] = 'models';
 $cfg['controllers_folder'] = 'controllers';
 $cfg['views_folder'] = 'views';
-$cfg['elements_folder'] = 'views' . DS . 'elements';
+$cfg['elements_folder'] = 'views' . DIRECTORY_SEPARATOR . 'elements';
 $cfg['layouts_folder'] = 'views';
 $cfg['libraries_folder'] = 'libs';
 
@@ -145,11 +140,6 @@ $cfg['routes'] = [
     ['/:controller',         "/:controller/{$cfg['default_action']}",                  'get post'],
     ['/',                    "/{$cfg['default_controller']}/{$cfg['default_action']}", 'get post'],
 ];
-
-/**
- * @var boolean Set to true to enable the use of the auth library.
- */
-$cfg['use_auth'] = false;
 
 /**
  * Base URL of the application (the location of index.php).

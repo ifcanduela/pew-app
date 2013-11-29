@@ -17,17 +17,19 @@ class Router
     const XML  = 'xml';
     const JSON = 'json';
 
+    const CONTROLLER_SEGMENT = 0;
+    const ACTION_SEGMENT = 1;
+    const PARAMETER_SEGMENT = 2;
+
     private $default_controller = '';
     private $default_action     = '';
 
     private $response_types = [
-        ':'=> self::JSON,
-        '@'=> self::XML,
+        ':' => self::JSON,
+        '@' => self::XML,
     ];
 
-    private $controller;
-    private $action;
-    private $parameters = [];
+    private $segments = [];
 
     private $token_prefix = '!';
     private $sequence_prefix = '*';
@@ -147,7 +149,9 @@ class Router
      */
     public function controller()
     {
-        return $this->controller ? : $this->default_controller;
+        return isSet($this->segments[self::CONTROLLER_SEGMENT]) 
+             ? $this->segments[self::CONTROLLER_SEGMENT] 
+             : $this->default_controller;
     }
 
     /**
@@ -157,30 +161,33 @@ class Router
      */
     public function action()
     {
-        if ($this->action) {
-            if (!ctype_alpha($this->action{0})) {
-                return substr($this->action, 1);
-            }
-
-            return $this->action;
+        $action = isSet($this->segments[self::ACTION_SEGMENT]) 
+             ? $this->segments[self::ACTION_SEGMENT] 
+             : $this->default_action;
+        
+        if (isSet($action{0}) && !ctype_alpha($action{0})) {
+            $action = substr($action, 1);
         }
 
-        return $this->default_action;
+        return $action;
     }
 
     /**
-     * Get the parameters array.
-     * 
+     * Get a parameter.
+     *
+     * If NULL, all parameters are returned.
+     *
+     * @param int $n A parameter position or
      * @return array Parameters
      */
     public function parameters($n = null)
     {
+        $parameters = array_slice($this->segments, 2);
+        
         if (is_numeric($n)) {
-            if (array_key_exists($n, $this->parameters)) {
-                return $this->parameters[$n];
-            }
+            return isSet($parameters[$n]) ? $parameters[$n] : null;
         } else {
-            return $this->parameters;
+            return $parameters;
         }
     }
 
@@ -191,14 +198,16 @@ class Router
      */
     public function response_type()
     {
-        if (!ctype_alpha($this->action{0})) {
-            switch ($this->action{0}) {
+        $action = $this->segments[self::ACTION_SEGMENT];
+
+        if (!ctype_alpha($action{0})) {
+            switch ($action{0}) {
                 case ':':
                     return self::JSON;
                 case '@':
                     return self::XML;
                 default:
-                    return $this->response_types[$this->action{0}];
+                    return @$this->response_types[$action{0}];
             }
         }
 
@@ -232,19 +241,17 @@ class Router
         if (array_key_exists($request_method, $this->routes)) {
             foreach ($this->routes[$request_method] as $route) {
                 if ($matches = $this->match($route, $uri)) {
-                    $built_route = $this->build($uri, $route);
+                    $segments = $this->build($uri, $route);
                     break;
                 }
             }
         }
 
-        if (!isSet($built_route)) {
-            $built_route = $this->build($uri, array());
+        if (!isSet($segments)) {
+            $this->segments = $this->build($uri, array());
+        } else {
+            $this->segments = $segments;
         }
-
-        $this->controller   = $built_route['controller'];
-        $this->action       = $built_route['action'];
-        $this->parameters   = $built_route['parameters'];
 
         return $this;
     }
@@ -359,10 +366,6 @@ class Router
     
         $segments = array_values(array_filter(explode('/', $segments)));
 
-        $controller = isSet($segments[0]) ? $segments[0] : $this->default_controller;
-        $action     = isSet($segments[1]) ? $segments[1] : $this->default_action;
-        $parameters = (count($segments) > 2) ? array_slice($segments, 2) : array();
-
-        return compact('controller', 'action', 'parameters');
+        return $segments;
     }
 }

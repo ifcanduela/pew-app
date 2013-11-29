@@ -12,9 +12,8 @@ use pew\libs\Session;
  * 
  * @package pew
  * @author ifcanduela <ifcanduela@gmail.com>
- * @abstract
  */
-abstract class Controller
+class Controller
 {
     /**
      * The Pew instance.
@@ -186,14 +185,7 @@ abstract class Controller
         unset($this->session);
         
         # Controller file name in the /views/ folder.
-        $this->url_slug = to_underscores(slugify(
-            join('', 
-                array_slice(
-                    explode('\\', get_class($this)), 
-                    -1
-                )
-            )
-        ));
+        $this->url_slug = to_underscores(slugify(basename(get_class($this))));
 
         # Global action prefix override
         if (!$this->action_prefix && $this->pew->config()->action_prefix) {
@@ -299,8 +291,8 @@ abstract class Controller
         throw new \RuntimeException("Property Controller::\$$property does not exist");
     }
 
-    public function __invoke($action, $params)
+    public function __invoke()
     {
-        return $this->_action($action, $params);
+        return call_user_func_array([$this, '_action'], func_get_args());
     }
 }
