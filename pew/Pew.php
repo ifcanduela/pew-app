@@ -2,16 +2,6 @@
 
 namespace pew;
 
-# Assorted functions
-require_once __DIR__ . '/functions.php';
-# Autoloader class definition
-require_once __DIR__ . '/Autoloader.php';
-# Registry class
-require_once __DIR__ . '/libs/' . 'Registry.php';
-
-# Autoload framework classes
-(new Autoloader('pew', dirname(__DIR__)))->register();
-
 use \pew\libs\Registry as Registry;
 
 /**
@@ -23,7 +13,7 @@ use \pew\libs\Registry as Registry;
  * @package pew
  * @author ifcanduela <ifcanduela@gmail.com>
  */
-class Pew
+class Pew extends Registry
 {
     /**
      * The Pew object instance.
