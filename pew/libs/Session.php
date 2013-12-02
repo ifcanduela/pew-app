@@ -70,10 +70,12 @@ class Session
         if (session_status() === PHP_SESSION_DISABLED) {
             throw new \RuntimeException("Native session handling is disabled");
         }
+        
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
-            $this->session_id = session_id();
         }
+
+        $this->session_id = session_id();
 
         if (!array_key_exists($this->group(), $_SESSION)) {
             $_SESSION[$this->group()] = array();
