@@ -44,7 +44,7 @@
         
         <ul>
             <li><a href="<?= url(here())  ?>">Try again</a>: If you think it might help.</li>
-            <li><a href="<?= APP_URL ?>">Go home</a>: And start from the beginning.</li>
+            <li><a href="<?= url() ?>">Go home</a>: And start from the beginning.</li>
         </ul>
         
         <p>In compensation, a picture of a cat:</p>
