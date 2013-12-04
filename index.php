@@ -10,4 +10,5 @@
 require __DIR__ . '/pew/bootstrap.php';
 
 # ...and the magic begins!
-\pew\Pew::instance()->app('app', 'config')->run();
+$app = new \pew\App('app', 'config');
+$app->run();
