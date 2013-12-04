@@ -198,7 +198,7 @@ class Router
      */
     public function response_type()
     {
-        $action = $this->segments[self::ACTION_SEGMENT];
+        $action = @$this->segments[self::ACTION_SEGMENT];
 
         if (!ctype_alpha($action{0})) {
             switch ($action{0}) {

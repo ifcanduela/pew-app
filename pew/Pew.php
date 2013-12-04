@@ -16,51 +16,31 @@ use \pew\libs\Registry as Registry;
 class Pew extends Registry
 {
     /**
-     * The Pew object instance.
-     *
-     * @var \pew\Pew
-     */
-    private static $instance = null;
-
-    /**
      * Framework and application configuration settings.
      * 
      * @var \pew\libs\Registry
      */
-    protected $config = null;
+    protected $config;
 
     /**
-     * Framework class instance storage.
+     * Singleton-like instances.
      * 
      * @var \pew\libs\Registry
      */
-    protected $registry = null;
+    protected $instances;
 
     /**
      * Constructor is out of bounds.
      *
      * @throws Exception
      */
-    public function __construct()
+    public function __construct(array $config = [])
     {
-        $this->registry = Registry::instance();
-        $this->config = new Registry;
+        parent::__construct();
 
+        $this->import($config);
+        $this->instances = new Registry();
         $this->init();
-    }
-
-    /**
-     * Create a Pew instance.
-     * 
-     * @return pew\Pew
-     */
-    public static function instance()
-    {
-        if (!isSet(self::$instance)) {
-            self::$instance = new Pew;
-        }
-
-        return self::$instance;
     }
 
     /**
@@ -70,31 +50,8 @@ class Pew extends Registry
     {
         if (file_exists(__DIR__ .'/config.php')) {
             $pew_config = require_once __DIR__ . '/config.php';
-            $this->config->import($pew_config);
+            $this->import($pew_config);
         }
-    }
-
-    /**
-     * Obtains an object of the specified class.
-     * 
-     * The $arguments parameter is used in the call to the class constructor.
-     * 
-     * @param string $index Index in the storage
-     * @param mixed $arguments A single argument or an array of arguments
-     * @return Object An instance of the required class
-     */
-    public function get($index, $arguments = [])
-    {
-        if (!isset($this->registry->$index)) {
-            if (class_exists($index)) {
-                $reflection_class = new \ReflectionClass($index);
-                $this->registry->$index = $reflection_class->newInstanceArgs($arguments);
-            } else {
-                throw new \Exception("Class $index could not be found.");
-            }
-        }
-        
-        return $this->registry->$index;
     }
 
     /**
@@ -108,7 +65,7 @@ class Pew extends Registry
      */
     public function app($app_folder = 'app', $config_file = 'config')
     {
-        if (!isset($this->registry->App)) {
+        if (!isset($this['App'])) {
             $appLoader = new Autoloader($app_folder, dirname(realpath($app_folder)));
             $appLoader->register();
 
@@ -116,42 +73,27 @@ class Pew extends Registry
             $app_config = include getcwd() . '/' . $app_folder . '/config/' . $config_file . '.php';
 
             // merge user config with Pew config
-            $this->config->import($app_config);
+            $this['import']($app_config);
 
-            if (!isSet($this->config->env)) {
-                $this->config->env = 'development';
+            if (!isSet($this['env'])) {
+                $this['env'] = 'development';
             }
 
             # add application namespace and path
             $app_folder_name = trim(basename($app_folder));
-            $this->config->app_namespace = '\\' . $app_folder_name;
-            $this->config->app_folder = realpath($app_folder);
-            $this->config->app_config = $config_file;
+            $this['app_namespace'] = '\\' . $app_folder_name;
+            $this['app_folder'] = realpath($app_folder);
+            $this['app_config'] = $config_file;
 
             # load app/config/bootstrap.php
-            if (file_exists($this->config->app_folder . '/config/bootstrap.php')) {
-                require $this->config->app_folder . '/config/bootstrap.php';
+            if (file_exists($this['app_folder'] . '/config/bootstrap.php')) {
+                require $this['app_folder'] . '/config/bootstrap.php';
             }
 
-            $this->registry->App = new App($app_folder);
+            $this['App'] = new App;
         }
 
-        return $this->registry->App;
-    }
-
-    /**
-     * Merges configuration arrays and returns the resulting configuration.
-     * 
-     * @param array $config An array with configuration keys
-     * @return Registry Object with configuration properties
-     */
-    public function config(array $config = null)
-    {
-        if ($config) {
-            $this->config->import($config);
-        }
-
-        return $this->config;
+        return $this['App'];
     }
 
     /**
@@ -166,9 +108,9 @@ class Pew extends Registry
     {
         # check if the class name is omitted
         if (!isset($controller_name)) {
-            if (isset($this->registry->CurrentRequestController)) {
+            if (isset($this['CurrentRequestController'])) {
                 # if exists, return the current controller
-                return $this->registry->CurrentRequestController;
+                return $this['CurrentRequestController'];
             } else {
                 # if not, throw an exception
                 throw new \InvalidArgumentException("No current controller could be retrieved");
@@ -176,7 +118,7 @@ class Pew extends Registry
         } else {
             $class_name = file_name_to_class_name($controller_name);
 
-            $app_class_name = $this->config->app_namespace . '\\controllers\\' . $class_name;
+            $app_class_name = $this['app_namespace'] . '\\controllers\\' . $class_name;
             $pew_class_name = '\\pew\\controllers\\' . $class_name;
 
             if (!$request) {
@@ -204,11 +146,11 @@ class Pew extends Registry
      */
     public function model($table_name)
     {
-        $class_name = $this->config->app_namespace . '\\models\\' . file_name_to_class_name($table_name) . 'Model';
-        $class_base_name = class_base_name($class_name);
+        $class_base_name = file_name_to_class_name($table_name) . 'Model';
+        $class_name = $this['app_namespace'] . '\\models\\' . $class_base_name;
 
         # Check that the model has not been previously instantiated
-        if (!isset($this->registry->$class_name)) {
+        if (!isset($this[$class_name])) {
             # Instantiate Model if the derived class is not available
             if (!class_exists($class_name)) {
                 $class_name = '\\pew\\Model';
@@ -218,10 +160,10 @@ class Pew extends Registry
             $database = self::database();
 
             # Instantiation and storage
-            $this->registry->$class_name = new $class_name($database, $table_name);
+            $this[$class_name] = new $class_name($database, $table_name);
         }
         
-        return $this->registry->$class_name;
+        return $this[$class_name];
     }
 
     /**
@@ -231,19 +173,20 @@ class Pew extends Registry
      * @param mixed $arguments One or more arguments for the constructor of the library
      * @return Object An instance of the required Library
      */
-    public function library($class_name, $arguments = null)
+    public function library($class_name, array $arguments = [])
     {
-        $library = null;
+        $app_class_name = $this['app_namespace'] . '\\libs\\' . $class_name;
+        $pew_class_name = __NAMESPACE__ . '\\libs\\' . $class_name; 
 
-        try {
-            $library = self::get($this->config->app_namespace . '\\libs\\' . $class_name);
-        } catch (\Exception $e) {
-            if (!$library) {
-                $library = self::get(__NAMESPACE__ . '\\libs\\' . $class_name);
-            }
+        if (class_exists($app_class_name)) {
+            $r = new \ReflectionClass($this['app_namespace'] . '\\lib\\' . $class_name);
+            return $r->newInstanceArgs($arguments);
+        } elseif (class_exists($pew_class_name)) {
+            $r = new \ReflectionClass($pew_class_name);
+            return $r->newInstanceArgs($arguments);
         }
 
-        return $library;
+        throw new \RuntimeException("Class {$class_name} not found");
     }
 
     /**
@@ -260,17 +203,17 @@ class Pew extends Registry
      */
     public function database($config = null)
     {
-        if (!isset($this->registry->Database)) {
+        if (!isset($this['Database'])) {
             if (!is_array($config)) {
                 # load app/config/database.php
-                if (file_exists($this->config->app_folder . '/config/database.php')) {
-                    $this->config->database_config = include $this->config->app_folder . '/config/database.php';
+                if (file_exists($this['app_folder'] . '/config/database.php')) {
+                    $this['database_config'] = include $this['app_folder'] . '/config/database.php';
                 }
 
-                $db_config = $this->config->database_config;
+                $db_config = $this['database_config'];
 
-                if (isSet($this->config->use_db)) {
-                    $use_db = $this->config->use_db;
+                if (isSet($this['use_db'])) {
+                    $use_db = $this['use_db'];
                 } else {
                     $use_db = 'default';
                 }
@@ -283,13 +226,13 @@ class Pew extends Registry
             }
 
             if (isset($config)) {
-                $this->registry->Database = new libs\Database($config);
+                $this['Database'] = new libs\Database($config);
             } else {
                 throw new \RuntimeException("Database is disabled.");
             }
         }
 
-        return $this->registry->Database;
+        return $this['Database'];
     }
     
     /**
@@ -300,12 +243,12 @@ class Pew extends Registry
      */
     public function request($uri_string = null)
     {
-        if (!isset($this->registry->Request)) {
+        if (!isset($this['Request'])) {
             # instantiate the request object
-            $this->registry->Request = $request = new libs\Request();
+            $this['Request'] = new libs\Request;
         }
 
-        return $this->registry->Request;
+        return $this['Request'];
     }
 
     /**
@@ -317,43 +260,24 @@ class Pew extends Registry
      */
     public function router($uri_string = null)
     {
-        if (!isset($this->registry->Router)) {
+        if (!isset($this['Router'])) {
             $routes = [];
             # fetch the routes configuration
 
             // load app/config/routes.php
-            if (file_exists($this->config->app_folder . '/config/routes.php')) {
-                $routes = include $this->config->app_folder . '/config/routes.php';
+            if (file_exists($this['app_folder'] . '/config/routes.php')) {
+                $routes = include $this['app_folder'] . '/config/routes.php';
             }
 
             # instantiate the router object
             $router = new libs\Router($routes);
-            $router->default_controller($this->config->default_controller);
-            $router->default_action($this->config->default_action);
+            $router->default_controller($this['default_controller']);
+            $router->default_action($this['default_action']);
 
-            $this->registry->Router = $router;
+            $this['Router'] = $router;
         }
 
-        return $this->registry->Router;
-    }
-
-    /**
-     * Get or instance an authentication object
-     * 
-     * @return object The authentication object
-     */
-    public function auth()
-    {
-        if (!isset($this->registry->Auth)) {
-            $database = self::database();
-            $session = self::session();
-            // if (!$database || !$session) {
-            //     throw new RuntimeException('Auth requires Database and Session providers');
-            // }
-            $this->registry->Auth = new Auth($database, $session);
-        }
-
-        return $this->registry->Auth;
+        return $this['Router'];
     }
 
     /**
@@ -363,11 +287,11 @@ class Pew extends Registry
      */
     public function log()
     {
-        if (!isset($this->registry->FileLogger)) {
-            $this->registry->FileLogger = new libs\FileLogger('logs', $this->config->log_level);
+        if (!isset($this['FileLogger'])) {
+            $this['FileLogger'] = new libs\FileLogger('logs', $this['log_level']);
         }
 
-        return $this->registry->FileLogger;
+        return $this['FileLogger'];
     }
 
     /**
@@ -377,11 +301,11 @@ class Pew extends Registry
      */
     public function session()
     {
-        if (!isset($this->registry->Session)) {
-            $this->registry->Session = new \pew\libs\Session();
+        if (!isset($this['Session'])) {
+            $this['Session'] = new \pew\libs\Session();
         }
 
-        return $this->registry->Session;
+        return $this['Session'];
     }
 
     /**
@@ -399,25 +323,56 @@ class Pew extends Registry
     {
         $view_key = "View_$key";
 
-        if (!isset($this->registry->{$view_key})) {
-            $prefix = in_array($this->config->views_folder{0}, ['/', '\\']) 
-                          ? $this->config->root_folder
-                          : $this->config->app_folder;
+        if (!isset($this[$view_key])) {
+            $prefix = in_array($this['views_folder']{0}, ['/', '\\']) 
+                          ? $this['root_folder']
+                          : $this['app_folder'];
 
-            $views_folder = $prefix . '/' . trim($this->config->views_folder, '/\\');
+            $views_folder = $prefix . '/' . trim($this['views_folder'], '/\\');
 
-            $this->registry->{$view_key} = new View($views_folder);
+            $this[$view_key] = new View($views_folder);
         }
 
-        return $this->registry->{$view_key};
+        return $this[$view_key];
     }
 
-    public static function __callstatic($name, $arguments)
+    /**
+     * Store or retrieve a singleton-like instance of an item.
+     * 
+     * @param string $key A key stored in the registry
+     * @param mixed $value The value for the key
+     * @return mixed The instance of the item
+     */
+    public function singleton($key, $value = null)
+    {
+        if (isSet($value)) {
+            $this[$key] = $value;
+        } else {
+            if (!isSet($this->singleton[$key])) {
+                if (!isSet($this[$key])) {
+                    throw new \Exception(__CLASS__ . " does not know what to do with the key ${key}");
+                }
+
+                $this->singleton[$key] = $this[$key];
+            }
+
+            return $this[$key];
+        }
+    }
+
+    /**
+     * Shortcut for Pew::instance()->method().
+     * 
+     * @param string $name Static method name
+     * @param array $arguments Method call argument
+     * @return mixed Result of relayed instance call
+     */
+    public static function __callstatic($name, array $arguments)
     {
         if (method_exists(self::$instance, $name)) {
             return self::$instance->$name($arguments);
-        } else {
-            throw new \RuntimeException("No method $name in class " . __CLASS__);
         }
+
+        throw new \RuntimeException("No method $name in class " . __CLASS__);
     }
 }

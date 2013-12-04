@@ -16,12 +16,12 @@ class Registry implements \Countable, \ArrayAccess
     /**
      * @var Registry Singleton instance of the registry
      */
-    private static $instance = null;
+    protected static $instance = null;
 
     /** 
      * @var array Key/value list
      */
-    private $items = [];
+    protected $items = [];
 
     /**
      * Constructor.

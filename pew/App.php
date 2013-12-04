@@ -3,6 +3,7 @@
 namespace pew;
 
 use pew\Pew;
+use pew\Autoloader;
 
 /**
  * The App class is a simple interface between the front controller and the
@@ -13,6 +14,37 @@ use pew\Pew;
  */
 class App
 {
+    public function __construct($app_folder = 'app', $config = 'config')
+    {
+        $pew = Pew::instance();
+
+        $appLoader = new Autoloader($app_folder, dirname(realpath($app_folder)));
+        $appLoader->register();
+
+        # load app/config/{$config}.php
+        $app_config = include getcwd() . "/{$app_folder}/config/{$config}.php";
+
+        // merge user config with Pew config
+        $pew->import($app_config);
+
+        if (!isSet($pew['env'])) {
+            $pew['env'] = 'development';
+        }
+
+        # add application namespace and path
+        $app_folder_name = trim(basename($app_folder));
+        $pew['app_namespace'] = '\\' . $app_folder_name;
+        $pew['app_folder'] = realpath($app_folder);
+        $pew['app_config'] = $config;
+
+        # load app/config/bootstrap.php
+        if (file_exists($pew['app_folder'] . '/config/bootstrap.php')) {
+            require $pew['app_folder'] . '/config/bootstrap.php';
+        }
+
+        $pew['app'] = $this;
+    }
+
     /**
      * Application entry point, manages controllers, actions and views.
      *
@@ -22,18 +54,20 @@ class App
      */
     public function run()
     {
-        $request = Pew::instance()->request();
-        $router  = Pew::instance()->router();
-        $view = Pew::instance()->view();
+        $pew = Pew::instance();
+
+        $request = $pew->request();
+        $router  = $pew->router();
+        $view = $pew->view();
 
         $router->route($request->segments(), $request->method());
         
         # Instantiate the main view
         $view->template($router->controller() . '/' . $router->action());
-        $view->layout(Pew::instance()->config()->default_layout);
+        $view->layout($pew['default_layout']);
         
         # instantiate the controller
-        $controller = Pew::instance()->controller($router->controller());
+        $controller = $pew->controller($router->controller());
         
         # check controller instantiation
         if (!is_object($controller)) {
@@ -85,9 +119,11 @@ class App
 
     public function render($controller, $view, $view_data)
     {
+        $pew = Pew::instance();
+
         if (!$view->exists()) {
             $defaultView = clone $view;
-            $defaultView->folder(Pew::instance()->config()->system_folder . '/views');
+            $defaultView->folder($pew['system_folder'] . '/views');
 
             if ($defaultView->exists()) {
                 $output = $defaultView->render(null, $view_data);
@@ -103,12 +139,12 @@ class App
         }
 
         $layout = clone $view;
-        $layout->extension(Pew::instance()->config()->layout_ext);
+        $layout->extension($pew['layout_ext']);
         $layout->template($view->layout());
 
         if (!$layout->exists()) {
             $defaultLayout = clone($layout);
-            $defaultLayout->folder(Pew::instance()->config()->system_folder . 'views');
+            $defaultLayout->folder($pew['system_folder'] . 'views');
 
             if (!$defaultLayout->exists()) {
                  throw new \Exception("Layout file could not be found: {$layout->folder()}/{$layout->template()}{$layout->extension()}");

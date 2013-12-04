@@ -23,7 +23,7 @@ function pew($key = null)
     if (is_null($key)) {
         return $pew;
     } else {
-        return isSet($pew->config()->$key) ? $pew->config()->$key : null;
+        return isSet($pew[$key]) ? $pew[$key] : null;
     }
 }
 
@@ -679,7 +679,7 @@ function c2f($class_name)
 function redirect($url)
 {
     $url = ltrim($url, '/');
-    header('Location: ' . \pew\Pew::instance()->config()->app_url . $url);
+    header('Location: ' . pew('app_url') . $url);
     exit(302);
 }
 
@@ -818,7 +818,7 @@ function to_underscores($str, $chars = [' ', '-'], $replacements = '_')
 function root($path = '')
 {
     $path = ltrim(str_replace('/', DIRECTORY_SEPARATOR, $path), ' \\/');
-    $root_path = \pew\Pew::instance()->config()->root_folder . ($path ? '/' . $path : '');
+    $root_path = pew('root_folder') . ($path ? '/' . $path : '');
     
     return $root_path;
 }
@@ -847,7 +847,7 @@ function url($path = '')
  */
 function here()
 {
-    $uri = \pew\Pew::instance()->router()->uri();
+    $uri = pew()->router()->uri();
 
     return $uri;
 }
@@ -867,7 +867,7 @@ function here()
 function www($path = '')
 {
     $path = trim($path, '/');
-    $www_url = rtrim(\pew\Pew::instance()->config()->www_url, '/') . ($path ? '/' . $path : '');
+    $www_url = rtrim(pew('www_url'), '/') . ($path ? '/' . $path : '');
 
     return $www_url;
 }
@@ -888,7 +888,8 @@ function user()
         $return = false;
         
         if (class_exists('Pew') && USEAUTH) {
-            $user = \pew\Pew::instance()->auth()->user();
+            $user = pew()->auth()->user();
+
             if (is_array($user)) {
                 $return = (object) $user;
             }
@@ -909,20 +910,14 @@ function user()
  */
 function session($path = null, $default = null)
 {
-    static $pew;
-
-    if (!$pew) {
-        $pew = \pew\Pew::instance();
-    }
-
     if (is_null($path)) {
-        return $pew->session()->get();
+        return pew()->session()->get();
     }
 
     $indexes = explode('.', $path);
     $first_index = array_shift($indexes);
 
-    $value = $pew->session()->$first_index;
+    $value = pew()->session()->$first_index;
 
     while (!empty($indexes)) {
         $index = array_shift($indexes);

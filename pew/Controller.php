@@ -188,8 +188,8 @@ class Controller
         $this->url_slug = to_underscores(slugify(basename(get_class($this))));
 
         # Global action prefix override
-        if (!$this->action_prefix && $this->pew->config()->action_prefix) {
-            $this->action_prefix = $this->pew->config()->action_prefix;
+        if (!$this->action_prefix && $this->pew['action_prefix']) {
+            $this->action_prefix = $this->pew['action_prefix'];
         }
         
         # Function libraries
