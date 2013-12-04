@@ -3,7 +3,6 @@
 namespace pew;
 
 use pew\Pew;
-use pew\Autoloader;
 
 /**
  * The App class is a simple interface between the front controller and the
@@ -17,9 +16,6 @@ class App
     public function __construct($app_folder = 'app', $config = 'config')
     {
         $pew = Pew::instance();
-
-        $appLoader = new Autoloader($app_folder, dirname(realpath($app_folder)));
-        $appLoader->register();
 
         # load app/config/{$config}.php
         $app_config = include getcwd() . "/{$app_folder}/config/{$config}.php";

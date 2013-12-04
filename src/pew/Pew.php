@@ -66,9 +66,6 @@ class Pew extends Registry
     public function app($app_folder = 'app', $config_file = 'config')
     {
         if (!isset($this['App'])) {
-            $appLoader = new Autoloader($app_folder, dirname(realpath($app_folder)));
-            $appLoader->register();
-
             # load app/config/{$config}.php
             $app_config = include getcwd() . '/' . $app_folder . '/config/' . $config_file . '.php';
 

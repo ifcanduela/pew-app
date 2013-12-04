@@ -7,7 +7,7 @@
  */
 
 # framework bootstrap
-require __DIR__ . '/src/pew/bootstrap.php';
+require __DIR__ . '/vendor/autoload.php';
 
 # ...and the magic begins!
 $app = new \pew\App('app', 'config');
