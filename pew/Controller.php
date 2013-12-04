@@ -241,7 +241,7 @@ class Controller
      * @param array $parameters Arguments for the action method
      * @return array An associative array to pass to the view
      */
-    public function _action($action, $parameters)
+    public function _action($action, array $parameters = [])
     {
         if (!method_exists($this, $this->action_prefix . $action)) {
             # If the $action method does not exist, show an error page
