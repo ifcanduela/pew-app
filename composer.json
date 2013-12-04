@@ -12,12 +12,12 @@
     },
     "autoload": {
         "files": [
-            "src/pew/functions.php",
-            "src/pew/bootstrap.php"
+            "pew/functions.php",
+            "pew/bootstrap.php"
         ],
         "psr-0": {
-            "pew": "src",
-            "app": ""
+            "app": "",
+            "pew": ""
         }
     }
 }
