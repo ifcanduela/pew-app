@@ -1,0 +1,25 @@
+{
+    "name": "ifcanduela/pew-app",
+    "description": "Pew-Pew-Pew sample application",
+    "authors": [
+        {
+            "name": "Igor F. Canduela",
+            "email": "ifcanduela@gmail.com"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/ifcanduela/pew"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "ifcanduela/pew": "*"
+    },
+    "autoload": {
+        "psr-0": {
+            "app": ""
+        }
+    }
+}
