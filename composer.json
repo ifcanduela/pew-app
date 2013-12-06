@@ -12,7 +12,6 @@
     },
     "autoload": {
         "files": [
-            "pew/functions.php",
             "pew/bootstrap.php"
         ],
         "psr-0": {
