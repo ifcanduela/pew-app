@@ -10,4 +10,5 @@ return [
     
     'use_db' => 'sqlite',
 
+    'autodetect_ajax' => false,
 ];
