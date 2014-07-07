@@ -5,26 +5,31 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <base href="<?= url() ?>">
-    <title><?= $title ?> | <?= pew('app_title') ?></title>
-    <link rel="stylesheet" href="www/css/default.css">
+    <title><?= $this->title() ?> | <?= pew('app_title') ?></title>
+    
+    <link rel="stylesheet" href="<?= www('css/default.css') ?>">
+    
+    <!-- <scrip src="http://code.jquery.com/jquery.min.js"></script> -->
+    
+    <!--[if lt IE 9]>
+        <script src="//cdn.jsdelivr.net/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
 </head>
 
 <body>
-    
     <header>
-        <h1><a href="<?= url() ?>"><?= $title ?></a></h1>
+        <h1><a href="<?= url() ?>"><?= $this->title() ?></a></h1>
     </header>
 
     <div id="main">
-        <?= $output ?>
+        <?= $this->child() ?>
     </div>
 
     <footer>
-        <p>2011-2013 ifcanduela | Powered by <a href="https://github.com/ifcanduela/Pew-Pew-Pew">Pew-Pew-Pew</a> <?= pew('version_string') ?></p>
+        <p>Powered by <a href="https://github.com/ifcanduela/pew">Pew-Pew-Pew</a></p>
     </footer>
     
-    <script type="text/javascript" src="http://code.jquery.com/jquery.min.js"></script>
-    <script type="text/javascript" src="www/js/app.js"></script>
-    
+    <script src="<?= www('js/app.js') ?>"></script>
 </body>
 </html>
