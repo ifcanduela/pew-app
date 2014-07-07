@@ -2,7 +2,7 @@
 
 namespace app\controllers;
 
-class Welcome extends \pew\Controller
+class Welcome extends Base
 {
 	public function index($name = 'dude')
 	{
