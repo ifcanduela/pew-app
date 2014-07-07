@@ -7,15 +7,9 @@
             "email": "ifcanduela@gmail.com"
         }
     ],
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/ifcanduela/pew"
-        }
-    ],
     "require": {
         "php": ">=5.4.0",
-        "ifcanduela/pew": "*"
+        "ifcanduela/pew": "dev-master"
     },
     "autoload": {
         "psr-0": {
