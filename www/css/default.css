@@ -1,44 +1,42 @@
 body {
-  background: #bd7 url(../img/pew-bg.png) no-repeat bottom left;
+  background: #bbdd77 url(../img/pew-bg.png) no-repeat bottom left;
   background-attachment: fixed;
   font: normal 16px/165% sans-serif;
   margin: 0;
   overflow-y: scroll;
   padding: 0;
 }
-
-div, h1, h2, p, blockquote, pre, ol, ul, li {
+div,
+h1,
+h2,
+p,
+blockquote,
+pre,
+ol,
+ul,
+li {
   margin: 0;
   padding: 0;
 }
-
-li li {
-  margin-left: 3em;
-}
-
 a {
-  color: #39f;
+  color: #ff9933;
 }
-
 a:hover {
-  color: #f93;
+  color: #ff9933;
 }
-
 body > header,
 body > footer {
   background-color: #333;
-  color: #bd7;
+  color: #bbdd77;
   left: 0;
   padding: 6px;
   position: fixed;
   right: 0;
 }
-
 body > header {
   height: 35px;
   top: 0;
 }
-
 body > header h1,
 body > header h2 {
   margin: 0;
@@ -46,30 +44,25 @@ body > header h2 {
   text-shadow: 0 0 3px rgba(180, 210, 120, 0.7), 0 0 6px rgba(250, 255, 250, 0.4);
   text-transform: uppercase;
 }
-
 body > header div {
-  float:right;
+  float: right;
 }
-
 body > header a {
-  color: #bd7;
+  color: #bbdd77;
   text-decoration: none;
 }
-
 body > footer {
   bottom: 0;
   height: 35px;
   text-align: center;
 }
-
 #main {
-  color: #575;
+  color: #559966;
   margin-bottom: 40px;
   margin-top: 40px;
   min-height: 400px;
   padding: 2em;
 }
-
 nav {
   clear: both;
   float: left;
@@ -78,13 +71,14 @@ nav {
   position: fixed;
   width: 40%;
 }
-
-nav * {
+nav li {
   display: block;
   float: none;
   text-align: right;
 }
-
+nav li li {
+  margin-left: 3em;
+}
 nav a {
   border-radius: 4px;
   border-right: 3px solid transparent;
@@ -94,28 +88,25 @@ nav a {
   padding: 0.2em;
   padding-right: 1.2em;
   text-decoration: none;
-  text-shadow:  0px 0px 3px rgba(0, 0, 0, 0.85), 0px 1px 1px rgba(0, 0, 0, 1);
+  text-shadow: 0px 0px 3px rgba(0, 0, 0, 0.85), 0px 1px 1px #000000;
 }
-
 nav a:hover {
   background-color: rgba(0, 0, 0, 0.3);
   border-right: 3px solid #f93;
 }
-
-code, pre {
+code,
+pre {
   background-color: rgba(255, 255, 255, 0.5);
   font-family: consolas, "lucida console", monospace;
   font-size: 90%;
   padding: 2px;
 }
-
 pre > code {
   background-color: transparent;
   font-size: 100%;
   padding: 0;
 }
-
 .pewpewpew {
-  color: #596;
+  color: #559966;
   awesomesauce: activated!;
 }

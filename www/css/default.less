@@ -1,0 +1,127 @@
+@pewGreen: #bd7;
+@pewGreenDark: #596;
+@linkColor: #f93;
+@linkColorHover: #f93;
+
+body {
+    background: @pewGreen url(../img/pew-bg.png) no-repeat bottom left;
+    background-attachment: fixed;
+    font: normal 16px/165% sans-serif;
+    margin: 0;
+    overflow-y: scroll;
+    padding: 0;
+}
+
+div, h1, h2, p, blockquote, pre, ol, ul, li {
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    color: @linkColor;
+
+    &:hover {
+        color: @linkColorHover;
+    }
+}
+
+body {
+    & > header,
+    & > footer {
+        background-color: #333;
+        color: @pewGreen;
+        left: 0;
+        padding: 6px;
+        position: fixed;
+        right: 0;
+    }
+
+    & > header {
+        height: 35px;
+        top: 0;
+
+        h1,
+        h2 {
+            margin: 0;
+            padding: 5px;
+            text-shadow: 0 0 3px rgba(180, 210, 120, 0.7), 0 0 6px rgba(250, 255, 250, 0.4);
+            text-transform: uppercase;
+        }
+
+        div {
+            float:right;
+        }
+        
+        a {
+            color: @pewGreen;
+            text-decoration: none;
+        }
+    }
+
+    & > footer {
+        bottom: 0;
+        height: 35px;
+        text-align: center;
+    }
+}
+
+#main {
+    color: @pewGreenDark;
+    margin-bottom: 40px;
+    margin-top: 40px;
+    min-height: 400px;
+    padding: 2em;
+}
+
+nav {
+    clear: both;
+    float: left;
+    margin: 0;
+    margin-top: 50px;
+    position: fixed;
+    width: 40%;
+
+    li {
+        display: block;
+        float: none;
+        text-align: right;
+        li {
+            margin-left: 3em;
+        }
+    }
+
+    a {
+        border-radius: 4px;
+        border-right: 3px solid transparent;
+        color: #fff;
+        font-weight: bold;
+        letter-spacing: 1px;
+        padding: 0.2em;
+        padding-right: 1.2em;
+        text-decoration: none;
+        text-shadow:  0px 0px 3px rgba(0, 0, 0, 0.85), 0px 1px 1px rgba(0, 0, 0, 1);
+        
+        &:hover {
+            background-color: rgba(0, 0, 0, 0.3);
+            border-right: 3px solid #f93;
+        }
+    }
+}
+
+code, pre {
+    background-color: rgba(255, 255, 255, 0.5);
+    font-family: consolas, "lucida console", monospace;
+    font-size: 90%;
+    padding: 2px;
+}
+
+pre > code {
+    background-color: transparent;
+    font-size: 100%;
+    padding: 0;
+}
+
+.pewpewpew {
+    color: @pewGreenDark;
+    awesomesauce: activated!;
+}
