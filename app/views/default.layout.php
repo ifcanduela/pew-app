@@ -9,7 +9,7 @@
     
     <link rel="stylesheet" href="<?= www('css/default.css') ?>">
     
-    <!-- <scrip src="http://code.jquery.com/jquery.min.js"></script> -->
+    <!-- <script src="http://code.jquery.com/jquery.min.js"></script> -->
     
     <!--[if lt IE 9]>
         <script src="//cdn.jsdelivr.net/html5shiv/3.7.2/html5shiv.min.js"></script>
