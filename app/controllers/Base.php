@@ -11,7 +11,7 @@ class Base extends \pew\Controller
         
     }
 
-    public function after_(array $view_data)
+    public function after_action(array $view_data)
     {
         return $view_data;
     }
