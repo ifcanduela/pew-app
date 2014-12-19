@@ -12,6 +12,7 @@ You need PHP 5.4 and [Composer](http://getcomposer.org/).
 2. Modify the `composer.json` file as you need.
 3. Run `composer install`.
 4. Start creating folders and files in `app/views`. 
+5. Run `php -S 127.0.0.1:8000` in the `www` folder.
 
 A file called `about.php` in `app/views/site` will be rendered when you request `http://localhost/site/about`.
 
