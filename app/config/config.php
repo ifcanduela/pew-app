@@ -7,4 +7,6 @@ return [
     'use_db' => 'sqlite',
 
     'autodetect_ajax' => true,
+
+    'debug' => true,
 ];
