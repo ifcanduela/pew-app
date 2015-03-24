@@ -28,14 +28,10 @@ body > header,
 body > footer {
   background-color: #333;
   color: #bbdd77;
-  left: 0;
   padding: 6px;
-  position: fixed;
-  right: 0;
 }
 body > header {
   height: 35px;
-  top: 0;
 }
 body > header h1,
 body > header h2 {
@@ -52,14 +48,17 @@ body > header a {
   text-decoration: none;
 }
 body > footer {
+  left: 0;
+  position: fixed;
+  right: 0;
   bottom: 0;
   height: 35px;
   text-align: center;
 }
 #main {
   color: #559966;
+  margin-top: 0;
   margin-bottom: 40px;
-  margin-top: 40px;
   min-height: 400px;
   padding: 2em;
 }
@@ -110,3 +109,4 @@ pre > code {
   color: #559966;
   awesomesauce: activated!;
 }
+/*# sourceMappingURL=default.css.map */
