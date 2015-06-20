@@ -1,112 +1,75 @@
+.clearfix {
+  zoom: 1;
+}
+.clearfix:before,
+.clearfix:after {
+  content: '';
+  display: table;
+}
+.clearfix:after {
+  clear: both;
+}
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+}
+html,
 body {
-  background: #bbdd77 url(../img/pew-bg.png) no-repeat bottom left;
-  background-attachment: fixed;
-  font: normal 16px/165% sans-serif;
+  height: 100%;
   margin: 0;
-  overflow-y: scroll;
   padding: 0;
 }
-div,
-h1,
-h2,
-p,
-blockquote,
-pre,
-ol,
-ul,
-li {
-  margin: 0;
+body {
+  background-color: #bbdd77;
+  color: #333333;
+  font: normal 16px/165% sans-serif;
+}
+header,
+footer {
+  background-color: #333333;
+  color: #b3b3b3;
   padding: 0;
 }
 a {
   color: #ff9933;
 }
 a:hover {
-  color: #ff9933;
+  color: #e57300;
 }
-body > header,
-body > footer {
-  background-color: #333;
-  color: #bbdd77;
-  padding: 6px;
+.push {
+  min-height: 100%;
+  margin-top: 0;
+  margin-bottom: -40px;
+  padding-bottom: 40px;
+  background: transparent url(../img/pew-bg.png) no-repeat bottom 25px left 5px;
 }
-body > header {
-  height: 35px;
+header {
+  height: 55px;
 }
-body > header h1,
-body > header h2 {
+header h1 {
   margin: 0;
-  padding: 5px;
+  padding: 15px;
   text-shadow: 0 0 3px rgba(180, 210, 120, 0.7), 0 0 6px rgba(250, 255, 250, 0.4);
   text-transform: uppercase;
 }
-body > header div {
-  float: right;
-}
-body > header a {
+header h1 a {
   color: #bbdd77;
   text-decoration: none;
 }
-body > footer {
-  left: 0;
-  position: fixed;
-  right: 0;
-  bottom: 0;
-  height: 35px;
+header .menu {
+  padding: 15px;
+  float: right;
+}
+footer.sticky {
+  height: 40px;
   text-align: center;
+  line-height: 40px;
 }
-#main {
-  color: #559966;
-  margin-top: 0;
-  margin-bottom: 40px;
-  min-height: 400px;
-  padding: 2em;
-}
-nav {
-  clear: both;
-  float: left;
+footer.sticky p {
   margin: 0;
-  margin-top: 50px;
-  position: fixed;
-  width: 40%;
-}
-nav li {
-  display: block;
-  float: none;
-  text-align: right;
-}
-nav li li {
-  margin-left: 3em;
-}
-nav a {
-  border-radius: 4px;
-  border-right: 3px solid transparent;
-  color: #fff;
-  font-weight: bold;
-  letter-spacing: 1px;
-  padding: 0.2em;
-  padding-right: 1.2em;
-  text-decoration: none;
-  text-shadow: 0px 0px 3px rgba(0, 0, 0, 0.85), 0px 1px 1px #000000;
-}
-nav a:hover {
-  background-color: rgba(0, 0, 0, 0.3);
-  border-right: 3px solid #f93;
-}
-code,
-pre {
-  background-color: rgba(255, 255, 255, 0.5);
-  font-family: consolas, "lucida console", monospace;
-  font-size: 90%;
-  padding: 2px;
-}
-pre > code {
-  background-color: transparent;
-  font-size: 100%;
   padding: 0;
 }
-.pewpewpew {
-  color: #559966;
-  awesomesauce: activated!;
+#main {
+  padding: 15px;
 }
-/*# sourceMappingURL=default.css.map */

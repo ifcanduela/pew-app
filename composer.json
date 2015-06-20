@@ -1,6 +1,6 @@
 {
     "name": "ifcanduela/pew-app",
-    "description": "Pew-Pew-Pew sample application",
+    "description": "Pew-Pew-Pew starter application",
     "authors": [
         {
             "name": "Igor F. Canduela",
@@ -9,7 +9,8 @@
     ],
     "require": {
         "php": ">=5.4.0",
-        "ifcanduela/pew": "~0.2.0"
+        "ifcanduela/pew": "~0.3.0",
+        "swiftmailer/swiftmailer": "^5.4"
     },
     "autoload": {
         "psr-0": {
