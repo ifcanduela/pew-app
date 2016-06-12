@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'use_db' => 'sqlite',
 
     'sqlite' => [
         'engine' => 'sqlite',
@@ -14,5 +15,4 @@ return [
         'pass' => 'password',
         'name' => 'database name'
     ],
-
 ];

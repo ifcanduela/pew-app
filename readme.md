@@ -6,7 +6,7 @@ The repository only hosts a base app to use with [ifcanduela/pew](https://github
 
 # Quickstart
 
-You need PHP 5.4 and [Composer](http://getcomposer.org/).
+You need PHP 7.0 and [Composer](http://getcomposer.org/).
 
 1. Clone this repository.
 2. Modify the `composer.json` file as you need.

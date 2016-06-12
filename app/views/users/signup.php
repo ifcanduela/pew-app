@@ -4,7 +4,7 @@
     <p class="alert <?= $class ?>"><?= $message ?></p>    
 <?php endforeach ?>
 
-<form action="<?= url(here()) ?>" method="post" id="form-users-signup">
+<form action="<?= url(here()) ?>" method="POST" id="form-users-signup">
     <div>
         <label for="username">Username:</label>
         <input type="text" name="username" id="form-users-signup-username">
