@@ -7,6 +7,7 @@ return [
 
     '/login' => 'Users@login',
     '/logout' => 'Users@logout',
+    '/signup' => 'Users@signup',
 
     #
     # general routes

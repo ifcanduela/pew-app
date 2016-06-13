@@ -1,7 +1,9 @@
 <h1>Sign Up</h1>
 
 <?php foreach (flash() as $class => $message): ?>
-    <p class="alert <?= $class ?>"><?= $message ?></p>    
+    <?php foreach ($messages as $message): ?>
+        <p class="alert <?= $class ?>"><?= $message ?></p>    
+    <?php endforeach ?>
 <?php endforeach ?>
 
 <form action="<?= url(here()) ?>" method="POST" id="form-users-signup">

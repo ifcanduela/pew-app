@@ -1,9 +1,12 @@
 <?php
 
 return [
+    # if this key is not set, the database configuration will be 'default'
+    'use_db' => 'dev',
+
     'dev' => [
         'engine' => 'sqlite',
-        'file' => 'app/config/db.sqlite3'
+        'file' => root('db/dev.sqlite'),
     ],
 
     'prod' => [

@@ -4,7 +4,6 @@ return [
     
     'app_title' => 'Pew-Pew-Pew',
 
-    # this determines which database configuration to use
     'env' => 'dev',
 
     # closures will receive the injection container as argument

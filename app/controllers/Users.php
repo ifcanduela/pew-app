@@ -15,12 +15,12 @@ class Users extends \pew\Controller
 
             if (!$user) {
                 $this->session->addFlash('ko', 'Invalid username or password');
-                return $this->redirect('users/login');
+                return $this->redirect('login');
             }
 
             if (!password_verify($this->request->post('password'), $user->password)) {
                 $this->session->addFlash('ko', 'Invalid username or password');
-                return $this->redirect('users/login');
+                return $this->redirect('login');
             }
 
             $this->session['user'] = $user->attributes();
@@ -30,7 +30,7 @@ class Users extends \pew\Controller
                 setcookie(SESSION_KEY, $user->id, time() + $thirty_days, '/', null, false, true);
             }
 
-            redirect('');
+            return $this->redirect('/');
         }
 
         return [];
@@ -41,7 +41,8 @@ class Users extends \pew\Controller
         unset($this->session['user']);
         setcookie(SESSION_KEY, false, 1, '/', null, false, true);
         session_destroy();
-        redirect('');
+        
+        return $this->redirect('/');
     }
 
     public function signup()
@@ -51,22 +52,22 @@ class Users extends \pew\Controller
 
             if (!preg_match('/[A-Za-z\_][A-Za-z\_]{4,20}/', $username)) {
                 $this->session->addFlash('ko', 'Please select a valid username');
-                return $this->redirect('users/signup');
+                return $this->redirect('signup');
             }
 
             if ($this->request->post('password') !== $this->request->post('password_confirm')) {
                 $this->session->addFlash('ko', 'The passwords must match');
-                return $this->redirect('users/signup');
+                return $this->redirect('signup');
             }
 
             if (strlen($this->request->post('password')) < 6) {
                 $this->session->addFlash('ko', 'Your password is too short');
-                return $this->redirect('users/signup');
+                return $this->redirect('signup');
             }
 
             if ($usernameExists = User::findOneByUsername($username)) {
                 $this->session->addFlash('ko', 'Please select a valid username');
-                return $this->redirect('users/signup');
+                return $this->redirect('signup');
             }
 
             $password = password_hash($this->request->post('password'), PASSWORD_DEFAULT);
@@ -75,12 +76,11 @@ class Users extends \pew\Controller
                     'username' => $username,
                     'password' => $password,
                     'email' => $this->request->post('email'),
-                    'slug' => \pew\libs\Str::slug($username),
                 ])->save();
 
             $this->session->addFlash('ok', 'Account created successfully');
 
-            return $this->redirect('users/login');
+            return $this->redirect('login');
         }
     }
 }
