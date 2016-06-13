@@ -1,12 +1,18 @@
 <?php
 
 return [
-
+    
     'app_title' => 'Pew-Pew-Pew',
 
-    'use_db' => 'sqlite',
+    # this determines which database configuration to use
+    'env' => 'dev',
 
-    'autodetect_ajax' => true,
+    # closures will receive the injection container as argument
+    'currentUser' => function ($c) {
+        if (isset($c['session']['user'])) {
+            return User::findOneById($c['session']['user.id']);
+        }
 
-    'debug' => true,
+        return false;
+    },
 ];

@@ -1,14 +1,12 @@
 <?php
 
 return [
-    'use_db' => 'sqlite',
-
-    'sqlite' => [
+    'dev' => [
         'engine' => 'sqlite',
         'file' => 'app/config/db.sqlite3'
     ],
 
-    'mysql' => [
+    'prod' => [
         'engine' => 'mysql',
         'host' => 'localhost',
         'user' => 'username',
