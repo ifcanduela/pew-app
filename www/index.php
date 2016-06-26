@@ -10,5 +10,5 @@
 require __DIR__ . '/../vendor/autoload.php';
 
 # ...and the magic begins!
-$app = new \pew\App('app', 'config');
+$app = new \pew\App('../app', 'config');
 $app->run();
