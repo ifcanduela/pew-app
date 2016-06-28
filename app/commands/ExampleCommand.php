@@ -11,7 +11,7 @@ class ExampleCommand extends Command
      * Command name.
      *
      * This is the name used to invoke the command in the console.
-     * 
+     *
      * @return string
      */
     public function name(): string
@@ -23,7 +23,7 @@ class ExampleCommand extends Command
      * Command description.
      *
      * Use this value to provide a brief explanation of the command.
-     * 
+     *
      * @return string
      */
     public function description(): string
@@ -34,18 +34,21 @@ class ExampleCommand extends Command
     /**
      * Example command.
      *
-     * Run this command by typing `php run example --dry-run --filter 1` in the 
-     * root folder of your app, where the "run"  script is found.
+     * Run this command by typing `php run example` in the root folder of your app, where the "run"
+     * script is found. Try also with different arguments:
      *
-     * @param CommandArguments $arguments Command-line arguments
+     * php run example pew -f 99
+     * php run example pew --dry-run --filter
+     *
+     * @param ConsoleCommandArguments $arguments Command-line arguments
      * @return null
      */
-    public function run(CommandArguments $arguments)
+    public function run(ConsoleCommandArguments $arguments)
     {
-        var_dump($arguments->dryRun);
-        var_dump($arguments->has('f'));
-        var_dump($arguments->f);
-        var_dump($arguments->at(0));
-        var_dump($arguments->get('f', 'filter'));
+        echo 'Has a --dry-run argument?       ' . ($arguments->dryRun ? 'Yes' : 'No') . PHP_EOL;
+        echo 'Has an -f flag?                 ' . ($arguments->has('f') ? 'Yes' : 'No') . PHP_EOL;
+        echo 'What value does f have?         ' . $arguments->f . PHP_EOL;
+        echo 'The first argument is           ' . $arguments->at(0) . PHP_EOL;
+        echo 'The value of -f or --filter is  ' . $arguments->get('f', 'filter') . PHP_EOL;
     }
 }
