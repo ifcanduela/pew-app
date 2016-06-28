@@ -1,9 +1,9 @@
 <?php
 
 return [
-    # 
+    #
     # login and logout
-    # 
+    #
 
     '/login' => 'Users@login',
     '/logout' => 'Users@logout',
@@ -11,7 +11,7 @@ return [
 
     #
     # general routes
-    # 
+    #
 
     [
         'path' => '/welcome[/{name}]',
