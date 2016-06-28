@@ -1,0 +1,12 @@
+<?php
+
+$cmd = PHP_BINARY . " -S localhost:8080 -t www";
+
+echo PHP_EOL . 'PHP ' . PHP_VERSION . ' Built-in server' . PHP_EOL;
+echo str_repeat('=', 80) . PHP_EOL;
+echo 'Host address:  localhost:8080' . PHP_EOL;
+echo 'Document root: ' . realpath('www') . PHP_EOL;
+echo 'Command:       ' . $cmd . PHP_EOL;
+echo str_repeat('-', 80) . PHP_EOL;
+
+`$cmd`;
