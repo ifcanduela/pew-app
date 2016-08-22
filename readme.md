@@ -6,18 +6,12 @@ The repository only hosts a base app to use with [ifcanduela/pew](https://github
 
 # Quickstart
 
-You need PHP 7.0 and [Composer](http://getcomposer.org/).
+You need PHP 7.0 with the `mbstring` extension enabled and [Composer](http://getcomposer.org/).
 
-1. Clone this repository.
+1. Clone this repository and move into it.
 2. Modify the `composer.json` file as you need.
 3. Run `composer install`.
-4. Run `php -S 127.0.0.1:8000` in the `www` folder.
-
-A file called `about.php` in `app/views/site` will be rendered when you request
-`http://localhost/site/about`.
-
-More complex stuff is achieved by configuring a database, adding routes and creating controllers and
-models.
+4. Run `php serve`.
 
 # Creating a basic web application
 
@@ -26,17 +20,32 @@ URL is requested, it is compared against the defined routes, and if one matches 
 action are used to generate a response.
 
 Routes are defined in the `app\config\routes.php` file. This file should return an array with route
-declarations, which come in two flavours: full and short. A full route declaration looks like this:
+declarations, which come in several flavors. A full route declaration looks like this:
 
 ```php
-[
-    'path' => '/post[/{slug}]',
-    'controller' => 'Posts@view',
-    'methods' => 'GET',
-    'defaults' => [
-        'slug' => 'home'
-    ]
-]
+return [
+    [
+        'path' => '/post[/{slug}]',
+        'controller' => 'Posts@view',
+        'methods' => 'GET',
+        'defaults' => [
+            'slug' => 'home'
+        ]
+    ],
+];
+```
+
+You can use the `Route` class to define the same route:
+
+```php
+use pew\router\Route;
+
+return [
+    Route::from('/post[/{slug}]')
+        ->handler('Posts@view')
+        ->methods('get')
+        ->defaults(['slug' => 'home']),
+];
 ```
 
 This route will match URLs like `posts` and `posts/my-blog-post`. In both cases the `view()` method
@@ -49,7 +58,9 @@ a value of `home` will be passed to the method's `$slug` argument.
 An almost-equivalent route can be written in short form:
 
 ```php
-'/post[/{slug}]' => 'Posts@view',
+return [
+    '/post[/{slug}]' => 'Posts@view',
+];
 ```
 
 The slug here is optional, but it has no default, which means you have to give it one in the
@@ -67,10 +78,20 @@ class Post
 }
 ```
 
-You can also define a `slug` key in the `app\config\config.php`, since action methods receive their
+You can also define a `slug` key in the `app\config\config.php` file, since action methods receive their
 argument values from the injection container, and the config file is one of the sources (the others
 being the GET and POST arrays, the services configuration file (`pew\config\bootstrap.php`) and the
 route itself).
+
+Finally, you can pass an anonymous function as the handler to a route. The function can ask for arguments
+the same way a controller action would, and the `$this` pseudo-variable in the body of the function is
+bound to an instance of `pew\Controller`:
+
+```php
+'/post[/{slug}]' => function ($slug) {
+    echo $this->renderJson(['slug' => $slug]);
+},
+```
 
 ## Create a controller
 

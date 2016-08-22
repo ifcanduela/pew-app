@@ -1,6 +1,28 @@
 <?php
 
+use pew\router\Route;
+
 return [
+    #
+    # examples
+    #
+
+    // [
+    //     'path' => '/post[/{slug}]',
+    //     'controller' => 'Posts@view',
+    //     'methods' => 'GET',
+    //     'defaults' => [
+    //         'slug' => 'home'
+    //     ]
+    // ],
+
+    // Route::from('/post[/{slug}]')
+    //     ->handler('Posts@view')
+    //     ->methods('get')
+    //     ->defaults(['slug' => 'home']),
+
+    // '/post[/{slug}]' => 'Posts@view',
+
     #
     # login and logout
     #

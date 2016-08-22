@@ -1,7 +1,7 @@
 <?php
 
 return [
-    
+
     'app_title' => 'Pew-Pew-Pew',
 
     'env' => 'dev',
@@ -14,4 +14,6 @@ return [
 
         return false;
     },
+
+    'debug' => true,
 ];
