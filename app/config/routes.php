@@ -35,18 +35,14 @@ return [
     # general routes
     #
 
-    [
-        'path' => '/welcome[/{name}]',
-        'controller' => 'Welcome@index',
-        'methods' => 'GET POST',
-        'defaults' => [
-            'name' => 'Pew'
-        ],
-    ],
+    Route::from('/welcome[/{name}]')
+        ->handler('Welcome@index')
+        ->methods('get post')
+        ->defaults(['name' => 'Pew']),
 
     [
         'path' => '/',
-        'controller' => 'Welcome@index',
+        'handler' => 'Welcome@index',
         'defaults' => [
             'name' => 'Pew'
         ],
