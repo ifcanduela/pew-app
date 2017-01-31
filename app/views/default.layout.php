@@ -4,7 +4,6 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <base href="<?= url() ?>">
     <title><?= $title = $this->title() ?> | <?= pew('app_title') ?></title>
 
     <link rel="stylesheet" href="<?= url('css/default.css') ?>">

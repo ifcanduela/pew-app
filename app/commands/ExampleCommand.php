@@ -40,10 +40,10 @@ class ExampleCommand extends Command
      * php run example pew -f 99
      * php run example pew --dry-run --filter
      *
-     * @param ConsoleCommandArguments $arguments Command-line arguments
+     * @param CommandArguments $arguments Command-line arguments
      * @return null
      */
-    public function run(ConsoleCommandArguments $arguments)
+    public function run(CommandArguments $arguments)
     {
         echo 'Has a --dry-run argument?       ' . ($arguments->dryRun ? 'Yes' : 'No') . PHP_EOL;
         echo 'Has an -f flag?                 ' . ($arguments->has('f') ? 'Yes' : 'No') . PHP_EOL;

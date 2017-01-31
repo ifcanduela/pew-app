@@ -1,7 +1,7 @@
 //!
 //! App.js
 //!
-//! Use this skeleton to create a KnockoutJS view-model for you app.
+//! Use this skeleton to create a KnockoutJS view-model for your app.
 //!
 
 function App()
