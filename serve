@@ -1,12 +1,16 @@
 <?php
 
+$php_version = PHP_VERSION;
+$document_root = realpath('www');
 $cmd = PHP_BINARY . " -S localhost:8080 -t www";
 
-echo PHP_EOL . 'PHP ' . PHP_VERSION . ' Built-in server' . PHP_EOL;
-echo str_repeat('=', 80) . PHP_EOL;
-echo 'Host address:  localhost:8080' . PHP_EOL;
-echo 'Document root: ' . realpath('www') . PHP_EOL;
-echo 'Command:       ' . $cmd . PHP_EOL;
-echo str_repeat('-', 80) . PHP_EOL;
+echo <<<SERVE
+PHP $php_version Built-in server
+================================================================================
+Host address:  localhost:8080
+Document root: $document_root
+Command:       $cmd
+--------------------------------------------------------------------------------\n
+SERVE;
 
 `$cmd`;

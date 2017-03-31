@@ -23,6 +23,12 @@ return [
 
     // '/post[/{slug}]' => 'Posts@view',
 
+    // '/admin' => [
+    //     'before' => [
+    //         \app\services\MiddlewareExample::class,
+    //     ],
+    // ],
+
     #
     # login and logout
     #
@@ -30,6 +36,7 @@ return [
     '/login' => 'Users@login',
     '/logout' => 'Users@logout',
     '/signup' => 'Users@signup',
+
 
     #
     # general routes
