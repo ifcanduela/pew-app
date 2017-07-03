@@ -6,9 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <title><?= $title = $this->title() ?> | <?= pew('app_title') ?></title>
 
-    <link rel="stylesheet" href="<?= url('css/default.css') ?>">
-    <script src="<?= url('js/jquery-3.1.0.min.js') ?>"></script>
-    <script src="<?= url('js/knockout-3.4.0.min.js') ?>"></script>
+    <link rel="stylesheet" href="<?= url('css/app.css') ?>">
 </head>
 
 <body>
@@ -37,7 +35,7 @@
         <p>Powered by <a href="https://github.com/ifcanduela/pew">Pew-Pew-Pew</a></p>
     </footer>
 
-    <script src="<?= url('js/app.js') ?>"></script>
+    <script src="<?= url('js/app.bundle.js') ?>"></script>
 
     <?= $this->block('scripts') ?>
 </body>
