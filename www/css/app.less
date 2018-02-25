@@ -15,24 +15,6 @@
 @base_padding: 15px;
 
 //
-// MIXINS
-//
-
-.clearfix {
-    zoom: 1;
-
-    &:before,
-    &:after {
-        content: '';
-        display: table;
-    }
-
-    &:after {
-        clear: both;
-    }
-}
-
-//
 // GENERAL STYLES
 //
 
@@ -42,19 +24,20 @@
     box-sizing: border-box;
 }
 
-
 html,
 body {
-    height: 100%;
+    min-height: 100%;
     margin: 0;
     padding: 0;
 }
 
 body {
-    background-color: @background;
+    background: @background url(../img/pew-bg.png) no-repeat bottom 0 left 5px;
     color: @foreground;
     font: normal 16px/165% sans-serif;
-    // overflow-y: scroll;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh
 }
 
 header,
@@ -76,38 +59,24 @@ a {
 // LAYOUT
 //
 
-.push {
-    min-height: 100%;
-    margin-top: 0;
-    margin-bottom: -@footer_height;
-    padding-bottom: @footer_height;
-
-    background: transparent url(../img/pew-bg.png) no-repeat bottom 25px left 5px;
+#main {
+    flex: 1;
+    padding: @base_padding;
 }
 
 header {
-    height: @header_height;
-
-    h1 {
-        margin: 0;
-        padding: @base_padding;
-        text-shadow: 0 0 3px rgba(180, 210, 120, 0.7), 0 0 6px rgba(250, 255, 250, 0.4);
-        text-transform: uppercase;
-
-        a {
-            color: @green_light;
-            text-decoration: none;
-        }
-    }
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-basis: @header_height;
 
     .menu {
         padding: @base_padding;
-        float: right;
     }
 }
 
-footer.sticky {
-    height: @footer_height;
+footer {
+    flex-basis: @footer_height;
     text-align: center;
     line-height: 40px;
 
@@ -117,6 +86,14 @@ footer.sticky {
     }
 }
 
-#main {
+.app-title {
+    margin: 0;
     padding: @base_padding;
+    text-shadow: 0 0 3px rgba(180, 210, 120, 0.7), 0 0 6px rgba(250, 255, 250, 0.4);
+    text-transform: uppercase;
+
+    a {
+        color: @green_light;
+        text-decoration: none;
+    }
 }

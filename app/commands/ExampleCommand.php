@@ -2,7 +2,7 @@
 
 namespace app\commands;
 
-use pew\console\Command ;
+use pew\console\Command;
 use pew\console\CommandArguments;
 
 class ExampleCommand extends Command

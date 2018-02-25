@@ -9,7 +9,7 @@
     ],
     "require": {
         "php": ">=7.0.0",
-        "ifcanduela/pew": "~0.5.0"
+        "ifcanduela/pew": "*"
     },
     "autoload": {
         "psr-0": {
