@@ -1,6 +1,6 @@
 <h1>Sign Up</h1>
 
-<?php foreach (flash() as $class => $message): ?>
+<?php foreach (flash() as $class => $messages): ?>
     <?php foreach ($messages as $message): ?>
         <p class="alert <?= $class ?>"><?= $message ?></p>    
     <?php endforeach ?>
