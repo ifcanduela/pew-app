@@ -15,12 +15,12 @@ const CONFIG = {
         // preprocessor: 'stylus',
 
         // Change these settings to fit your paths and preprocessor of choice
-        watchGlob: './src/css/**/*.less',
+        watchGlob: './css/**/*.less',
         inputFileNames: [
-            './src/css/app.less',
+            './css/app.less',
         ],
         // Destination folder for compiled CSS files
-        outputPath: './css/',
+        outputPath: './www/css/',
         // Set to false to disable Autoprefixer
         autoPrefixer: {},
         // Source maps are inlined by default
@@ -35,13 +35,13 @@ const CONFIG = {
     js: {
         // Use Browserify to bundle JavaScript files.
 
-        // watch source files
-        watchGlob: './src/js/**/*.js',
+        // Watch source files
+        watchGlob: './www/js/src/**/*.js',
         // Destination folder for compiled JS files
-        outputPath: './js/',
+        outputPath: './www/js/',
         // Entry files for JavaScript compilation
         files: {
-            './src/js/app.js': 'app.bundle.js'
+            './www/js/src/app.js': 'app.bundle.js'
         },
         // Babel configuration
         babel: {
