@@ -2,12 +2,13 @@
 
 $php_version = PHP_VERSION;
 $document_root = realpath('www');
-$cmd = PHP_BINARY . " -S localhost:8080 -t www";
+$port = $argv[1] ?? 8080;
+$cmd = PHP_BINARY . " -S localhost:$port -t www";
 
 echo <<<SERVE
 PHP $php_version Built-in server
 ================================================================================
-Host address:  localhost:8080
+Host address:  localhost:$port
 Document root: $document_root
 Command:       $cmd
 --------------------------------------------------------------------------------\n
