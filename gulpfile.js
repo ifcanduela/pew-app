@@ -15,9 +15,9 @@ const CONFIG = {
         // preprocessor: 'stylus',
 
         // Change these settings to fit your paths and preprocessor of choice
-        watchGlob: './css/**/*.less',
+        watchGlob: './www/css/**/*.less',
         inputFileNames: [
-            './css/app.less',
+            './www/css/app.less',
         ],
         // Destination folder for compiled CSS files
         outputPath: './www/css/',
