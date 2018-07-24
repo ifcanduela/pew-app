@@ -16,7 +16,7 @@ class MiddlewareExample extends \pew\request\Middleware
      */
     public function before($currentUser)
     {
-        return new \Symfony\Component\HttpFoundation\RedirectResponse('/login');
+        return new \Symfony\Component\HttpFoundation\RedirectResponse("/login");
     }
 
     /**

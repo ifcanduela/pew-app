@@ -8,7 +8,7 @@ $cmd = PHP_BINARY . " -S localhost:$port -t www";
 echo <<<SERVE
 PHP $php_version Built-in server
 ================================================================================
-Host address:  localhost:$port
+Host address:  http://localhost:$port
 Document root: $document_root
 Command:       $cmd
 --------------------------------------------------------------------------------\n

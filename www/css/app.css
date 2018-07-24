@@ -10,13 +10,16 @@ body {
   padding: 0;
 }
 body {
-  background-color: #bd7;
   background: #bd7 url(../img/pew-bg.png) no-repeat bottom 0 left 5px;
   color: #333;
   font: normal 16px/165% sans-serif;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+}
+body.users-layout {
+  justify-content: center;
+  align-items: center;
 }
 header,
 footer {
@@ -33,22 +36,14 @@ a:hover {
 #main {
   flex: 1;
   padding: 15px;
+  display: flex;
+  flex-direction: column;
 }
 header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-basis: 55px;
-}
-header .app-title {
-  margin: 0;
-  padding: 15px;
-  text-shadow: 0 0 3px rgba(180, 210, 120, 0.7), 0 0 6px rgba(250, 255, 250, 0.4);
-  text-transform: uppercase;
-}
-header .app-title a {
-  color: #bd7;
-  text-decoration: none;
 }
 header .menu {
   padding: 15px;
@@ -61,4 +56,69 @@ footer {
 footer p {
   margin: 0;
   padding: 0;
+}
+.app-title {
+  margin: 0;
+  padding: 15px;
+  text-shadow: 0 0 3px rgba(180, 210, 120, 0.7), 0 0 6px rgba(250, 255, 250, 0.4);
+  text-transform: uppercase;
+}
+.app-title a {
+  color: #bd7;
+  text-decoration: none;
+}
+.user-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.user-wrapper form {
+  background-color: rgba(255, 255, 255, 0.85);
+  border-radius: 2px;
+  padding: 25px;
+}
+.user-wrapper label {
+  display: block;
+  font-size: 0.9em;
+}
+.user-wrapper input[type="text"],
+.user-wrapper input[type="email"],
+.user-wrapper input[type="password"],
+.user-wrapper input[type=""] {
+  min-width: 300px;
+  padding: 6px;
+}
+form > h1,
+form > h2,
+form h3 {
+  margin-top: 0;
+}
+form .form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 24px;
+}
+form .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+form .form-actions button,
+form .form-actions input[type="submit"],
+form .form-actions input[type="reset"] {
+  margin-left: 12px;
+}
+form button,
+form input[type="submit"],
+form input[type="reset"] {
+  background-color: #596;
+  color: #fff;
+  border: 1px solid #596;
+  padding: 12px 24px;
+  text-transform: uppercase;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+  cursor: pointer;
 }

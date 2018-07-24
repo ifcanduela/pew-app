@@ -4,10 +4,10 @@ namespace app\controllers;
 
 class Welcome extends \pew\Controller
 {
-    public function index($name)
+    public function index(string $name)
     {
-        $this->view->title('Welcome!');
+        $this->view->title("Welcome!");
 
-        return ['name' => $name];
+        return ["name" => $name];
     }
 }

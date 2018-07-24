@@ -1,19 +1,27 @@
 <?php
 
+use pew\libs\Session;
+use app\models\User;
+
 return [
+    "app_title" => "Pew-Pew-Pew",
 
-    'app_title' => 'Pew-Pew-Pew',
-
-    'env' => 'dev',
+    "env" => "dev",
 
     # closures will receive the injection container as argument
-    'currentUser' => function ($c) {
-        if (isset($c['session']['user'])) {
-            return \app\models\User::findOneById($c['session']['user.id']);
+    "user" => function ($c) {
+        /** @var Session */
+        $session = $c["session"];
+
+        /** @var User|null */
+        $user = null;
+
+        if ($user_id = $session->get("user_id")) {
+            return User::findOne($user_id);
         }
 
-        return false;
+        return $user;
     },
 
-    'debug' => true,
+    "debug" => true,
 ];
