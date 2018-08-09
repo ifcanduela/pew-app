@@ -2,7 +2,7 @@
 
 namespace app\middleware;
 
-use pew\libs\Session;
+use pew\lib\Session;
 use pew\request\Middleware;
 
 class RedirectToPrevious extends Middleware

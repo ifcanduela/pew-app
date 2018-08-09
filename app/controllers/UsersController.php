@@ -2,7 +2,7 @@
 
 namespace app\controllers;
 
-use pew\libs\Session;
+use pew\lib\Session;
 use app\models\User;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
@@ -33,13 +33,13 @@ class UsersController extends \pew\Controller
             }
 
             # password was hashed with an old algorithm
-            if (password_needs_rehash($user->password)) {
+            if (password_needs_rehash($user->password, PASSWORD_DEFAULT)) {
                 $user->password = password_hash($this->request->post("password"));
                 $user->save();
             }
 
-            # indicate the users is logged in
-            $session["user_id"] = $user->id;
+            # indicate the user is logged in
+            $session->set(USER_KEY, $user->id);
 
             # send a cookie for long-term state
             if ($this->request->post("remember_me")) {
@@ -47,15 +47,7 @@ class UsersController extends \pew\Controller
                 setcookie(SESSION_KEY, $user->id, time() + $thirty_days, "/", null, false, true);
             }
 
-            $redirect = "/";
-
-            # check for redirects
-            if ($session["redirect_to"]) {
-                $redirect = $session["redirect_to"];
-                unset($session["redirect_to"]);
-            }
-
-            return $this->redirect($redirect);
+            return $this->redirect("/");
         }
 
         return [];
@@ -68,7 +60,7 @@ class UsersController extends \pew\Controller
     public function logout(Session $session)
     {
         # clear the logged-in status
-        unset($session["user_id"]);
+        $session->remove(USER_KEY);
         # clear any long-term cookies
         setcookie(SESSION_KEY, false, 1, "/", null, false, true);
         session_destroy();

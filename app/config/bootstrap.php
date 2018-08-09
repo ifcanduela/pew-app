@@ -1,6 +1,7 @@
 <?php
 
 const SESSION_KEY = "MjgzOTkyNzY3MjIyODc2";
+const USER_KEY = "user_id";
 
 function app_title(...$page_title)
 {

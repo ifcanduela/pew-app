@@ -1,16 +1,20 @@
+<?php
+/**
+ * @var \pew\View $this
+ */
+?>
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    
+
     <title><?= app_title($this->title()) ?></title>
     <link rel="stylesheet" href="<?= url('css/app.css') ?>">
 
     <?= $this->block("styles") ?>
 </head>
-
 <body>
     <header>
         <div class="app-title"><a href="<?= url() ?>"><?= pew('app_title') ?></a></div>

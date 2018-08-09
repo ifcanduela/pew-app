@@ -1,6 +1,6 @@
 <?php
 
-use pew\libs\Session;
+use pew\lib\Session;
 use app\models\User;
 
 return [
