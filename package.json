@@ -1,33 +1,40 @@
 {
-  "name": "gulp-boilerplate",
-  "version": "1.0.0",
-  "description": "Gulp watchin'",
-  "author": "ifcanduela",
-  "license": "MIT",
-  "repository": "https://github.com/ifcanduela/gulp-boilerplate",
-  "dependencies": {
-    "jquery": "^3.2.1",
-    "knockout": "^3.4.2"
-  },
-  "devDependencies": {
-    "babel-preset-env": "^1.6.0",
-    "babelify": "^7.3.0",
-    "browserify": "^14.4.0",
-    "gulp": "^3.9.1",
-    "gulp-autoprefixer": "^4.0.0",
-    "gulp-batch": "^1.0.5",
-    "gulp-clean-css": "^3.8.0",
-    "gulp-if": "^2.0.2",
-    "gulp-less": "^3.3.2",
-    "gulp-notify": "^3.0.0",
-    "gulp-plumber": "^1.1.0",
-    "gulp-rename": "^1.2.2",
-    "gulp-sass": "^3.1.0",
-    "gulp-sourcemaps": "^2.6.1",
-    "gulp-stylus": "^2.6.0",
-    "gulp-uglify": "^3.0.0",
-    "gulp-watch": "^4.3.11",
-    "vinyl-buffer": "^1.0.0",
-    "vinyl-source-stream": "^1.1.0"
-  }
+    "scripts": {
+        "dev": "webpack --mode development",
+        "prod": "webpack --mode production",
+        "watch": "webpack --watch"
+    },
+    "dependencies": {
+        "autoprefixer": "^8.6.5",
+        "axios": "^0.18.0",
+        "babel-core": "^6.26.3",
+        "babel-loader": "^7.1.5",
+        "babel-preset-env": "^1.7.0",
+        "clean-webpack-plugin": "^0.1.19",
+        "copy-webpack-plugin": "^4.5.2",
+        "css-loader": "^1.0.0",
+        "extract-loader": "^2.0.1",
+        "file-loader": "^1.1.11",
+        "friendly-errors-webpack-plugin": "^1.7.0",
+        "html-loader": "^0.5.5",
+        "html-webpack-plugin": "^3.2.0",
+        "less": "^3.7.1",
+        "less-loader": "^4.1.0",
+        "mini-css-extract-plugin": "^0.4.1",
+        "natural-compare": "^1.4.0",
+        "postcss-loader": "^2.1.6",
+        "style-loader": "^0.21.0",
+        "url-loader": "^1.0.1",
+        "vue": "^2.5.16",
+        "vue-loader": "^15.2.4",
+        "vue-template-compiler": "^2.5.16",
+        "vuedraggable": "^2.16.0",
+        "webpack": "^4.16.0",
+        "webpack-build-notifier": "^0.1.28",
+        "webpack-command": "^0.4.1",
+        "webpack-md5-hash": "0.0.6"
+    },
+    "browser": {
+        "vue": "vue/dist/vue.common.js"
+    }
 }

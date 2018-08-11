@@ -11,13 +11,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <title><?= app_title($this->title()) ?></title>
-    <link rel="stylesheet" href="<?= url('css/app.css') ?>">
+    <link rel="stylesheet" href="<?= url("assets/css/app.bundle.css") ?>">
 
     <?= $this->block("styles") ?>
 </head>
 <body>
     <header>
-        <div class="app-title"><a href="<?= url() ?>"><?= pew('app_title') ?></a></div>
+        <div class="app-title"><a href="<?= url() ?>"><?= pew("app_title") ?></a></div>
 
         <div class="menu">
             <a href="<?= url() ?>">Home</a>
@@ -26,7 +26,7 @@
                 <a href="<?= url("logout") ?>">Log out</a>
             <?php else: ?>
                 <a href="<?= url("login") ?>">Log in</a>
-                <a href="<?= url('signup') ?>">Sign up</a>
+                <a href="<?= url("signup") ?>">Sign up</a>
             <?php endif ?>
         </div>
     </header>
@@ -45,7 +45,7 @@
         <p>Powered by <a href="https://github.com/ifcanduela/pew">Pew-Pew-Pew</a></p>
     </footer>
 
-    <script src="<?= url("js", "app.bundle.js") ?>"></script>
+    <script src="<?= url("js", "assets/app.bundle.js") ?>"></script>
     <?= $this->block("scripts") ?>
 </body>
 </html>

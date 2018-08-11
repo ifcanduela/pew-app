@@ -26,19 +26,8 @@ class UsersController extends \pew\Controller
                 return $this->redirect("login");
             }
 
-            # provided password does not match database password
-            if (!password_verify($this->request->post("password"), $user->password)) {
-                $session->addFlash("ko", "Invalid username or password");
-                return $this->redirect("login");
-            }
-
-            # password was hashed with an old algorithm
-            if (password_needs_rehash($user->password, PASSWORD_DEFAULT)) {
-                $user->password = password_hash($this->request->post("password"));
-                $user->save();
-            }
-
-            # indicate the user is logged in
+            # log the user in
+            $user->login($this->request->post("password"));
             $session->set(USER_KEY, $user->id);
 
             # send a cookie for long-term state
