@@ -48,8 +48,11 @@ module.exports = function (env = {}, argv = {}) {
             rules: [
                 {
                     test: /\.js$/,
-                    exclude: /node_modules/,
-                    use: "babel-loader",
+                    loader: "babel-loader",
+                    exclude: [/node_modules/],
+                    options: {
+                        presets: ["env"],
+                    },
                 },
                 {
                     test: /\.vue$/,
@@ -61,20 +64,20 @@ module.exports = function (env = {}, argv = {}) {
                         { // (4) Create actual CSS files, be done with it.
                             loader: MiniCssExtractPlugin.loader,
                             options: {
-                                // Don't ask me about this, just
+                                // Don't ask me about this, let it be.
                                 publicPath: "../",
                             }
                         },
                         { // (3) Now this one "translates CSS into CommonJS", whatever that means.
                             loader: "css-loader",
-                            options: {
-                                minimize: IS_PROD,
-                            },
                         },
-                        { // (2) This one would enable autoprefixer.
+                        { // (2) This one would enable autoprefixer and minification.
                             loader: "postcss-loader",
                             options: {
-                                plugins: () => [require("autoprefixer")()],
+                                plugins: () => [
+                                    require("autoprefixer")(),
+                                    (MODE === "production") ? cssnano() : null,
+                                ].filter(p => p !== null),
                             },
                         },
                         { // (1) We start compiling LessCSS into regular CSS
@@ -118,9 +121,9 @@ module.exports = function (env = {}, argv = {}) {
             new VueLoaderPlugin(),
 
             new WebpackBuildNotifierPlugin({
-                  title: "Duels assets",
-                  // Will only show popups on errors and first success after an error.
-                  suppressSuccess: true,
+                title: "Pew assets",
+                // Will only show popups on errors and first success after an error.
+                suppressSuccess: true,
             }),
 
             // No idea what this is for. I think it adds a querystring parameter to
