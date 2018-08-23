@@ -73,9 +73,9 @@ module.exports = function (env = {}, argv = {}) {
                         { // (2) This one would enable autoprefixer and minification.
                             loader: "postcss-loader",
                             options: {
-                                    MODE === "production" ? require("cssnano")() : null,
                                 plugins: () => [
                                     require("autoprefixer")(),
+                                    MODE === "production" ? require("cssnano")() : null,
                                 ].filter(p => p !== null),
                             },
                         },
