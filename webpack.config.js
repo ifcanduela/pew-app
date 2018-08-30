@@ -35,6 +35,7 @@ module.exports = function (env = {}, argv = {}) {
         mode: MODE,
         performance: { hints: false, },
         devtool: MODE === "production" ? false : "eval-source-map",
+        stats: "minimal",
 
         optimization: {
             // splitChunks: {

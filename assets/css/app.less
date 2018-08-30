@@ -13,6 +13,7 @@
 @footer_height: 40px;
 
 @base_padding: 15px;
+@font_family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 
 //
 // GENERAL STYLES
@@ -34,7 +35,7 @@ body {
 body {
     background: @background url(../img/pew-bg.png) no-repeat bottom 0 left 5px;
     color: @foreground;
-    font: normal 16px/165% sans-serif;
+    font: normal 16px/165% @font_family;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
@@ -66,7 +67,7 @@ a {
 
 #main {
     flex: 1;
-    padding: @base_padding;
+    padding: 50px;
     display: flex;
     flex-direction: column;
 }
@@ -113,8 +114,9 @@ footer {
     align-items: center;
 
     form {
-        background-color: rgba(255, 255, 255, 0.85);
+        background-color: fade(@grey, 95%);
         border-radius: 2px;
+        color: #fff;
         padding: 25px;
     }
 
@@ -133,7 +135,10 @@ footer {
 }
 
 form {
-    > h1, > h2, h3 {
+    > h1,
+    > h2,
+    > h3 {
+        color: @green_light;
         margin-top: 0;
     }
 
@@ -158,9 +163,9 @@ form {
     button,
     input[type="submit"],
     input[type="reset"] {
-        background-color: @green_dark;
-        color: #fff;
-        border: 1px solid @green_dark;
+        background-color: @green_light;
+        color: rgba(0, 0, 0, 0.9);
+        border: 1px solid @green_light;
         padding: 12px 24px;
         text-transform: uppercase;
         font-weight: bold;

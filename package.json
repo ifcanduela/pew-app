@@ -21,12 +21,13 @@
     "less-loader": "^4.1.0",
     "mini-css-extract-plugin": "^0.4.1",
     "postcss-loader": "^3.0.0",
+    "url-loader": "^1.1.1",
     "vue": "^2.5.17",
     "vue-loader": "^15.3.0",
     "vue-template-compiler": "^2.5.17",
     "webpack": "^4.16.5",
     "webpack-build-notifier": "^0.1.28",
-    "webpack-command": "^0.4.1"
+    "webpack-cli": "^3.1.0"
   },
   "browser": {
     "vue": "vue/dist/vue.common.js"
