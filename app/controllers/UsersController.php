@@ -17,17 +17,16 @@ class UsersController extends \pew\Controller
         if ($this->request->isPost()) {
             # try logging user in via form
             $username = $this->request->post("username");
+            $password = $this->request->post("password");
 
             $user = User::findOneByUsername($username);
 
             # user does not exist
-            if (!$user) {
+            if (!$user || !$user->login($password)) {
                 $session->addFlash("ko", "Invalid username or password");
                 return $this->redirect("login");
             }
 
-            # log the user in
-            $user->login($this->request->post("password"));
             $session->set(USER_KEY, $user->id);
 
             # send a cookie for long-term state
@@ -53,7 +52,7 @@ class UsersController extends \pew\Controller
         # clear any long-term cookies
         setcookie(SESSION_KEY, false, 1, "/", null, false, true);
         session_destroy();
-        
+
         return $this->redirect("/");
     }
 

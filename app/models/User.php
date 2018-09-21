@@ -6,12 +6,17 @@ class User extends \pew\Model
 {
     public $tableName = "users";
 
-    public function login($password)
+    /**
+     * Check the credentials of a user.
+     *
+     * @param  string $password
+     * @return bool
+     */
+    public function login(string $password)
     {
         # provided password does not match database password
-        if (!password_verify($this->request->post("password"), $this->password)) {
-            $session->addFlash("ko", "Invalid username or password");
-            return $this->redirect("login");
+        if (!password_verify($password, $this->password)) {
+            return false;
         }
 
         # password was hashed with an old algorithm
@@ -20,5 +25,6 @@ class User extends \pew\Model
             $this->save();
         }
 
+        return true;
     }
 }
