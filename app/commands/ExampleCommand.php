@@ -16,7 +16,7 @@ class ExampleCommand extends Command
      */
     public function name(): string
     {
-        return 'example';
+        return "example";
     }
 
     /**
@@ -28,7 +28,7 @@ class ExampleCommand extends Command
      */
     public function description(): string
     {
-        return 'Test several features of the Console Command functionality';
+        return "Test several features of the Console Command functionality";
     }
 
     /**
@@ -45,10 +45,10 @@ class ExampleCommand extends Command
      */
     public function run(CommandArguments $arguments)
     {
-        echo 'Has a --dry-run argument?       ' . ($arguments->dryRun ? 'Yes' : 'No') . PHP_EOL;
-        echo 'Has an -f flag?                 ' . ($arguments->has('f') ? 'Yes' : 'No') . PHP_EOL;
-        echo 'What value does f have?         ' . $arguments->f . PHP_EOL;
-        echo 'The first argument is           ' . $arguments->at(0) . PHP_EOL;
-        echo 'The value of -f or --filter is  ' . $arguments->get('f', 'filter') . PHP_EOL;
+        echo "Has a --dry-run argument?       " . ($arguments->dryRun ? "Yes" : "No") . PHP_EOL;
+        echo "Has an -f flag?                 " . ($arguments->has("f") ? "Yes" : "No") . PHP_EOL;
+        echo "What value does f have?         " . $arguments->f . PHP_EOL;
+        echo "The first argument is           " . $arguments->at(0) . PHP_EOL;
+        echo "The value of -f or --filter is  " . $arguments->get("f", "filter") . PHP_EOL;
     }
 }

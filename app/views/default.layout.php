@@ -46,7 +46,7 @@
         <p>Powered by <a href="https://github.com/ifcanduela/pew">Pew-Pew-Pew</a></p>
     </footer>
 
-    <script src="<?= url("js", "assets/app.bundle.js") ?>"></script>
+    <script src="<?= url("assets/js/app.bundle.js") ?>"></script>
     <?= $this->block("scripts") ?>
 </body>
 </html>
