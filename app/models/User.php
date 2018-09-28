@@ -2,6 +2,14 @@
 
 namespace app\models;
 
+/**
+ * @prop string $username
+ * @prop string $password
+ * @prop string $email
+ * @prop string $login_token
+ * @prop int $created
+ * @prop int $updated
+ */
 class User extends \pew\Model
 {
     public $tableName = "users";
@@ -9,7 +17,7 @@ class User extends \pew\Model
     /**
      * Check the credentials of a user.
      *
-     * @param  string $password
+     * @param string $password
      * @return bool
      */
     public function login(string $password)
@@ -19,9 +27,9 @@ class User extends \pew\Model
             return false;
         }
 
-        # password was hashed with an old algorithm
+        # check if password was hashed with an old algorithm
         if (password_needs_rehash($this->password, PASSWORD_DEFAULT)) {
-            $this->password = password_hash($this->request->post("password"));
+            $this->password = password_hash($password);
             $this->save();
         }
 

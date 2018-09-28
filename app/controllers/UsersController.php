@@ -97,7 +97,8 @@ class UsersController extends \pew\Controller
                     "username" => $username,
                     "password" => $password,
                     "email" => $this->request->post("email"),
-                ])->save();
+                ]);
+            $user->save();
 
             $session->addFlash("ok", "Account created successfully");
 
