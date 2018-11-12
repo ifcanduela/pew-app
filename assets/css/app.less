@@ -1,3 +1,5 @@
+@import "~normalize.css/normalize.css";
+
 @orange: #f93;
 @green_light: #bd7;
 @green_dark: #596;
@@ -22,13 +24,14 @@
 *,
 *:before,
 *:after {
-    box-sizing: border-box;
+    box-sizing: inherit;
 }
 
 html,
 body {
-    min-height: 100%;
+    box-sizing: border-box;
     margin: 0;
+    min-height: 100%;
     padding: 0;
 }
 

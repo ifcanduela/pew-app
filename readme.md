@@ -25,11 +25,11 @@ declarations, which come in several flavors. A full route declaration looks like
 ```php
 return [
     [
-        'path' => '/post[/{slug}]',
-        'controller' => 'Posts@view',
-        'methods' => 'GET',
-        'defaults' => [
-            'slug' => 'home'
+        "path" => "/post[/{slug}]",
+        "controller" => "Posts@view",
+        "methods" => "GET",
+        "defaults" => [
+            "slug" => "home"
         ]
     ],
 ];
@@ -41,10 +41,10 @@ You can use the `Route` class to define the same route:
 use pew\router\Route;
 
 return [
-    Route::from('/post[/{slug}]')
-        ->handler('Posts@view')
-        ->methods('get')
-        ->defaults(['slug' => 'home']),
+    Route::from("/post[/{slug}]")
+        ->handler("Posts@view")
+        ->methods("get")
+        ->defaults(["slug" => "home"]),
 ];
 ```
 
@@ -59,7 +59,7 @@ An almost-equivalent route can be written in short form:
 
 ```php
 return [
-    '/post[/{slug}]' => 'Posts@view',
+    "/post[/{slug}]" => "Posts@view",
 ];
 ```
 
@@ -69,10 +69,10 @@ controller action:
 ```php
 class Post
 {
-    public function view($slug = 'home')
+    public function view($slug = "home")
     {
         return [
-            'post' => Post::findOneBySlug($slug)
+            "post" => Post::findOneBySlug($slug)
         ];
     }
 }
@@ -88,8 +88,8 @@ the same way a controller action would, and the `$this` pseudo-variable in the b
 bound to an instance of `pew\Controller`:
 
 ```php
-'/post[/{slug}]' => function ($slug) {
-    echo $this->renderJson(['slug' => $slug]);
+"/post[/{slug}]" => function ($slug) {
+    echo $this->renderJson(["slug" => $slug]);
 },
 ```
 
@@ -111,12 +111,12 @@ class Cats
     public function view($name)
     {
         $cats = Cat::find()
-            ->where(['name' => $name]))
-            ->orderBy('date_of_birth ASC')
+            ->where(["name" => $name])
+            ->orderBy("date_of_birth ASC")
             ->all();
 
         return [
-            'cats' => $cats,
+            "cats" => $cats,
         ];
     }
 }
@@ -130,7 +130,7 @@ names, but it can be modified by requesting the `$view` object to be injected:
 ```php
 public function view($name, $view)
 {
-    $view->template('animals/overview');
+    $view->template("animals/overview");
 
     // ...
 }
@@ -146,7 +146,7 @@ public function index($name, $request)
         return $this->renderJson(Cat::find()->all());
     }
 
-    return $this->redirect('/home');
+    return $this->redirect("/home");
 }
 ```
 
@@ -165,7 +165,7 @@ namespace app\models;
 
 class Cat extends \pew\Model
 {
-    public $tableName = 'cats';
+    public $tableName = "cats";
 }
 ```
 
@@ -187,10 +187,10 @@ class Cats
 {
     public function view($name, $view)
     {
-        $view->template('cats/view');
+        $view->template("cats/view");
 
         return [
-            'cat' => $this->model->find_by_name($name)
+            "cat" => $this->model->find_by_name($name)
         ];
     }
 }
@@ -217,7 +217,7 @@ about the cat:
 There's also the possibility of rendering the view within a layout:
 
 ```php
-<?php $this->layout('layouts/main') ?>
+<?php $this->layout("layouts/main") ?>
 
 <div class="cat-info">
     <h1><?= $cat->name ?></h1>

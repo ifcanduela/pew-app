@@ -55,7 +55,7 @@ module.exports = function (env = {}, argv = {}) {
                     loader: "vue-loader",
                 },
                 {
-                    test: /\.less$/,
+                    test: /\.(c|le)ss$/,
                     use: [
                         {
                             loader: MiniCssExtractPlugin.loader,
@@ -90,6 +90,15 @@ module.exports = function (env = {}, argv = {}) {
                         limit: 8192,
                         fallback: "file-loader",
                         name: "img/[name].[ext]",
+                    },
+                },
+                {
+                    test: /\.(ttf|woff2?|eot|otf)$/i,
+                    loader: "url-loader",
+                    options: {
+                        limit: 8192,
+                        fallback: "file-loader",
+                        name: "fonts/[name].[ext]",
                     },
                 },
             ],
