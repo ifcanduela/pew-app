@@ -11,6 +11,7 @@ const WebpackBuildNotifierPlugin = require("webpack-build-notifier");
 module.exports = function (env = {}, argv = {}) {
     const DEST_FOLDER = path.resolve(__dirname, "www/assets");
     const MODE = env.mode || argv.mode || "development";
+    const PROJECT_NAME = path.basename(__dirname);
 
     return {
         entry: {
@@ -125,7 +126,7 @@ module.exports = function (env = {}, argv = {}) {
             new VueLoaderPlugin(),
 
             new WebpackBuildNotifierPlugin({
-                title: "Pew assets",
+                title: `${PROJECT_NAME} assets`,
                 suppressSuccess: true,
             }),
         ],
