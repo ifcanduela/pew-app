@@ -36,11 +36,12 @@ return [
     #
     # protected routes
     #
-    
+
     Route::group()->prefix("/admin")->routes([
         Route::from("[/{action}[/{id}]]")->to("AdminController")
             ->default("action", "index")
-            ->default("id", null),
+            ->default("id", null)
+            ->name("admin"),
     ])->before([
         RedirectToPrevious::class,
         OnlyAuthenticated::class,
