@@ -62,7 +62,7 @@ module.exports = function (env = {}, argv = {}) {
                             loader: MiniCssExtractPlugin.loader,
                             options: {
                                 publicPath: "../",
-                            }
+                            },
                         },
                         {
                             loader: "css-loader",
