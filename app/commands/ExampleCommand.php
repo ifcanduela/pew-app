@@ -63,12 +63,12 @@ class ExampleCommand extends Command
      */
     public function run(CommandArguments $arguments)
     {
-        echo $this->info("Has a --dry-run argument?       " . ($arguments->dryRun ? "Yes" : "No")); // . PHP_EOL;
-        echo $this->success("Has an -f flag?                 " . ($arguments->has("f") ? "Yes" : "No")); // . PHP_EOL;
-        echo $this->warning("What value does f have?         " . $arguments->f); // . PHP_EOL;
-        echo $this->error("The first argument is           " . $arguments->at(0)); // . PHP_EOL;
-        echo $this->warning("The value of -f or --filter is  " . $arguments->get("f", "filter")); // . PHP_EOL;
-        echo $this->success("The value of dryRun is          " . ($arguments->dryRun ? "true" : "false")); // . PHP_EOL;
+        echo $this->info    ("Has a --dry-run argument?      " . ($arguments->dryRun ? "Yes" : "No")); // . PHP_EOL;
+        echo $this->success ("Has an -f flag?                " . ($arguments->has("f") ? "Yes" : "No")); // . PHP_EOL;
+        echo $this->warning ("What value does f have?        " . $arguments->f); // . PHP_EOL;
+        echo $this->error   ("The first argument is          " . $arguments->at(0)); // . PHP_EOL;
+        echo $this->warning ("The value of -f or --filter is " . $arguments->get("f", "filter")); // . PHP_EOL;
+        echo $this->success ("The value of dryRun is         " . ($arguments->dryRun ? "true" : "false")); // . PHP_EOL;
 
         echo PHP_EOL . PHP_EOL;
 
