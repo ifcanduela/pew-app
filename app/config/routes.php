@@ -6,39 +6,19 @@ use app\middleware\OnlyAuthenticated;
 
 return [
     #
-    # examples
-    #
-
-    // [
-    //     "path" => "/post[/{slug}]",
-    //     "controller" => "Posts@view",
-    //     "methods" => "GET",
-    //     "defaults" => [
-    //         "slug" => "home"
-    //     ]
-    // ],
-
-    // Route::from("/post[/{slug}]")
-    //     ->handler("Posts@view")
-    //     ->methods("get")
-    //     ->defaults(["slug" => "home"]),
-
-    // "/post[/{slug}]" => "Posts@view",
-
-    #
     # login and logout
     #
 
-    "/login" => "UsersController@login",
-    "/logout" => "UsersController@logout",
-    "/signup" => "UsersController@signup",
+    "/login" => "users@login",
+    "/logout" => "users@logout",
+    "/signup" => "users@signup",
 
     #
     # protected routes
     #
 
     Route::group()->prefix("/admin")->routes([
-        Route::from("[/{action}[/{id}]]")->to("AdminController")
+        Route::from("[/{action}[/{id}]]")->to("admin")
             ->default("action", "index")
             ->default("id", null)
             ->name("admin"),
@@ -52,13 +32,13 @@ return [
     #
 
     Route::from("/welcome[/{name}]")
-        ->handler("Welcome@index")
+        ->handler("welcome@index")
         ->methods("get", "post")
         ->defaults(["name" => "Pew"]),
 
     [
         "path" => "/",
-        "handler" => "Welcome@index",
+        "handler" => "welcome@index",
         "defaults" => [
             "name" => "Pew"
         ],

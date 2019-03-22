@@ -16,7 +16,7 @@
     <?= $this->block("styles") ?>
 </head>
 
-<body class="<?= pew("controller_slug") ?>--<?= pew("action_alug") ?>">
+<body class="<?= pew("controller_slug") ?>--<?= pew("action_slug") ?>">
     <header>
         <div class="app-title"><a href="<?= url() ?>"><?= pew("app_title") ?></a></div>
 
