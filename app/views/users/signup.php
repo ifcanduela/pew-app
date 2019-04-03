@@ -6,12 +6,12 @@ $this->title("Sign up");
 $this->layout("users.layout");
 ?>
 <div class="user-wrapper">
-    <form action="<?= url(here()) ?>" method="POST" id="form-users-signup">
+    <form action="<?= here() ?>" method="POST" id="form-users-signup">
         <h1>Sign Up</h1>
 
         <?php foreach (flash() as $class => $messages): ?>
             <?php foreach ($messages as $message): ?>
-                <p class="alert <?= $class ?>"><?= $message ?></p>    
+                <p class="alert <?= $class ?>"><?= $message ?></p>
             <?php endforeach ?>
         <?php endforeach ?>
 
@@ -34,7 +34,7 @@ $this->layout("users.layout");
             <label for="email">E-mail address:</label>
             <input type="email" name="email" id="form-users-signup-email">
         </div>
-        
+
         <div class="form-actions">
             <a href="<?= url("login") ?>">Log in</a>
             <button type="submit" id="form-users-signup-submit">Sign Up</button>

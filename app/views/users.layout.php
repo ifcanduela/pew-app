@@ -11,7 +11,7 @@
     <?= $this->block("styles") ?>
 </head>
 
-<body class="users-layout <?= pew("controller_slug") ?>--<?= pew("action") ?>">
+<body class="users-layout <?= pew("controller_slug") ?>--<?= pew("action_slug") ?>">
     <div>
         <?php foreach (flash() as $key => $value): ?>
             <p class="alert <?= $key ?>">

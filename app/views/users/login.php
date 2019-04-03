@@ -6,12 +6,12 @@ $this->title("Log in");
 $this->layout("users.layout");
 ?>
 <div class="user-wrapper">
-    <form action="<?= url(here()) ?>" method="POST" id="form-users-login">
+    <form action="<?= here() ?>" method="POST" id="form-users-login">
         <h1>Log In</h1>
 
         <?php foreach (flash() as $class => $messages): ?>
             <?php foreach ($messages as $message): ?>
-                <p class="alert <?= $class ?>"><?= $message ?></p>    
+                <p class="alert <?= $class ?>"><?= $message ?></p>
             <?php endforeach ?>
         <?php endforeach ?>
 
@@ -19,7 +19,7 @@ $this->layout("users.layout");
             <label for="username">Username:</label>
             <input type="text" name="username" id="form-users-login-username">
         </div>
-        
+
         <div class="form-group">
             <label for="password">Password:</label>
             <input type="password" name="password" id="form-users-login-password">
