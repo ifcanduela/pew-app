@@ -4,9 +4,10 @@ const CleanWebpackPlugin = require("clean-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const FriendlyErrorsWebpackPlugin = require("friendly-errors-webpack-plugin");
 const ImageminPlugin = require("imagemin-webpack-plugin").default;
+const LiveReloadPlugin = require("webpack-livereload-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const VueLoaderPlugin = require("vue-loader/lib/plugin");
-const WebpackBuildNotifierPlugin = require("webpack-build-notifier");
+const BuildNotifierPlugin = require("webpack-build-notifier");
 
 module.exports = function (env = {}, argv = {}) {
     const DEST_FOLDER = path.resolve(__dirname, "www/assets");
@@ -106,7 +107,12 @@ module.exports = function (env = {}, argv = {}) {
         },
 
         plugins: [
-            new CleanWebpackPlugin([DEST_FOLDER], {}),
+            new BuildNotifierPlugin({
+                title: `${PROJECT_NAME} assets`,
+                suppressSuccess: true,
+            }),
+
+            new CleanWebpackPlugin({}),
 
             new CopyWebpackPlugin([
                 // {from: "./assets/img/icons", to: "img/icons
@@ -119,16 +125,16 @@ module.exports = function (env = {}, argv = {}) {
                 disable: MODE !== "production",
             }),
 
+            // The following tag must be added to the <head> of the HTML
+            // document to activate the Live Reload features.
+            // <script src="http://localhost:44444/livereload.js"></script>
+            new LiveReloadPlugin({port: 44444}),
+
             new MiniCssExtractPlugin({
                 filename: "css/app.bundle.css",
             }),
 
             new VueLoaderPlugin(),
-
-            new WebpackBuildNotifierPlugin({
-                title: `${PROJECT_NAME} assets`,
-                suppressSuccess: true,
-            }),
         ],
     };
 };
