@@ -29,7 +29,7 @@ migration to create an SQLite database with a `users` table are included.
 To compile assets, install the NPM dependencies with `npm install` and run one of the npm scripts:
 
 1. `npm run watch` to compile as you go.
-2. `npm run watch` to compile a development version of the assets, including source maps.
+2. `npm run dev` to compile a development version of the assets, including source maps.
 3. `npm run prod` to get a production, minified version of the assets.
 
 The default setup uses Webpack to compile LessCSS and Javascript (with support for VueJS single-file components).
