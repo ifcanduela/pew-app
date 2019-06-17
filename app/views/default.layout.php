@@ -39,7 +39,7 @@
             </p>
         <?php endforeach ?>
 
-        <?= $this->child() ?>
+        <?= $this->content() ?>
     </div>
 
     <footer>

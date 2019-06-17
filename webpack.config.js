@@ -1,6 +1,6 @@
 const path = require("path");
 
-const CleanWebpackPlugin = require("clean-webpack-plugin");
+const {CleanWebpackPlugin} = require("clean-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const FriendlyErrorsWebpackPlugin = require("friendly-errors-webpack-plugin");
 const ImageminPlugin = require("imagemin-webpack-plugin").default;
@@ -112,7 +112,7 @@ module.exports = function (env = {}, argv = {}) {
                 suppressSuccess: true,
             }),
 
-            new CleanWebpackPlugin({}),
+            new CleanWebpackPlugin({cleanStaleWebpackAssets: false}),
 
             new CopyWebpackPlugin([
                 // {from: "./assets/img/icons", to: "img/icons
@@ -128,7 +128,7 @@ module.exports = function (env = {}, argv = {}) {
             // The following tag must be added to the <head> of the HTML
             // document to activate the Live Reload features.
             // <script src="http://localhost:44444/livereload.js"></script>
-            new LiveReloadPlugin({port: 44444}),
+            // new LiveReloadPlugin({port: 44444}),
 
             new MiniCssExtractPlugin({
                 filename: "css/app.bundle.css",

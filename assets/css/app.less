@@ -1,4 +1,4 @@
-@import "~normalize.css/normalize.css";
+@import (less) "~normalize.css/normalize.css";
 
 @orange: #f93;
 @green_light: #bd7;
@@ -6,7 +6,8 @@
 @grey: #333;
 
 @foreground: @grey;
-@background: @green_light;
+@background: #fff;
+@primary: @green_light;
 
 @link_default: @orange;
 @link_hover: darken(@orange, 15%);
@@ -29,7 +30,6 @@
 
 html,
 body {
-    box-sizing: border-box;
     margin: 0;
     min-height: 100%;
     padding: 0;
@@ -37,15 +37,16 @@ body {
 
 body {
     background: @background url(../img/pew-bg.png) no-repeat bottom 0 left 5px;
+    box-sizing: border-box;
     color: @foreground;
-    font: normal 16px/165% @font_family;
     display: flex;
     flex-direction: column;
+    font: normal 16px/165% @font_family;
     min-height: 100vh;
 
     &.users-layout {
-        justify-content: center;
         align-items: center;
+        justify-content: center;
     }
 }
 
@@ -58,9 +59,11 @@ footer {
 
 a {
     color: @link_default;
+    text-decoration: none;
 
     &:hover {
         color: @link_hover;
+        text-decoration: underline;
     }
 }
 
@@ -69,27 +72,28 @@ a {
 //
 
 #main {
-    flex: 1;
-    padding: 50px;
     display: flex;
+    flex: 1;
     flex-direction: column;
+    padding: 50px;
 }
 
 header {
-    display: flex;
-    justify-content: space-between;
     align-items: center;
+    display: flex;
     flex-basis: @header_height;
+    justify-content: space-between;
 
-    .menu {
+    .menu a {
         padding: @base_padding;
     }
 }
 
 footer {
     flex-basis: @footer_height;
-    text-align: center;
+    font-size: 11px;
     line-height: 40px;
+    text-align: center;
 
     p {
         margin: 0;
@@ -105,16 +109,17 @@ footer {
 
     a {
         color: @green_light;
+        font-weight: bold;
         text-decoration: none;
     }
 }
 
 .user-wrapper {
-    flex: 1;
+    align-items: center;
     display: flex;
+    flex: 1;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
 
     form {
         background-color: fade(@grey, 95%);
@@ -152,9 +157,9 @@ form {
     }
 
     .form-actions {
+        align-items: center;
         display: flex;
         justify-content: flex-end;
-        align-items: center;
 
         button,
         input[type="submit"],
@@ -167,12 +172,12 @@ form {
     input[type="submit"],
     input[type="reset"] {
         background-color: @green_light;
-        color: rgba(0, 0, 0, 0.9);
         border: 1px solid @green_light;
-        padding: 12px 24px;
-        text-transform: uppercase;
+        color: rgba(0, 0, 0, 0.9);
+        cursor: pointer;
         font-weight: bold;
         letter-spacing: 0.1em;
-        cursor: pointer;
+        padding: 12px 24px;
+        text-transform: uppercase;
     }
 }

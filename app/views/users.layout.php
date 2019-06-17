@@ -1,3 +1,8 @@
+<?php
+/**
+ * @var \pew\View $this
+ */
+?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -19,7 +24,7 @@
             </p>
         <?php endforeach ?>
 
-        <?= $this->child() ?>
+        <?= $this->content() ?>
     </div>
 
     <script src="<?= url("assets/js/app.bundle.js") ?>"></script>
