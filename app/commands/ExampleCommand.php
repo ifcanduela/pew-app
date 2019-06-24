@@ -8,29 +8,11 @@ use pew\console\CommandArguments;
 
 class ExampleCommand extends Command
 {
-    /**
-     * Command name.
-     *
-     * This is the name used to invoke the command in the console.
-     *
-     * @return string
-     */
-    public function name(): string
-    {
-        return "example";
-    }
+    /** @var string Command name */
+    public $name = "example";
 
-    /**
-     * Command description.
-     *
-     * Use this value to provide a brief explanation of the command.
-     *
-     * @return string
-     */
-    public function description(): string
-    {
-        return "Test several features of the Console Command functionality";
-    }
+    /** @var string */
+    public $description = "Test several features of the Console Command functionality";
 
     /**
      * Default command parameters.
@@ -63,23 +45,23 @@ class ExampleCommand extends Command
      */
     public function run(CommandArguments $arguments)
     {
-        echo $this->info    ("Has a --dry-run argument?      " . ($arguments->dryRun ? "Yes" : "No")); // . PHP_EOL;
-        echo $this->success ("Has an -f flag?                " . ($arguments->has("f") ? "Yes" : "No")); // . PHP_EOL;
-        echo $this->warning ("What value does f have?        " . $arguments->f); // . PHP_EOL;
-        echo $this->error   ("The first argument is          " . $arguments->at(0)); // . PHP_EOL;
-        echo $this->warning ("The value of -f or --filter is " . $arguments->get("f", "filter")); // . PHP_EOL;
-        echo $this->success ("The value of dryRun is         " . ($arguments->dryRun ? "true" : "false")); // . PHP_EOL;
+        $this->info    ("Has a --dry-run argument?      " . ($arguments->dryRun ? "Yes" : "No")); // . PHP_EOL;
+        $this->success ("Has an -f flag?                " . ($arguments->has("f") ? "Yes" : "No")); // . PHP_EOL;
+        $this->warning ("What value does f have?        " . $arguments->f); // . PHP_EOL;
+        $this->error   ("The first argument is          " . $arguments->at(0)); // . PHP_EOL;
+        $this->warning ("The value of -f or --filter is " . $arguments->get("f", "filter")); // . PHP_EOL;
+        $this->success ("The value of dryRun is         " . ($arguments->dryRun ? "true" : "false")); // . PHP_EOL;
 
         echo PHP_EOL . PHP_EOL;
 
-        echo $this->message("black")->fg(Message::COLOR_BLACK)->bg(Message::COLOR_WHITE);
-        echo $this->message("red")->fg(Message::COLOR_RED);
-        echo $this->message("green")->fg(Message::COLOR_GREEN);
-        echo $this->message("yellow")->fg(Message::COLOR_YELLOW);
-        echo $this->message("blue")->fg(Message::COLOR_BLUE);
-        echo $this->message("magenta")->fg(Message::COLOR_MAGENTA);
-        echo $this->message("cyan")->fg(Message::COLOR_CYAN);
-        echo $this->message("white")->fg(Message::COLOR_WHITE);
-        echo $this->message("default")->fg(Message::COLOR_DEFAULT);
+        $this->message("<fg=black;bg=white>black</>");
+        $this->message("<fg=red>red</>");
+        $this->message("<fg=green>green</>");
+        $this->message("<fg=yellow>yellow</>");
+        $this->message("<fg=blue>blue</>");
+        $this->message("<fg=magenta>magenta</>");
+        $this->message("<fg=cyan>cyan</>");
+        $this->message("<fg=white>white</>");
+        $this->message("<fg=white>default</>");
     }
 }

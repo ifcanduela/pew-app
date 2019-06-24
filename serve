@@ -1,7 +1,7 @@
 <?php
 
 $php_version = PHP_VERSION;
-$document_root = realpath('www');
+$document_root = realpath("www");
 $port = $argv[1] ?? 8080;
 $cmd = PHP_BINARY . " -S localhost:$port -t www";
 
