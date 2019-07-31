@@ -28,7 +28,7 @@
 </head>
 
 <body>
-    <h1>404 Not Found</h1>
+    <h1><?= $exception->getCode() ?> <?= $exception->getMessage() ?></h1>
 
     <?php if (isset($error) || isset($exception)): ?>
         <details>
