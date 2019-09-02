@@ -9,6 +9,7 @@
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="base-url" content="<?= url() ?>">
 
     <title><?= app_title($this->title()) ?></title>
     <link rel="stylesheet" href="<?= url("assets/css/app.bundle.css") ?>">

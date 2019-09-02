@@ -36,11 +36,5 @@ return [
         ->methods("get", "post")
         ->defaults(["name" => "Pew"]),
 
-    [
-        "path" => "/",
-        "handler" => "welcome@index",
-        "defaults" => [
-            "name" => "Pew"
-        ],
-    ],
+    Route::from("/")->to("welcome@index")->default("name", "Pew"),
 ];
