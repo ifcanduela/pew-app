@@ -13,8 +13,8 @@
 
     <title><?= app_title($this->title()) ?></title>
     <link rel="stylesheet" href="<?= url("assets/css/app.bundle.css") ?>">
-
     <?= $this->block("styles") ?>
+    <?php /* echo pew("debugbar")->renderHead() */ ?>
 </head>
 
 <body class="<?= pew("controller_slug") ?>--<?= pew("action_slug") ?>">
@@ -49,5 +49,6 @@
 
     <script src="<?= url("assets/js/app.bundle.js") ?>"></script>
     <?= $this->block("scripts") ?>
+    <?php /* echo pew("debugbar")->render() */ ?>
 </body>
 </html>
