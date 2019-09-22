@@ -45,6 +45,7 @@ class Debugbar
 
             $this->debugbar->addCollector(new TemplateCollector());
             $this->debugbar->addCollector(new ActionCollector());
+            $this->debugbar->addCollector(new PewVersionCollector());
             $this->debugbar->addCollector(new DatabaseCollector(pew("db")));
 
             $this->listento("view.render", function ($payload) {

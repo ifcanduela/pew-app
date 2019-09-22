@@ -25,13 +25,13 @@ class ActionCollector extends DataCollector implements Renderable
 
     public function getWidgets()
     {
-        return array(
-            "mycollector" => array(
+        return [
+            "mycollector" => [
                 "icon" => "cog",
                 "tooltip" => "Controller and action",
                 "map" => "action",
                 "default" => "'Anonymous function'"
-            )
-        );
+            ]
+        ];
     }
 }

@@ -23,12 +23,12 @@ class DatabaseCollector extends PDOCollector
     public function getWidgets()
     {
         return [
-            "database" => array(
+            "database" => [
                 "icon" => "database",
                 "widget" => "PhpDebugBar.Widgets.SQLQueriesWidget",
                 "map" => "database",
                 "default" => "[]"
-            ),
+            ],
             "database:badge" => [
                 "map" => "database.nb_statements",
                 "default" => "0"
