@@ -1,18 +1,20 @@
 const path = require("path");
 
-const {CleanWebpackPlugin} = require("clean-webpack-plugin");
+const BuildNotifierPlugin = require("webpack-build-notifier");
+const CleanWebpackPlugin = require("clean-webpack-plugin").CleanWebpackPlugin;
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const FriendlyErrorsWebpackPlugin = require("friendly-errors-webpack-plugin");
 const ImageminPlugin = require("imagemin-webpack-plugin").default;
 const LiveReloadPlugin = require("webpack-livereload-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const VueLoaderPlugin = require("vue-loader/lib/plugin");
-const BuildNotifierPlugin = require("webpack-build-notifier");
 
 module.exports = function (env = {}, argv = {}) {
     const DEST_FOLDER = path.resolve(__dirname, "www/assets");
-    const MODE = env.mode || argv.mode || "development";
     const PROJECT_NAME = path.basename(__dirname);
+
+    const MODE = env.mode || argv.mode || "development";
+    const IS_DEV = MODE === "development";
 
     return {
         entry: {
@@ -26,7 +28,7 @@ module.exports = function (env = {}, argv = {}) {
 
         mode: MODE,
         performance: { hints: false, },
-        devtool: MODE === "production" ? false : "eval-source-map",
+        devtool: IS_DEV ? "source-map" : false,
         stats: "none",
 
         optimization: {
@@ -37,9 +39,10 @@ module.exports = function (env = {}, argv = {}) {
         },
 
         resolve: {
-            alias: {
-                "vue$": "vue/dist/vue.esm.js",
-            },
+            // alias: {
+            //     "vue$": "vue/dist/vue.esm.js",
+            // },
+            extensions: [".wasm", ".mjs", ".js", ".json", ".vue"],
         },
 
         module: {
@@ -62,25 +65,30 @@ module.exports = function (env = {}, argv = {}) {
                         {
                             loader: MiniCssExtractPlugin.loader,
                             options: {
+                                sourceMap: IS_DEV,
                                 publicPath: "../",
                             },
                         },
                         {
                             loader: "css-loader",
+                            options: {
+                                sourceMap: IS_DEV,
+                            },
                         },
                         {
                             loader: "postcss-loader",
                             options: {
+                                sourceMap: IS_DEV,
                                 plugins: () => [
                                     require("autoprefixer")(),
-                                    MODE === "production" ? require("cssnano")() : null,
+                                    IS_DEV ? require("cssnano")() : null,
                                 ].filter(p => p !== null),
                             },
                         },
                         {
                             loader: "less-loader",
                             options: {
-                                strictMath: true,
+                                sourceMap: IS_DEV,
                             },
                         },
                     ],
@@ -115,19 +123,21 @@ module.exports = function (env = {}, argv = {}) {
             new CleanWebpackPlugin({cleanStaleWebpackAssets: false}),
 
             new CopyWebpackPlugin([
-                // {from: "./assets/img/icons", to: "img/icons
+                // {from: "./assets/img/icons", to: "img/icons"}
             ], {}),
 
             new FriendlyErrorsWebpackPlugin(),
 
             new ImageminPlugin({
                 test: /\.(jpe?g|png|gif|svg)$/i,
-                disable: MODE !== "production",
+                disable: IS_DEV,
             }),
 
-            // The following tag must be added to the <head> of the HTML
-            // document to activate the Live Reload features.
-            // <script src="http://localhost:44444/livereload.js"></script>
+            /*
+               The following tag must be added to the <head> of the HTML
+               document to activate the Live Reload features:
+               <script src="http://localhost:44444/livereload.js"></script>
+            */
             // new LiveReloadPlugin({port: 44444}),
 
             new MiniCssExtractPlugin({

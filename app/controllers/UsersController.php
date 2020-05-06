@@ -3,8 +3,8 @@
 namespace app\controllers;
 
 use pew\lib\Session;
+use pew\response\RedirectResponse;
 use app\models\User;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class UsersController extends \pew\Controller
 {
@@ -24,7 +24,7 @@ class UsersController extends \pew\Controller
             # user does not exist
             if (!$user || !$user->login($password)) {
                 $session->addFlash("ko", "Invalid username or password");
-                return $this->redirect("login");
+                return $this->redirect("/login");
             }
 
             $session->set(USER_KEY, $user->id);
@@ -68,25 +68,26 @@ class UsersController extends \pew\Controller
             # check for a valid username
             if (!preg_match("/[A-Za-z\_][A-Za-z\_]{4,20}/", $username)) {
                 $session->addFlash("ko", "Please select a valid username");
-                return $this->redirect("signup");
+                return $this->redirect("/signup");
             }
 
             # check both passwords match
             if ($this->request->post("password") !== $this->request->post("password_confirm")) {
                 $session->addFlash("ko", "The passwords must match");
-                return $this->redirect("signup");
+                return $this->redirect("/signup");
             }
 
             # ensure the password has a minumum length
             if (strlen($this->request->post("password")) < 6) {
                 $session->addFlash("ko", "Your password is too short");
-                return $this->redirect("signup");
+                return $this->redirect("/signup");
             }
 
             # check the username is not taken
             if ($usernameExists = User::findOneByUsername($username)) {
                 $session->addFlash("ko", "Please select a valid username");
-                return $this->redirect("signup");
+
+                return $this->redirect("/signup");
             }
 
             # has the password
@@ -102,7 +103,7 @@ class UsersController extends \pew\Controller
 
             $session->addFlash("ok", "Account created successfully");
 
-            return $this->redirect("login");
+            return $this->redirect("/login");
         }
 
         return [];
