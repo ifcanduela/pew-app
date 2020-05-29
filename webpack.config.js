@@ -122,9 +122,11 @@ module.exports = function (env = {}, argv = {}) {
 
             new CleanWebpackPlugin({cleanStaleWebpackAssets: false}),
 
-            new CopyWebpackPlugin([
-                // {from: "./assets/img/icons", to: "img/icons"}
-            ], {}),
+            // new CopyWebpackPlugin({
+            //     patterns: [
+            //         {from: "./assets/img", to: "static"},
+            //     ],
+            // }),
 
             new FriendlyErrorsWebpackPlugin(),
 
