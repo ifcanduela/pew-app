@@ -8,12 +8,12 @@
         }
     ],
     "require": {
-        "php": ">=7.0.0",
+        "php": ">=7.2.0",
         "ifcanduela/pew": "*"
     },
     "autoload": {
-        "psr-0": {
-            "app\\": ""
+        "psr-4": {
+            "app\\": "app"
         }
     }
 }
