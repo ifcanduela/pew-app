@@ -3,20 +3,20 @@
 @orange: #f93;
 @green_light: #bd7;
 @green_dark: #596;
-@grey: #333;
-
-@foreground: @grey;
-@background: #fff;
-@primary: @green_light;
-
-@link_default: @orange;
-@link_hover: darken(@orange, 15%);
-
-@header_height: 55px;
-@footer_height: 40px;
-
-@base_padding: 15px;
 @font_family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+
+:root {
+    --bg: white;
+    --text: rgba(0, 0, 0, 0.95);
+    --text-muted: rgba(0, 0, 0, 0.5);
+    --text-link: @orange;
+    --text-link-hover: darken(@orange, 15%);
+    --font-family: @font_family;
+
+    --primary: @green_light;
+    --primary-dark: @green_dark;
+    --secondary: @orange;
+}
 
 //
 // GENERAL STYLES
@@ -36,12 +36,13 @@ body {
 }
 
 body {
-    background: @background url(../img/pew-bg.png) no-repeat bottom 0 left 5px;
+    background: var(--bg) url(../img/pew-bg.png) no-repeat bottom -10px left 5px;
+    color: var(--text);
     box-sizing: border-box;
-    color: @foreground;
     display: flex;
     flex-direction: column;
-    font: normal 16px/165% @font_family;
+    font-size: 100%;
+    font-family: var(--font-family);
     min-height: 100vh;
 
     &.users-layout {
@@ -52,17 +53,17 @@ body {
 
 header,
 footer {
-    background-color: @foreground;
-    color: lighten(@foreground, 50%);
+    background-color: var(--text);
+    color: rgba(255, 255, 255, 0.5);
     padding: 0;
 }
 
 a {
-    color: @link_default;
+    color: var(--text-link);
     text-decoration: none;
 
     &:hover {
-        color: @link_hover;
+        color: var(--text-link-hover);
         text-decoration: underline;
     }
 }
@@ -76,24 +77,23 @@ a {
     flex: 1;
     flex-direction: column;
     padding: 50px;
+    background-color: rgba(255, 255, 255, 0.75);
 }
 
-header {
+body > header {
     align-items: center;
     display: flex;
-    flex-basis: @header_height;
+    flex: 0 1 auto;
     justify-content: space-between;
-
-    .menu a {
-        padding: @base_padding;
-    }
 }
 
-footer {
-    flex-basis: @footer_height;
-    font-size: 11px;
-    line-height: 40px;
-    text-align: center;
+body > footer {
+    flex: 0 0 auto;
+    font-size: 0.9rem;
+    line-height: 2em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
     p {
         margin: 0;
@@ -101,16 +101,37 @@ footer {
     }
 }
 
-.app-title {
-    margin: 0;
-    padding: @base_padding;
-    text-shadow: 0 0 3px rgba(180, 210, 120, 0.7), 0 0 6px rgba(250, 255, 250, 0.4);
-    text-transform: uppercase;
+.main-menu {
+    display: flex;
+    justify-content: space-between;
+
+    > div {
+        display: flex;
+    }
 
     a {
-        color: @green_light;
+        padding: 1rem;
+
+        &:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            text-decoration: none;
+        }
+    }
+
+    .app-title {
+        padding: 1rem;
         font-weight: bold;
+        text-transform: uppercase;
+        color: var(--primary);
         text-decoration: none;
+    }
+}
+
+.page-title {
+    h1 {
+        color: var(--primary-dark);
+        font-size: 2.5rem;
+        margin: 0 0 2rem 0;
     }
 }
 
@@ -122,7 +143,7 @@ footer {
     justify-content: center;
 
     form {
-        background-color: fade(@grey, 95%);
+        background-color: rgba(0, 0, 0, 0.2);
         border-radius: 2px;
         color: #fff;
         padding: 25px;
@@ -146,7 +167,7 @@ form {
     > h1,
     > h2,
     > h3 {
-        color: @green_light;
+        color: var(--primary);
         margin-top: 0;
     }
 
@@ -171,13 +192,34 @@ form {
     button,
     input[type="submit"],
     input[type="reset"] {
-        background-color: @green_light;
-        border: 1px solid @green_light;
+        background-color: var(--primary);
+        border: 1px solid var(--primary);
         color: rgba(0, 0, 0, 0.9);
         cursor: pointer;
         font-weight: bold;
         letter-spacing: 0.1em;
         padding: 12px 24px;
         text-transform: uppercase;
+    }
+}
+
+.alert {
+    margin: 0 0 1rem;
+    padding: 1rem;
+    border: 1px solid transparent;
+
+    &.error {
+        background-color: rgba(255, 100, 0, 0.25);
+        border-color:  rgba(255, 100, 0, 0.25);
+    }
+
+    &.success {
+        background-color: rgba(100, 255, 0, 0.25);
+        border-color:  rgba(100, 255, 0, 0.25);
+    }
+
+    &.info {
+        background-color: rgba(0, 160, 255, 0.25);
+        border-color:  rgba(0, 160, 255, 0.25);
     }
 }

@@ -18,12 +18,13 @@
 </head>
 
 <body class="<?= pew("controller_slug") ?>--<?= pew("action_slug") ?>">
-    <header>
-        <div class="app-title"><a href="<?= url() ?>"><?= pew("app_title") ?></a></div>
-
-        <div class="menu">
+    <header class="main-menu">
+        <div>
+            <a class="app-title" href="<?= url() ?>"><?= pew("app_title") ?></a>
             <a href="<?= url() ?>">Home</a>
+        </div>
 
+        <div>
             <?php if (pew("user")): ?>
                 <a href="<?= url("logout") ?>">Log out</a>
             <?php else: ?>

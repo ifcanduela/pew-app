@@ -39,9 +39,9 @@ module.exports = function (env = {}, argv = {}) {
         },
 
         resolve: {
-            // alias: {
-            //     "vue$": "vue/dist/vue.esm.js",
-            // },
+            alias: {
+                "vue$": "vue/dist/vue.esm.js",
+            },
             extensions: [".wasm", ".mjs", ".js", ".json", ".vue"],
         },
 

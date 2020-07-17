@@ -2,16 +2,13 @@
 
 namespace app\middleware;
 
-use pew\View;
-use pew\response\JsonResponse;
-use Symfony\Component\HttpFoundation\JsonResponse as SymfonyJsonResponse;
+use pew\request\Middleware;
+use pew\request\Request;
 
-class ReturnJson
+class ReturnJson extends Middleware
 {
-    public function after(\pew\View $view)
+    public function before(Request $r)
     {
-        $response = new SymfonyJsonResponse($view->getData());
-
-        return new JsonResponse($response);
+        $r->forceJsonResponse();
     }
 }
