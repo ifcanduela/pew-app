@@ -1,50 +1,49 @@
 <?php
 
-use pew\router\RouteBuilder as R;
-
 use app\middleware\RedirectToPrevious;
 use app\middleware\OnlyAuthenticated;
 use app\middleware\ReturnJson;
+use ifcanduela\router\Group;
+use ifcanduela\router\Router;
 
-R::get("/test[/{action}[/{id}]]")->to("test");
+/** @var Router $router */
 
-R::group(function () {
-    R::from("[/{action}]")->to("api");
-})
-->prefix("/api")
-->before([ReturnJson::class]);
+$router->before(app\middleware\LoginWithToken::class);
+
+$router->get("/test[/{action}[/{id}]]")->to("test");
+
+$router->group("/api", function (Group $group) {
+    $group->before(ReturnJson::class);
+    $group->from("[/{action}]")->to("api");
+});
 
 #
 # login and logout
 #
 
-R::from("/login")->to("users@login");
-R::from("/logout")->to("users@logout");
-R::from("/signup")->to("users@signup");
+$router->from("/login")->to("users@login");
+$router->from("/logout")->to("users@logout");
+$router->from("/signup")->to("users@signup");
 
 #
 # protected routes
 #
 
-R::group(function () {
-    R::from("[/{action}[/{id}]]")->to("admin")
+$router->group("/admin", function (Group $group) {
+    $group->before(RedirectToPrevious::class, OnlyAuthenticated::class);
+
+    $group->from("[/{action}[/{id}]]")->to("admin")
         ->default("action", "index")
         ->default("id", null)
         ->name("admin");
-})
-->prefix("/admin")
-->before([
-    RedirectToPrevious::class,
-    OnlyAuthenticated::class,
-]);
+});
 
 #
 # general routes
 #
 
-R::from("/welcome[/{name}]")
-    ->handler("welcome@index")
+$router->from("/welcome[/{name}]")->to("welcome@index")
     ->methods("get", "post")
     ->defaults(["name" => "Pew"]);
 
-R::get("/")->to("welcome@index")->default("name", "Pew");
+$router->get("/")->to("welcome@index")->default("name", "Pew");

@@ -79,10 +79,12 @@ module.exports = function (env = {}, argv = {}) {
                             loader: "postcss-loader",
                             options: {
                                 sourceMap: IS_DEV,
-                                plugins: () => [
-                                    require("autoprefixer")(),
-                                    IS_DEV ? require("cssnano")() : null,
-                                ].filter(p => p !== null),
+                                postcssOptions: {
+                                    plugins: [
+                                        "autoprefixer",
+                                        IS_DEV ? "cssnano" : null,
+                                    ].filter(p => p),
+                                }
                             },
                         },
                         {

@@ -16,13 +16,21 @@ $this->layout("users.layout");
         <?php endforeach ?>
 
         <div class="form-group">
-            <label for="username">Username:</label>
-            <input type="text" name="username" id="form-users-login-username">
+            <label for="user-username">Username:</label>
+            <input type="text" name="username" id="user-username">
         </div>
 
         <div class="form-group">
-            <label for="password">Password:</label>
-            <input type="password" name="password" id="form-users-login-password">
+            <label for="user-password">Password:</label>
+            <input type="password" name="password" id="user-password">
+        </div>
+
+        <div class="form-group">
+            <label for="user-remember-me">
+                <input type="hidden" name="remember_me" value="">
+                <input type="checkbox" name="remember_me" id="user-remember-me" value="1">
+                Remember me for 30 days
+            </label>
         </div>
 
         <div class="form-actions">

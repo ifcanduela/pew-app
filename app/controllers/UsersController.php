@@ -2,9 +2,10 @@
 
 namespace app\controllers;
 
+use app\models\User;
 use pew\lib\Session;
 use pew\response\RedirectResponse;
-use app\models\User;
+use Symfony\Component\HttpFoundation\Cookie;
 
 class UsersController extends \pew\Controller
 {
@@ -18,24 +19,30 @@ class UsersController extends \pew\Controller
             # try logging user in via form
             $username = $this->request->post("username");
             $password = $this->request->post("password");
+            $rememberMe = $this->request->post("remember_me");
 
             $user = User::findOneByUsername($username);
 
             # user does not exist
-            if (!$user || !$user->login($password)) {
-                $session->addFlash("ko", "Invalid username or password");
-                return $this->redirect("/login");
+            if (!$user || !$user->checkPassword($password)) {
+                return $this->redirect("/login")->flash("ko", "Invalid username or password");
             }
 
-            $session->set(USER_KEY, $user->id);
+            $loginToken = $user->login($session, $rememberMe);
+            $response = $this->redirect("/");
 
             # send a cookie for long-term state
-            if ($this->request->post("remember_me")) {
-                $thirty_days = 60 * 60 * 24 * 30;
-                setcookie(SESSION_KEY, $user->id, time() + $thirty_days, "/", null, false, true);
+            if ($rememberMe) {
+                $cookie = Cookie::create(SESSION_KEY)
+                    ->withValue($loginToken)
+                    ->withExpires(new \DateTime("+30 days"))
+                    ->withSecure(true)
+                    ->withHttpOnly(true);
+
+                $response->cookie($cookie);
             }
 
-            return $this->redirect("/");
+            return $response;
         }
 
         return [];
