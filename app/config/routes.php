@@ -8,8 +8,6 @@ use ifcanduela\router\Router;
 
 /** @var Router $router */
 
-$router->before(app\middleware\LoginWithToken::class);
-
 $router->get("/test[/{action}[/{id}]]")->to("test")->name("test.actions");
 
 $router->group("/api", function (Group $group) {
