@@ -3,7 +3,7 @@
 $php_version = PHP_VERSION;
 $document_root = realpath("www");
 $port = $argv[1] ?? 8080;
-$cmd = PHP_BINARY . " -S localhost:$port -t www";
+$cmd = realpath(PHP_BINARY) . " -S localhost:$port -t www";
 
 echo <<<SERVE
 PHP $php_version Built-in server

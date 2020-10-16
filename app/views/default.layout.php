@@ -12,7 +12,7 @@
     <meta name="base-url" content="<?= url() ?>">
 
     <title><?= app_title($this->title()) ?></title>
-    <link rel="stylesheet" href="<?= url("assets/css/app.bundle.css") ?>">
+    <link rel="stylesheet" href="<?= url("assets/css/app.css") ?>">
     <?= $this->block("styles") ?>
     <?php /* echo pew("debugbar")->renderHead() */ ?>
 </head>
@@ -48,7 +48,7 @@
         <p>Powered by <a href="https://github.com/ifcanduela/pew">Pew-Pew-Pew</a></p>
     </footer>
 
-    <script src="<?= url("assets/js/app.bundle.js") ?>"></script>
+    <script src="<?= url("assets/js/app.js") ?>"></script>
     <?= $this->block("scripts") ?>
     <?php /* echo pew("debugbar")->render() */ ?>
 </body>

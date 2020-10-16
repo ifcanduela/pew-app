@@ -23,7 +23,7 @@ module.exports = function (env = {}, argv = {}) {
 
         output: {
             path: DEST_FOLDER,
-            filename: "js/[name].bundle.js",
+            filename: "js/[name].js",
         },
 
         mode: MODE,
@@ -65,16 +65,10 @@ module.exports = function (env = {}, argv = {}) {
                         {
                             loader: MiniCssExtractPlugin.loader,
                             options: {
-                                sourceMap: IS_DEV,
                                 publicPath: "../",
                             },
                         },
-                        {
-                            loader: "css-loader",
-                            options: {
-                                sourceMap: IS_DEV,
-                            },
-                        },
+                        "css-loader",
                         {
                             loader: "postcss-loader",
                             options: {
@@ -82,17 +76,12 @@ module.exports = function (env = {}, argv = {}) {
                                 postcssOptions: {
                                     plugins: [
                                         "autoprefixer",
-                                        IS_DEV ? "cssnano" : null,
-                                    ].filter(p => p),
+                                        "cssnano",
+                                    ],
                                 }
                             },
                         },
-                        {
-                            loader: "less-loader",
-                            options: {
-                                sourceMap: IS_DEV,
-                            },
-                        },
+                        "less-loader",
                     ],
                 },
                 {
@@ -102,6 +91,7 @@ module.exports = function (env = {}, argv = {}) {
                         limit: 8192,
                         fallback: "file-loader",
                         name: "img/[name].[ext]",
+                        esModule: false,
                     },
                 },
                 {
@@ -111,6 +101,7 @@ module.exports = function (env = {}, argv = {}) {
                         limit: 8192,
                         fallback: "file-loader",
                         name: "fonts/[name].[ext]",
+                        esModule: false,
                     },
                 },
             ],
@@ -126,8 +117,8 @@ module.exports = function (env = {}, argv = {}) {
 
             // new CopyWebpackPlugin({
             //     patterns: [
-            //         {from: "./assets/img", to: "static"},
-            //     ],
+            //         {from: "./assets/img/icons", to: "img/icons"},
+            //     ]
             // }),
 
             new FriendlyErrorsWebpackPlugin(),
@@ -145,7 +136,7 @@ module.exports = function (env = {}, argv = {}) {
             // new LiveReloadPlugin({port: 44444}),
 
             new MiniCssExtractPlugin({
-                filename: "css/app.bundle.css",
+                filename: "css/app.css",
             }),
 
             new VueLoaderPlugin(),
