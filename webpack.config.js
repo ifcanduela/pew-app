@@ -7,14 +7,12 @@ const FriendlyErrorsWebpackPlugin = require("friendly-errors-webpack-plugin");
 const ImageminPlugin = require("imagemin-webpack-plugin").default;
 const LiveReloadPlugin = require("webpack-livereload-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const VueLoaderPlugin = require("vue-loader/lib/plugin");
+const VueLoaderPlugin = require("vue-loader").VueLoaderPlugin;
 
-module.exports = function (env = {}, argv = {}) {
+module.exports = (env, argv) => {
     const DEST_FOLDER = path.resolve(__dirname, "www/assets");
     const PROJECT_NAME = path.basename(__dirname);
-
-    const MODE = env.mode || argv.mode || "development";
-    const IS_DEV = MODE === "development";
+    const MODE = argv.mode || "production";
 
     return {
         entry: {
@@ -23,12 +21,11 @@ module.exports = function (env = {}, argv = {}) {
 
         output: {
             path: DEST_FOLDER,
-            filename: "js/[name].bundle.js",
+            filename: "js/[name].js",
         },
 
-        mode: MODE,
         performance: { hints: false, },
-        devtool: IS_DEV ? "source-map" : false,
+        devtool: MODE === "production" ? false : "source-map",
         stats: "none",
 
         optimization: {
@@ -40,6 +37,7 @@ module.exports = function (env = {}, argv = {}) {
 
         resolve: {
             alias: {
+                "@": path.resolve(__dirname, "src"),
                 "vue$": "vue/dist/vue.esm.js",
             },
             extensions: [".wasm", ".mjs", ".js", ".json", ".vue"],
@@ -65,34 +63,22 @@ module.exports = function (env = {}, argv = {}) {
                         {
                             loader: MiniCssExtractPlugin.loader,
                             options: {
-                                sourceMap: IS_DEV,
                                 publicPath: "../",
                             },
                         },
-                        {
-                            loader: "css-loader",
-                            options: {
-                                sourceMap: IS_DEV,
-                            },
-                        },
+                        "css-loader",
                         {
                             loader: "postcss-loader",
                             options: {
-                                sourceMap: IS_DEV,
                                 postcssOptions: {
                                     plugins: [
                                         "autoprefixer",
-                                        IS_DEV ? "cssnano" : null,
-                                    ].filter(p => p),
+                                        "cssnano",
+                                    ],
                                 }
                             },
                         },
-                        {
-                            loader: "less-loader",
-                            options: {
-                                sourceMap: IS_DEV,
-                            },
-                        },
+                        "less-loader",
                     ],
                 },
                 {
@@ -102,6 +88,7 @@ module.exports = function (env = {}, argv = {}) {
                         limit: 8192,
                         fallback: "file-loader",
                         name: "img/[name].[ext]",
+                        esModule: false,
                     },
                 },
                 {
@@ -111,6 +98,7 @@ module.exports = function (env = {}, argv = {}) {
                         limit: 8192,
                         fallback: "file-loader",
                         name: "fonts/[name].[ext]",
+                        esModule: false,
                     },
                 },
             ],
@@ -126,15 +114,15 @@ module.exports = function (env = {}, argv = {}) {
 
             // new CopyWebpackPlugin({
             //     patterns: [
-            //         {from: "./assets/img", to: "static"},
-            //     ],
+            //         {from: "./assets/img/icons", to: "img/icons"},
+            //     ]
             // }),
 
             new FriendlyErrorsWebpackPlugin(),
 
             new ImageminPlugin({
                 test: /\.(jpe?g|png|gif|svg)$/i,
-                disable: IS_DEV,
+                disable: MODE !== "production",
             }),
 
             /*
@@ -145,7 +133,7 @@ module.exports = function (env = {}, argv = {}) {
             // new LiveReloadPlugin({port: 44444}),
 
             new MiniCssExtractPlugin({
-                filename: "css/app.bundle.css",
+                filename: "css/app.css",
             }),
 
             new VueLoaderPlugin(),

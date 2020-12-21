@@ -38,7 +38,7 @@ class User extends \pew\Model
         return true;
     }
 
-    protected function login(Session $session, bool $rememberMe = false): string
+    public function login(Session $session, bool $rememberMe = false): string
     {
         $session->set(USER_KEY, $user->id);
         $login_token = bin2hex(random_bytes(16));
@@ -64,6 +64,11 @@ class User extends \pew\Model
         return $this->login_token;
     }
 
+    /**
+     * Login a user using a session token.
+     *
+     * @param Session $session
+     */
     public static function loginWithToken(Session $session)
     {
         $request = pew("request");
