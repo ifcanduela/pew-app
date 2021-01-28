@@ -40,3 +40,39 @@ function user()
 
     return $user;
 }
+
+function pew(...$arguments)
+{
+    return \pew\pew(...$arguments);
+}
+
+function flash(...$arguments)
+{
+    return \pew\flash(...$arguments);
+}
+
+function url(...$arguments): string
+{
+    return \pew\url(...$arguments);
+}
+
+function here(): \pew\lib\Url
+{
+    return \pew\here();
+}
+
+function root(...$arguments): string
+{
+    return \pew\root(...$arguments);
+}
+
+function route(...$arguments): \pew\lib\Url
+{
+    return \pew\route(...$arguments);
+}
+
+
+function is_route(...$arguments): bool
+{
+    return \pew\is_route(...$arguments);
+}
