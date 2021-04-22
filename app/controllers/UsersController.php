@@ -25,24 +25,13 @@ class UsersController extends \pew\Controller
 
             # user does not exist
             if (!$user || !$user->checkPassword($password)) {
-                return $this->redirect("/login")->flash("ko", "Invalid username or password");
+                return $this->redirect(url("/login"))
+                    ->flash("ko", "Invalid username or password");
             }
 
-            $loginToken = $user->login($session, $rememberMe);
-            $response = $this->redirect("/");
+            $user->login($session, $rememberMe);
 
-            # send a cookie for long-term state
-            if ($rememberMe) {
-                $cookie = Cookie::create(SESSION_KEY)
-                    ->withValue($loginToken)
-                    ->withExpires(new \DateTime("+30 days"))
-                    ->withSecure(true)
-                    ->withHttpOnly(true);
-
-                $response->cookie($cookie);
-            }
-
-            return $response;
+            return$this->redirect(url("/"));
         }
 
         return [];

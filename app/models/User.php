@@ -38,17 +38,15 @@ class User extends \pew\Model
         return true;
     }
 
-    public function login(Session $session, bool $rememberMe = false): string
+    public function login(Session $session, bool $rememberMe = false)
     {
-        $session->set(USER_KEY, $this->id);
-        $login_token = bin2hex(random_bytes(16));
+        $this->refreshSesssion();
 
         if ($rememberMe) {
-            $this->login_token = $login_token;
-            $this->save();
+            $this->refreshCookie();
         }
 
-        return $login_token;
+        return;
     }
 
     /**
@@ -65,19 +63,35 @@ class User extends \pew\Model
     }
 
     /**
-     * Login a user using a session token.
-     *
-     * @param Session $session
+     * Refresh the session data.
      */
-    public static function loginWithToken(Session $session)
+    public function refreshSession()
     {
-        $request = pew("request");
-        $loginToken = $request->cookies->get(SESSION_KEY);
+        pew("session")->set("user_id", $this->id);
+    }
 
-        $user = static::findOneByLoginToken($loginToken);
+    /**
+     * Refresh the login cookie.
+     */
+    public function refreshCookie()
+    {
+        setcookie(SESSION_KEY, $this->generateLoginToken(), time() + 60 * 60 * 24 * 30, "/", null, false, true);
+    }
 
-        if ($user) {
-            $user->login($session, false);
+    /**
+     * Login a user using a cookie token.
+     */
+    public static function loginWithToken(string $token)
+    {
+        /** @var User $user */
+        $user = static::find()->where(["token" => $token])->one();
+
+        if (!$user) {
+            return null;
         }
+
+        $user->refreshSession();
+
+        return $user;
     }
 }

@@ -8,31 +8,8 @@ use pew\console\CommandArguments;
 
 class ExampleCommand extends Command
 {
-    /** @var string Command name */
-    public $name = "example";
-
-    /** @var string */
-    public $description = "Test several features of the Console Command functionality";
-
     /**
-     * Default command parameters.
-     *
-     * The keys in the array must be the camel-case version of the command-line
-     * arguments.
-     *
-     * @return array
-     */
-    public function getDefaultArguments()
-    {
-        return [
-            "f" => "default filter here",
-            "filter" => "default filter here",
-            "dryRun" => false,
-        ];
-    }
-
-    /**
-     * Example command.
+     * Test several features of the Console Command functionality.
      *
      * Run this command by typing `php run example` in the root folder of your app, where the "run"
      * script is found. Try also with different arguments:
