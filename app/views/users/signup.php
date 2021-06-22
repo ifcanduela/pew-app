@@ -26,12 +26,12 @@ $this->layout("users.layout");
         </div>
 
         <div class="form-group">
-            <label for="password_confirm">Confirm Password:</label>
+            <label for="password_confirm">Confirm password:</label>
             <input type="password" name="password_confirm" id="form-users-signup-password-confirm">
         </div>
 
         <div class="form-group">
-            <label for="email">E-mail address:</label>
+            <label for="email">Email address:</label>
             <input type="email" name="email" id="form-users-signup-email">
         </div>
 

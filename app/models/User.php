@@ -40,7 +40,7 @@ class User extends \pew\Model
 
     public function login(Session $session, bool $rememberMe = false)
     {
-        $this->refreshSesssion();
+        $this->refreshSession();
 
         if ($rememberMe) {
             $this->refreshCookie();

@@ -56,7 +56,7 @@ function url(...$arguments): string
     return \pew\url(...$arguments);
 }
 
-function here(): \pew\lib\Url
+function here(): string
 {
     return \pew\here();
 }
