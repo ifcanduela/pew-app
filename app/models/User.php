@@ -2,7 +2,7 @@
 
 namespace app\models;
 
-use pew\lib\Session;
+use Symfony\Component\HttpFoundation\Cookie;
 
 /**
  * @prop string $username
@@ -38,17 +38,6 @@ class User extends \pew\Model
         return true;
     }
 
-    public function login(Session $session, bool $rememberMe = false)
-    {
-        $this->refreshSession();
-
-        if ($rememberMe) {
-            $this->refreshCookie();
-        }
-
-        return;
-    }
-
     /**
      * Generate a random token for the "Remember Me" functionality.
      *
@@ -63,19 +52,16 @@ class User extends \pew\Model
     }
 
     /**
-     * Refresh the session data.
-     */
-    public function refreshSession()
-    {
-        pew("session")->set("user_id", $this->id);
-    }
-
-    /**
      * Refresh the login cookie.
      */
-    public function refreshCookie()
+    public function getRememberCookie(): Cookie
     {
-        setcookie(SESSION_KEY, $this->generateLoginToken(), time() + 60 * 60 * 24 * 30, "/", null, false, true);
+        $token = $this->generateLoginToken();
+        $cookie = Cookie::create(SESSION_KEY)->withValue($token)
+            ->withExpires(time() + 60 * 60 * 24 * 30)
+            ->withSecure(true);
+
+        return $cookie;
     }
 
     /**
@@ -89,8 +75,6 @@ class User extends \pew\Model
         if (!$user) {
             return null;
         }
-
-        $user->refreshSession();
 
         return $user;
     }

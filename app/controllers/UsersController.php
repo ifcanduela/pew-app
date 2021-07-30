@@ -25,13 +25,20 @@ class UsersController extends \pew\Controller
 
             # user does not exist
             if (!$user || !$user->checkPassword($password)) {
-                return $this->redirect(url("/login"))
+                return $this->redirect(url("login"))
                     ->flash("ko", "Invalid username or password");
             }
 
-            $user->login($session, $rememberMe);
+            $session->set("user_id", $user->id);
 
-            return$this->redirect(url("/"));
+            $response = $this->redirect(url("/"));
+
+            if ($rememberMe) {
+                $cookie = $user->getRememberCookie();
+                $response->cookie($cookie);
+            }
+
+            return $response;
         }
 
         return [];

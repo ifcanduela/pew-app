@@ -19,6 +19,7 @@ class OnlyAuthenticated extends Middleware
             $user = User::loginWithToken($request->cookies->get(SESSION_KEY));
 
             if ($user) {
+                $session->set("user_id", $user->id);
                 return;
             }
         }
