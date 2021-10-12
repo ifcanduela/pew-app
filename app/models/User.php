@@ -57,25 +57,10 @@ class User extends \pew\Model
     public function getRememberCookie(): Cookie
     {
         $token = $this->generateLoginToken();
-        $cookie = Cookie::create(SESSION_KEY)->withValue($token)
+        $cookie = Cookie::create(COOKIE_KEY)->withValue($token)
             ->withExpires(time() + 60 * 60 * 24 * 30)
             ->withSecure(true);
 
         return $cookie;
-    }
-
-    /**
-     * Login a user using a cookie token.
-     */
-    public static function loginWithToken(string $token)
-    {
-        /** @var User $user */
-        $user = static::find()->where(["token" => $token])->one();
-
-        if (!$user) {
-            return null;
-        }
-
-        return $user;
     }
 }

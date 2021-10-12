@@ -1,5 +1,6 @@
 <?php
 
+use app\middleware\LoginUser;
 use app\middleware\RedirectToPrevious;
 use app\middleware\OnlyAuthenticated;
 use app\middleware\ReturnJson;
@@ -7,6 +8,8 @@ use ifcanduela\router\Group;
 use ifcanduela\router\Router;
 
 /** @var Router $router */
+
+$router->before(LoginUser::class);
 
 $router->get("/test[/{action}[/{id}]]")->to("test")->name("test.actions");
 

@@ -3,7 +3,7 @@
 use ifcanduela\events\EventManager as E;
 
 const SESSION_KEY = "MjgzOTkyNzY3MjIyODc2";
-const USER_KEY = "user_id";
+const COOKIE_KEY = "eIRBcCgPXzKD_UxnuNXC";
 
 E::register("app.init", function () {
     # Initialize the debugbar

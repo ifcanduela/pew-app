@@ -5,27 +5,15 @@ namespace app\middleware;
 use app\models\User;
 use pew\lib\Session;
 use pew\request\Middleware;
-use pew\request\Request;
 
 class OnlyAuthenticated extends Middleware
 {
-    public function before(Session $session, Request $request)
+    public function before(Session $session, ?User $user)
     {
-        if ($session->has(USER_KEY)) {
-            return;
+        if (!$user) {
+            $session->set("return_to", here());
+
+            return $this->redirect("/login");
         }
-
-        if ($request->cookies->has(SESSION_KEY)) {
-            $user = User::loginWithToken($request->cookies->get(SESSION_KEY));
-
-            if ($user) {
-                $session->set("user_id", $user->id);
-                return;
-            }
-        }
-
-        $session->set("return_to", here());
-
-        return $this->redirect("/login");
     }
 }

@@ -8,6 +8,8 @@ class Welcome extends \pew\Controller
     {
         $this->view->title("Welcome!");
 
-        return ["name" => $name];
+        return $this
+            ->render("welcome/index", ["name" => $name])
+            ->header("X-Controller-Action", __METHOD__);
     }
 }

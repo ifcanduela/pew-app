@@ -5,7 +5,6 @@ namespace app\controllers;
 use app\models\User;
 use pew\lib\Session;
 use pew\response\RedirectResponse;
-use Symfony\Component\HttpFoundation\Cookie;
 
 class UsersController extends \pew\Controller
 {
@@ -29,7 +28,7 @@ class UsersController extends \pew\Controller
                     ->flash("ko", "Invalid username or password");
             }
 
-            $session->set("user_id", $user->id);
+            $session->set(SESSION_KEY, $user->id);
 
             $response = $this->redirect(url("/"));
 
@@ -51,9 +50,9 @@ class UsersController extends \pew\Controller
     public function logout(Session $session)
     {
         # clear the logged-in status
-        $session->remove(USER_KEY);
+        $session->remove(SESSION_KEY);
         # clear any long-term cookies
-        setcookie(SESSION_KEY, false, 1, "/", null, false, true);
+        setcookie(COOKIE_KEY, false, 1, "/", null, false, true);
         session_destroy();
 
         return $this->redirect("/");
