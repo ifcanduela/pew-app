@@ -39,8 +39,10 @@ module.exports = (env, argv) => {
 
         resolve: {
             alias: {
-                "@": path.resolve(__dirname, "src"),
-                "vue$": "vue/dist/vue.esm.js",
+                // Use "@@/path/to.file" with `import` or `require`
+                "@@": path.resolve(__dirname, "assets"),
+                // Remove this alias is all Vue templates reside in components
+                "vue": "vue/dist/vue.esm-bundler.js",
             },
             extensions: [".wasm", ".mjs", ".js", ".json", ".vue"],
         },
@@ -102,7 +104,7 @@ module.exports = (env, argv) => {
                     oneOf: [
                         {
                             resourceQuery: /inline/,
-                            use: ["babel-loader", "vue-svg-loader"],
+                            use: ["vue-loader", "vue-svg-loader"],
                         },
                         {
                             type: "asset",
