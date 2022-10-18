@@ -14,7 +14,6 @@
     <title><?= app_title($this->title()) ?></title>
     <link rel="stylesheet" href="<?= url("assets/css/app.css") ?>">
     <?= $this->block("styles") ?>
-    <?php /* echo pew("debugbar")->renderHead() */ ?>
 </head>
 
 <body class="users-layout <?= pew("controller_slug") ?>--<?= pew("action_slug") ?>">
@@ -30,6 +29,5 @@
 
     <script src="<?= url("assets/js/app.js") ?>"></script>
     <?= $this->block("scripts") ?>
-    <?php /* echo pew("debugbar")->render() */ ?>
 </body>
 </html>

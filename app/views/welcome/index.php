@@ -1,6 +1,8 @@
 <?php
+
 /**
  * @var \pew\View $this
+ * @var string $name
  */
 $this->title("Welcome to Pew-Pew-Pew");
 $this->layout("default.layout");

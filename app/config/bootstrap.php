@@ -31,7 +31,7 @@ function user()
         $session = pew("session");
 
         if (isset($session["user"])) {
-            $userId = $session->get(USER_KEY);
+            $userId = $session->get(SESSION_KEY);
             $user = \app\models\User::findOneById($userId);
         } else {
             $user = false;
@@ -70,7 +70,6 @@ function route(...$arguments): \pew\lib\Url
 {
     return \pew\route(...$arguments);
 }
-
 
 function is_route(...$arguments): bool
 {

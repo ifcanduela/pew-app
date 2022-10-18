@@ -42,6 +42,7 @@ class User extends \pew\Model
      * Generate a random token for the "Remember Me" functionality.
      *
      * @return string
+     * @throws \Exception
      */
     public function generateLoginToken()
     {
@@ -53,14 +54,15 @@ class User extends \pew\Model
 
     /**
      * Refresh the login cookie.
+     *
+     * @throws \Exception
      */
     public function getRememberCookie(): Cookie
     {
         $token = $this->generateLoginToken();
-        $cookie = Cookie::create(COOKIE_KEY)->withValue($token)
+
+        return Cookie::create(COOKIE_KEY)->withValue($token)
             ->withExpires(time() + 60 * 60 * 24 * 30)
             ->withSecure(true);
-
-        return $cookie;
     }
 }
